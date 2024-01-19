@@ -255,4 +255,37 @@ func TestGetCommonAssociativeKey(t *testing.T) {
 }
 
 func TestGetCommonAssociativeKeys(t *testing.T) {
+	tests := []struct {
+		name  string
+		keyss [][]string
+		want  []string
+	}{
+		{
+			name:  "empty keyss",
+			keyss: [][]string{},
+			want:  nil,
+		},
+		{
+			name:  "one keyss",
+			keyss: [][]string{{"name", "type"}},
+			want:  []string{"name", "type"},
+		},
+		{
+			name:  "two keyss",
+			keyss: [][]string{{"name", "type"}, {"type", "name", "mountPath"}},
+			want:  []string{"name", "type"},
+		},
+		{
+			name:  "three keyss",
+			keyss: [][]string{{"name", "type"}, {"type", "name", "mountPath"}, {"devicePath", "type", "name"}},
+			want:  []string{"name", "type"},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := getCommonAssociativeKeys(test.keyss)
+			assert.Equal(t, test.want, got)
+		})
+	}
 }

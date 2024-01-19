@@ -1,7 +1,7 @@
 package krmmerge
 
 var (
-	// TODO: this is a bit of a hack, but it works for now, we should try
+	// TODO(RRethy): this is a bit of a hack, but it works for now, we should try
 	// to use openapi
 	associativeKeys = []string{
 		"mountPath",
