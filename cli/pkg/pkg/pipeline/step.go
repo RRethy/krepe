@@ -12,13 +12,13 @@ type Step struct {
 	fn   function.Function
 }
 
-type StepRaw struct {
+type RawStep struct {
 	Function  string         `yaml:"function,omitempty"`
 	ConfigMap map[string]any `yaml:"configMap,omitempty"`
 }
 
 func (m *Step) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	raw := StepRaw{}
+	raw := RawStep{}
 	if err := unmarshal(&raw); err != nil {
 		return err
 	}

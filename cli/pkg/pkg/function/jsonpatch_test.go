@@ -50,3 +50,12 @@ func TestJsonPatchWithConfigMap(t *testing.T) {
 		},
 	})
 }
+
+// func TestJsonPatchRun(t *testing.T) {
+// 	tests := []struct{
+// 		name string
+// 		fn *JsonPatch
+// 		resource map[string]any
+// 		wantErr bool
+// 	}{}
+// }
