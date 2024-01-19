@@ -16,11 +16,13 @@ var (
 type Step struct {
 	name      string
 	fn        function.Function
+	target    *Target
 	configMap map[string]any
 }
 
 type RawStep struct {
 	Function  string         `yaml:"function,omitempty"`
+	Target    *Target        `yaml:"target,omitempty"`
 	ConfigMap map[string]any `yaml:"configMap,omitempty"`
 }
 
@@ -35,8 +37,9 @@ func (m *Step) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
-	m.fn = f
 	m.name = raw.Function
+	m.fn = f
+	m.target = raw.Target
 	m.configMap = raw.ConfigMap
 	return nil
 }
@@ -44,6 +47,7 @@ func (m *Step) UnmarshalYAML(unmarshal func(interface{}) error) error {
 func (m *Step) MarshalYAML() (interface{}, error) {
 	return RawStep{
 		Function:  m.name,
+		Target:    m.target,
 		ConfigMap: m.configMap,
 	}, nil
 }

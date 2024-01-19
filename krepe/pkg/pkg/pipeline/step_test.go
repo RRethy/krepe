@@ -9,35 +9,57 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// TODO: test Target
 func TestStepUnmarshallYAML(t *testing.T) {
 	setLabelsFn, _ := function.NewFunction("set-labels", map[string]any{
 		"foo": "bar",
 	})
 
 	tests := []struct {
-		name     string
-		yaml     string
-		wantName string
-		wantFn   function.Function
-		wantErr  bool
+		name       string
+		yaml       string
+		wantName   string
+		wantFn     function.Function
+		wantTarget *Target
+		wantErr    bool
 	}{
 		{
 			name: "succeeds with valid step",
 			yaml: `
 function: set-labels
+target:
+  kind: Deployment
+  name: foo
 configMap:
   foo: bar
-			`,
+`,
 			wantName: "set-labels",
 			wantFn:   setLabelsFn,
-			wantErr:  false,
+			wantTarget: &Target{
+				Kind: "Deployment",
+				Name: "foo",
+			},
+			wantErr: false,
 		},
 		{
-			name:     "fails with invalid step yaml",
-			yaml:     `foo: bar`,
-			wantName: "",
-			wantFn:   nil,
-			wantErr:  true,
+			name: "succeeds with empty target",
+			yaml: `
+function: set-labels
+configMap:
+  foo: bar
+`,
+			wantName:   "set-labels",
+			wantFn:     setLabelsFn,
+			wantTarget: nil,
+			wantErr:    false,
+		},
+		{
+			name:       "fails with invalid step yaml",
+			yaml:       `foo: bar`,
+			wantName:   "",
+			wantFn:     nil,
+			wantTarget: nil,
+			wantErr:    true,
 		},
 		{
 			name: "fails with invalid function",
@@ -46,9 +68,10 @@ function: unknown-fn
 configMap:
   foo: bar
 			`,
-			wantName: "",
-			wantFn:   nil,
-			wantErr:  true,
+			wantName:   "",
+			wantFn:     nil,
+			wantTarget: nil,
+			wantErr:    true,
 		},
 	}
 
