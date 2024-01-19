@@ -6,6 +6,8 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+// KrmMerge is a 3-tuple of origin, local, and upstream resources.
+// These can be used to merge them into a single resource.
 type KrmMerge struct {
 	origin   *unstructured.Unstructured
 	local    *unstructured.Unstructured
@@ -24,6 +26,8 @@ func NewKrmMerge(
 	}
 }
 
+// Merge returns the result of performing a 3-way merge on the origin, local, and upstream resources.
+// The specifics of the 3-way merge algorithm are described in the README.
 func (k *KrmMerge) Merge() (*unstructured.Unstructured, error) {
 	// A resource missing from origin, local, and upstream will have nil returned.
 	if k.origin == nil && k.local == nil && k.upstream == nil {
@@ -54,6 +58,7 @@ func (k *KrmMerge) Merge() (*unstructured.Unstructured, error) {
 		return nil, nil
 	}
 
+	// A resource present in local and upstream but missing from origin will have local merged with upstream returned.
 	if k.origin == nil && k.local != nil && k.upstream != nil {
 		return nil, nil // TODO: merge local and upstream
 	}
@@ -61,6 +66,8 @@ func (k *KrmMerge) Merge() (*unstructured.Unstructured, error) {
 	return k.threeWayMergeRoot()
 }
 
+// threeWayMergeRoot performs a 3-way merge on the root of the origin, local, and upstream resources.
+// It will take into account the GVK of the resources.
 func (k *KrmMerge) threeWayMergeRoot() (*unstructured.Unstructured, error) {
 	originGVK := k.origin.GetObjectKind().GroupVersionKind()
 	localGVK := k.local.GetObjectKind().GroupVersionKind()
