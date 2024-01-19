@@ -2,6 +2,10 @@ package function
 
 import (
 	"testing"
+
+	"github.com/Shopify/krepe/krepe/pkg/pkg/resource"
+	"github.com/stretchr/testify/assert"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 func TestSetLabelsWithConfigMap(t *testing.T) {
@@ -19,6 +23,35 @@ func TestSetLabelsWithConfigMap(t *testing.T) {
 			configMap: map[string]any{"foo": 1},
 			wantFn:    nil,
 			wantErr:   true,
+		},
+	})
+}
+
+func TestSetLabelsRun(t *testing.T) {
+	runRunTests(t, Function(&SetLabels{}), []runTest{
+		{
+			name: "succeeds with valid set labels",
+			configMap: map[string]any{
+				"foo": "bar",
+			},
+			res: &resource.Resource{
+				Unstructured: unstructured.Unstructured{
+					Object: map[string]any{
+						"metadata": map[string]any{
+							"labels": map[string]any{
+								"foo": "baz",
+								"bar": "baz",
+							},
+						},
+					},
+				},
+			},
+			validate: func(t *testing.T, res *resource.Resource) {
+				assert.Equal(t, map[string]string{
+					"foo": "bar",
+				}, res.GetLabels())
+			},
+			wantErr: false,
 		},
 	})
 }

@@ -2,6 +2,10 @@ package function
 
 import (
 	"testing"
+
+	"github.com/Shopify/krepe/krepe/pkg/pkg/resource"
+	"github.com/stretchr/testify/assert"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 func TestSetNamespaceWithConfigMap(t *testing.T) {
@@ -23,6 +27,28 @@ func TestSetNamespaceWithConfigMap(t *testing.T) {
 			},
 			wantFn:  nil,
 			wantErr: true,
+		},
+	})
+}
+
+func TestSetNamespaceRun(t *testing.T) {
+	runRunTests(t, Function(&SetNamespace{}), []runTest{
+		{
+			name: "succeeds with valid set namespace",
+			configMap: map[string]any{
+				"namespace": "foo",
+			},
+			res: &resource.Resource{
+				Unstructured: unstructured.Unstructured{
+					Object: map[string]any{
+						"namespace": "bar",
+					},
+				},
+			},
+			validate: func(t *testing.T, res *resource.Resource) {
+				assert.Equal(t, "foo", res.GetNamespace())
+			},
+			wantErr: false,
 		},
 	})
 }

@@ -4,6 +4,9 @@ import (
 	"testing"
 
 	"github.com/Shopify/krepe/jsonpatch"
+	"github.com/Shopify/krepe/krepe/pkg/pkg/resource"
+	"github.com/stretchr/testify/assert"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 func TestJsonPatchWithConfigMap(t *testing.T) {
@@ -51,11 +54,60 @@ func TestJsonPatchWithConfigMap(t *testing.T) {
 	})
 }
 
-// func TestJsonPatchRun(t *testing.T) {
-// 	tests := []struct{
-// 		name string
-// 		fn *JsonPatch
-// 		resource map[string]any
-// 		wantErr bool
-// 	}{}
-// }
+func TestJsonPatchRun(t *testing.T) {
+	runRunTests(t, Function(&JsonPatch{}), []runTest{
+		{
+			name: "succeeds with valid `add` json patch",
+			configMap: map[string]any{
+				"op":    "add",
+				"path":  "/foo",
+				"value": "bar",
+			},
+			res: &resource.Resource{
+				Unstructured: unstructured.Unstructured{
+					Object: map[string]any{
+						"foo": "baz",
+					},
+				},
+			},
+			validate: func(t *testing.T, res *resource.Resource) {
+				assert.Equal(t, map[string]any{
+					"foo": "bar",
+				}, res.Object)
+			},
+			wantErr: false,
+		},
+		{
+			name: "fails with invalid path for `add` json patch",
+			configMap: map[string]any{
+				"op":    "add",
+				"path":  "/foo/bar",
+				"value": "baz",
+			},
+			res: &resource.Resource{
+				Unstructured: unstructured.Unstructured{
+					Object: map[string]any{
+						"foo": "baz",
+					},
+				},
+			},
+			wantErr: true,
+		},
+		{
+			name: "fails with invalid value for `add` json patch",
+			configMap: map[string]any{
+				"op":    "add",
+				"path":  "",
+				"value": 1,
+			},
+			res: &resource.Resource{
+				Unstructured: unstructured.Unstructured{
+					Object: map[string]any{
+						"foo": "baz",
+					},
+				},
+			},
+			wantErr: true,
+		},
+	})
+}
