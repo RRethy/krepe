@@ -3,6 +3,7 @@ package imports
 import (
 	"testing"
 
+	"github.com/Shopify/krepe/krepe/pkg/yaml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -66,7 +67,61 @@ func TestNewPkg(t *testing.T) {
 }
 
 func TestPkgUnmarshalYAML(t *testing.T) {
+	tests := []struct {
+		name    string
+		yaml    string
+		want    *Pkg
+		wantErr bool
+	}{
+		{
+			name: "valid yaml",
+			yaml: `tag: github.com/Shopify/krepe@v0.0.1
+name: foo`,
+			want: &Pkg{
+				url:     "github.com/Shopify/krepe",
+				version: "v0.0.1",
+				name:    "foo",
+			},
+			wantErr: false,
+		},
+		{
+			name:    "invalid yaml",
+			yaml:    `tag`,
+			want:    nil,
+			wantErr: true,
+		},
+		{
+			name:    "invalid pkg import",
+			yaml:    `tag: github.com/Shopify/krepe`,
+			want:    nil,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pkg := &Pkg{}
+			err := yaml.Unmarshal([]byte(tt.yaml), pkg)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.want, pkg)
+			}
+		})
+	}
 }
 
 func TestPkgMarshalYAML(t *testing.T) {
+	want := `tag: github.com/Shopify/krepe@v0.0.1
+name: foo
+`
+	pkg := &Pkg{
+		url:     "github.com/Shopify/krepe",
+		version: "v0.0.1",
+		name:    "foo",
+	}
+	got, err := yaml.Marshal(&pkg)
+	assert.NoError(t, err)
+	assert.Equal(t, want, string(got))
 }
