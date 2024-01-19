@@ -1,39 +1,26 @@
-The 3-way merge algorithm operates both on the level of each resource and on each individual field with a resource.
+# threewaymerge
 
-On the resource level, the rules are:
+TODO(RRethy): Add godoc link
 
-A resource present in none will not be present in local.
-A resource missing from origin and local but present in upstream will be added to local.
-A resource present in local but missing from origin and upstream will be kept without changes.
+Package threewaymerge provides a 3-way merge for data structures that would be produced from parsing YAML.
 
-A resource present in origin and deleted from upstream will be deleted from local.
-A resource missing from origin and added in upstream will be added to local.
-A resource only in local will be kept without changes.
-A resource in both upstream and local will be merged into local.
+At a high level, the 3-way merge algorithm will return the local value if it is different than origin iff upstream != origin.
+Otherwise, it will return upstream.
 
-On the field level, the rules differ based on the type of field.
+Maps and associative slices are merged recursively by key.
+Scalars are merged by returning upstream iff upstream == origin, otherwise local.
+Non-associative slices are treated as scalars.
+Associative slices are recursively merged by associative key.
 
-For scalars and non-associative lists:
+Values of different types, including nil, are treated as scalars.
+They are still still merged recursively when possible.
 
-If the field is present in either upstream or local and the value is null, remove the field from local.
-If the field is unchanged between upstream and local, leave the local value unchanged.
-If the field has been changed in both upstream and local, update local with the value from upstream.
-
-For mappings:
-
-If the field is present in either upstream or local and the value is null, remove the field from local.
-If the field is present only in local, leave the local value unchanged.
-If the field is not present in local, add the delta between origin and upstream as the value in local.
-If the field is present in both upstream and local, recursively merge the values between local, upstream and origin.
-
-For associative lists:
-
-If the field is present in either upstream or local and the value is null, remove the field from local.
-If the field is present only in local, leave the local value unchanged.
-If the field is not present in local, add the delta between origin and upstream as the value in local. ---------------
-If the field is present in both upstream and local, recursively merge the values between local, upstream and origin.
-
-# TODO
-
-removing the value vs null
-    what happens with deployment.spec.replica and the default value (thinking interaction with hpa)
+An associative slice is a slice of maps where each map has an associative key that is unique across all maps.
+The following are possible associative keys:
+  - mountPath
+  - devicePath
+  - ip
+  - type
+  - topologyKey
+  - name
+  - containerPort

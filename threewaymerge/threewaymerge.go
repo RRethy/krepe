@@ -20,7 +20,6 @@
 //   - topologyKey
 //   - name
 //   - containerPort
-
 package threewaymerge
 
 // Merge returns the result of performing a 3-way merge on the origin, local, and upstream maps.
