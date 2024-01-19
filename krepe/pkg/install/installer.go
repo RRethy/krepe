@@ -12,10 +12,10 @@ import (
 
 type Installer struct {
 	gitClient   git.Client
-	cacheClient *cache.Client
+	cacheClient cache.Cache
 }
 
-func NewInstaller(git git.Client, cache *cache.Client) *Installer {
+func NewInstaller(git git.Client, cache cache.Cache) *Installer {
 	return &Installer{
 		gitClient:   git,
 		cacheClient: cache,

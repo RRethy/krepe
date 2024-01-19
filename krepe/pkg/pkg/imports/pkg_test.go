@@ -3,7 +3,7 @@ package imports
 import (
 	"testing"
 
-	"github.com/RRethy/krepe/krepe/pkg/reporef"
+	"github.com/RRethy/krepe/krepe/pkg/git"
 	"github.com/RRethy/krepe/krepe/pkg/yaml"
 	"github.com/stretchr/testify/assert"
 )
@@ -20,7 +20,7 @@ func TestPkgUnmarshalYAML(t *testing.T) {
 			yaml: `ref: github.com/RRethy/krepe@v0.0.1
 name: foo`,
 			want: &Pkg{
-				ref: &reporef.RepoRef{
+				ref: &git.RepoRef{
 					URL:  "github.com/RRethy/krepe",
 					Tag:  "v0.0.1",
 					Name: "krepe",
@@ -62,7 +62,7 @@ func TestPkgMarshalYAML(t *testing.T) {
 name: foo
 `
 	pkg := &Pkg{
-		ref: &reporef.RepoRef{
+		ref: &git.RepoRef{
 			URL: "github.com/RRethy/krepe",
 			Tag: "v0.0.1",
 		},

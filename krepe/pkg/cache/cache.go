@@ -11,14 +11,17 @@ const (
 	dirName = "krepe"
 )
 
-type Client struct {
+type Cache interface {
+	Path() string
 }
 
-func NewClient() *Client {
-	return &Client{}
+type xdgCache struct{}
+
+func NewCache() Cache {
+	return &xdgCache{}
 }
 
-func (c *Client) Path() string {
+func (c *xdgCache) Path() string {
 	path := filepath.Join(xdg.CacheHome, dirName)
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
