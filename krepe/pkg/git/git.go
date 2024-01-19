@@ -2,9 +2,6 @@ package git
 
 import (
 	"os"
-
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
 )
 
 type Client interface {
@@ -27,25 +24,24 @@ func (g *Git) CloneInto(ref *RepoRef, dir string) error {
 		cloned = false
 	}
 
-	var repo *git.Repository
+	exec := NewExec(dir)
+
 	if !cloned {
-		repo, err = git.PlainClone(dir, false, &git.CloneOptions{
-			URL:      ref.URL,
-			Progress: os.Stdout,
-		})
+		_, err := exec.Run("clone", ref.URL, "--depth", "1")
 		if err != nil {
 			return err
 		}
 	}
 
-	wt, err := repo.Worktree()
+	_, err = exec.Run("rev-parse", ref.Tag)
 	if err != nil {
-		return err
+		_, err = exec.Run("fetch", "origin", "tag", ref.Tag)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = wt.Checkout(&git.CheckoutOptions{
-		Branch: plumbing.ReferenceName("refs/tags/" + ref.Tag),
-	})
+	_, err = exec.Run("checkout", ref.Tag)
 	if err != nil {
 		return err
 	}

@@ -1,7 +1,6 @@
 BINARY_NAME=krepe
 BINARY_PATH=./krepe/$(BINARY_NAME)
-GOPATH=$(shell go env GOPATH)
-GOCACHE=$(GOPATH)/pkg/mod
+INSTALL_PATH=~/bin/$(BINARY_NAME)
 GOBUILD=go build
 GOCLEAN=go clean
 GOTEST=go test
@@ -42,3 +41,7 @@ tidy:
 .PHONY: tidy-%
 tidy-%:
 	$(GOMOD) -C $* tidy
+
+.PHONY: install
+install: build-krepe
+	cp $(BINARY_PATH) $(INSTALL_PATH)
