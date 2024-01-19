@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Shopify/krepe/krepe/pkg/pkg/imports"
 	"github.com/Shopify/krepe/krepe/pkg/pkg/resource"
 )
 
@@ -75,6 +76,13 @@ func (p *Pkg) RunPipelineByName(name string) error {
 }
 
 func (p *Pkg) InstallPackage(url string, name string) error {
+	pkgImport, err := imports.NewPkg(url, name)
+	if err != nil {
+		return fmt.Errorf("failed to create pkg import `%s` from url `%s`: %w", name, url, err)
+	}
+
+	p.Krepe.Imports.AddPackage(pkgImport)
+	// TODO
 	return nil
 }
 

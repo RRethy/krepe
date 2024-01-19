@@ -68,7 +68,7 @@ func TestNewKrepeFromPath(t *testing.T) {
 				assert.Equal(t, tt.wantImportFiles, k.Imports.Files)
 				var gotPkgs []string
 				for _, pkg := range k.Imports.Packages {
-					gotPkgs = append(gotPkgs, *pkg.Url)
+					gotPkgs = append(gotPkgs, pkg.Name())
 				}
 				assert.Equal(t, tt.wantImportPackages, gotPkgs)
 				gotPipelines := make(map[string][]string)
