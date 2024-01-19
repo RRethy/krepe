@@ -114,8 +114,8 @@ func (p *Pkg) UpdatePackage(newPkg *Pkg, pkgImport *PackageImport) error {
 		}
 	}
 
-	for i, pkgImport := range p.Krepe.Imports.Packages {
-		if pkgImport.Name() == pkgImport.Name() {
+	for i, other := range p.Krepe.Imports.Packages {
+		if other.Name() == pkgImport.Name() {
 			p.Krepe.Imports.Packages[i] = pkgImport
 		}
 	}
