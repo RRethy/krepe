@@ -2,49 +2,83 @@ package git
 
 import (
 	"os"
+	"path/filepath"
+
+	"github.com/RRethy/krepe/krepe/pkg/cache"
+	"github.com/RRethy/krepe/krepe/pkg/exec"
 )
 
-type Client interface {
-	CloneInto(ref *RepoRef, dir string) error
+type Git struct {
+	executable *exec.Exec
+	dir        string
 }
 
-type Git struct{}
+type Option func(*Git)
 
-func NewGit() Client {
-	return &Git{}
+func WithDir(dir string) Option {
+	return func(g *Git) {
+		g.dir = dir
+	}
 }
 
-func (g *Git) CloneInto(ref *RepoRef, dir string) error {
+func WithExec(executable *exec.Exec) Option {
+	return func(g *Git) {
+		g.executable = executable
+	}
+}
+
+func NewGit(options ...Option) (*Git, error) {
+	cache := cache.NewCache()
+	cachePath, err := cache.Path()
+	if err != nil {
+		return nil, err
+	}
+
+	g := &Git{
+		executable: exec.NewExec(exec.WithCmd("git")),
+		dir:        cachePath,
+	}
+	for _, option := range options {
+		option(g)
+	}
+	return g, nil
+}
+
+func (g *Git) Clone(ref *PkgRef) (string, error) {
 	cloned := true
+	clonePath := filepath.Join(g.dir, ref.Repo)
 	var err error
-	if _, err = os.Stat(dir); err != nil {
+	if _, err = os.Stat(clonePath); err != nil {
 		if !os.IsNotExist(err) {
-			return err
+			return "", err
+		}
+
+		err = os.MkdirAll(clonePath, 0755)
+		if err != nil {
+			return "", err
 		}
 		cloned = false
 	}
 
-	exec := NewExec(dir)
-
 	if !cloned {
-		_, err := exec.Run("clone", ref.URL, "--depth", "1")
+		_, err := g.executable.Run("clone", ref.URL(), ".", "--depth", "1")
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 
-	_, err = exec.Run("rev-parse", ref.Tag)
+	_, err = g.executable.Run("rev-parse", ref.Tag)
 	if err != nil {
-		_, err = exec.Run("fetch", "origin", "tag", ref.Tag)
+		_, err := g.executable.Run("fetch", "origin", "tag", ref.Tag)
 		if err != nil {
-			return err
+			return "", err
 		}
 	}
 
-	_, err = exec.Run("checkout", ref.Tag)
+	_, err = g.executable.Run("checkout", ref.Tag)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return clonePath, nil
 }

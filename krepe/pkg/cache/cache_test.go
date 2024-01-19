@@ -4,17 +4,15 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/adrg/xdg"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestPath(t *testing.T) {
 	path := t.TempDir()
-	xdg.CacheHome = path
-
-	cache := NewCache()
-	cachePath := cache.Path()
+	cache := NewCache(WithDir(path))
+	cachePath, err := cache.Path()
+	assert.NoError(t, err)
 	assert.NotEmpty(t, cachePath)
 	assert.DirExists(t, cachePath)
-	assert.Equal(t, filepath.Join(path, dirName), cachePath)
+	assert.Equal(t, filepath.Join(path, "krepe"), cachePath)
 }

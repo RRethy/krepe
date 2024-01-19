@@ -1,45 +1,55 @@
 package install
 
 import (
-	"path/filepath"
-
-	"github.com/RRethy/krepe/krepe/pkg/cache"
 	"github.com/RRethy/krepe/krepe/pkg/git"
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 	"github.com/RRethy/krepe/krepe/pkg/pkg/imports"
 )
 
 type Installer struct {
-	gitClient   git.Client
-	cacheClient cache.Cache
+	git *git.Git
 }
 
-func NewInstaller(git git.Client, cache cache.Cache) *Installer {
-	return &Installer{
-		gitClient:   git,
-		cacheClient: cache,
+type Option func(*Installer)
+
+func WithGit(git *git.Git) Option {
+	return func(installer *Installer) {
+		installer.git = git
 	}
 }
 
-func (i *Installer) Install(p *pkg.Pkg, url, name string) error {
-	ref, err := git.NewRepoRefFromString(url)
+func NewInstaller(options ...Option) (*Installer, error) {
+	git, err := git.NewGit()
+	if err != nil {
+		return nil, err
+	}
+
+	i := &Installer{
+		git,
+	}
+	for _, option := range options {
+		option(i)
+	}
+	return i, nil
+}
+
+func (installer *Installer) Install(p *pkg.Pkg, url, name string) error {
+	ref, err := git.NewPkgRefFromString(url)
+	if err != nil {
+		return err
+	}
+
+	downloadPath, err := installer.git.Clone(ref)
+	if err != nil {
+		return err
+	}
+
+	newPkg, err := pkg.NewPkgFromPath(downloadPath)
 	if err != nil {
 		return err
 	}
 
 	pkgImport := imports.NewPkg(ref, name)
-	installPath := filepath.Join(i.cacheClient.Path(), pkgImport.Name())
-
-	err = i.gitClient.CloneInto(ref, installPath)
-	if err != nil {
-		return err
-	}
-
-	newPkg, err := pkg.NewPkgFromPath(installPath)
-	if err != nil {
-		return err
-	}
-
 	err = p.AddPackage(newPkg, pkgImport)
 	if err != nil {
 		return err

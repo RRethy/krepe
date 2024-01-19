@@ -8,25 +8,40 @@ import (
 )
 
 const (
-	dirName = "krepe"
+	name = "krepe"
 )
 
-type Cache interface {
-	Path() string
+type Cache struct {
+	dir string
 }
 
-type xdgCache struct{}
+type Option func(*Cache)
 
-func NewCache() Cache {
-	return &xdgCache{}
+func WithDir(dir string) Option {
+	return func(c *Cache) {
+		c.dir = dir
+	}
 }
 
-func (c *xdgCache) Path() string {
-	path := filepath.Join(xdg.CacheHome, dirName)
+func NewCache(options ...Option) *Cache {
+	cache := &Cache{
+		dir: xdg.CacheHome,
+	}
+	for _, option := range options {
+		option(cache)
+	}
+	return cache
+}
+
+func (c *Cache) Path() (string, error) {
+	path := filepath.Join(c.dir, name)
 
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.Mkdir(path, 0755)
+		err = os.Mkdir(path, 0755)
+		if err != nil {
+			return "", err
+		}
 	}
 
-	return path
+	return path, nil
 }

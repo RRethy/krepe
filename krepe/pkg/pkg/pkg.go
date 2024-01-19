@@ -79,9 +79,7 @@ func (p *Pkg) RunPipelineByName(name string) error {
 }
 
 func (p *Pkg) AddPackage(pkg *Pkg, pkgImport *imports.Pkg) error {
-	if pkgImport.Name() != pkg.name {
-		return fmt.Errorf("package name `%s` does not match import name `%s`", pkg.name, pkgImport.Name())
-	}
+	pkg.name = pkgImport.Name()
 
 	if p.ContainsPkg(pkgImport) {
 		return fmt.Errorf("package `%s` already exists", pkg.name)

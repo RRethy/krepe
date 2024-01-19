@@ -98,13 +98,6 @@ func TestPkgAddPackage(t *testing.T) {
 			wantErr:    false,
 		},
 		{
-			name:       "fails with invalid pkg add",
-			pkgPath:    samplePkgPath,
-			newPkgPath: samplePkgPath,
-			newPkgName: "foo",
-			wantErr:    true,
-		},
-		{
 			name:       "fails with duplicate pkg add",
 			pkgPath:    samplePkgWithPkgInstalledPath,
 			newPkgPath: samplePkgPath,
@@ -119,7 +112,7 @@ func TestPkgAddPackage(t *testing.T) {
 			assert.NoError(t, err)
 			newPkg, err := NewPkgFromPath(tt.newPkgPath)
 			assert.NoError(t, err)
-			repoRef, err := git.NewRepoRefFromString("github.com/RRethy/" + tt.newPkgName + "@v0.0.1")
+			repoRef, err := git.NewPkgRefFromString("github.com/RRethy/" + tt.newPkgName + "@v0.0.1")
 			assert.NoError(t, err)
 			pkgImport := imports.NewPkg(repoRef, "")
 
@@ -157,7 +150,7 @@ func TestPkgContainsPkg(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repoRef, err := git.NewRepoRefFromString(tt.other)
+			repoRef, err := git.NewPkgRefFromString(tt.other)
 			assert.NoError(t, err)
 			pkgImport := imports.NewPkg(repoRef, "")
 			assert.Equal(t, tt.want, pkg.ContainsPkg(pkgImport))

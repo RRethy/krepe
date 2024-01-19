@@ -11,7 +11,7 @@ var (
 )
 
 type Pkg struct {
-	ref  *git.RepoRef
+	ref  *git.PkgRef
 	name string
 }
 
@@ -20,7 +20,7 @@ type RawPkg struct {
 	Name string `yaml:"name,omitempty"`
 }
 
-func NewPkg(ref *git.RepoRef, name string) *Pkg {
+func NewPkg(ref *git.PkgRef, name string) *Pkg {
 	return &Pkg{
 		ref:  ref,
 		name: name,
@@ -33,7 +33,7 @@ func (p *Pkg) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
-	ref, err := git.NewRepoRefFromString(raw.Ref)
+	ref, err := git.NewPkgRefFromString(raw.Ref)
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func (p *Pkg) MarshalYAML() (interface{}, error) {
 
 func (p *Pkg) Name() string {
 	if p.name == "" {
-		return p.ref.Name
+		return p.ref.Repo
 	}
 
 	return p.name
