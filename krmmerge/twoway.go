@@ -46,8 +46,8 @@ func twoWayMergeSlice(local, upstream []any) []any {
 }
 
 func twoWayMergeSliceAssociative(local, upstream []any) []any {
-	key := getAssociativeKey(local)
-	if key == "" {
+	key := getAssociativeKeys(local)
+	if len(key) == 0 {
 		return twoWayMergeSliceNonAssociative(local, upstream)
 	}
 

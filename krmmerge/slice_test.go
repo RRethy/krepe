@@ -50,31 +50,31 @@ func TestIsAssociativeSlice(t *testing.T) {
 	}
 }
 
-func TestGetAssociativeKey(t *testing.T) {
+func TestGetAssociativeKeys(t *testing.T) {
 	tests := []struct {
 		name  string
 		slice []any
-		want  string
+		want  []string
 	}{
 		{
 			name:  "nil slice",
 			slice: nil,
-			want:  "",
+			want:  nil,
 		},
 		{
 			name:  "empty slice",
 			slice: []any{},
-			want:  "",
+			want:  nil,
 		},
 		{
 			name:  "non-associative slice",
 			slice: []any{1, 2, 3},
-			want:  "",
+			want:  nil,
 		},
 		{
 			name:  "associative slice with no associative key",
 			slice: []any{map[string]any{"a": 1, "b": 2, "c": 3}},
-			want:  "",
+			want:  nil,
 		},
 		{
 			name: "associative slice with associative key",
@@ -83,7 +83,7 @@ func TestGetAssociativeKey(t *testing.T) {
 				map[string]any{"name": "bar", "a": 2, "b": 3, "c": 4},
 				map[string]any{"name": "baz", "a": 2, "b": 3, "c": 4},
 			},
-			want: "name",
+			want: []string{"name"},
 		},
 		{
 			name: "associative slice with multiple associative keys with duplicate values",
@@ -92,22 +92,21 @@ func TestGetAssociativeKey(t *testing.T) {
 				map[string]any{"name": "bar", "a": 2, "b": 3, "c": 4, "d": 5},
 				map[string]any{"name": "bar", "a": 2, "b": 3, "c": 4, "d": 5},
 			},
-			want: "",
+			want: nil,
 		},
 		{
-			name: "associative slice with multiple associative keys and one non-associative key",
+			name: "associative slice with multiple associative keys",
 			slice: []any{
-				map[string]any{"name": "foo", "a": 2, "b": 3, "c": 4},
-				map[string]any{"name": "bar", "a": 2, "b": 3, "c": 4, "d": 5},
-				3,
+				map[string]any{"name": "foo", "type": "foo", "a": 2, "b": 3, "c": 4},
+				map[string]any{"name": "bar", "type": "bar", "a": 2, "b": 3, "c": 4, "d": 5},
 			},
-			want: "",
+			want: []string{"type", "name"},
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := getAssociativeKey(test.slice)
+			got := getAssociativeKeys(test.slice)
 			assert.Equal(t, test.want, got)
 		})
 	}

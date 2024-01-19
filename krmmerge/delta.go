@@ -77,8 +77,8 @@ func deltaSliceNonAssociative(source, remove []any) []any {
 // All elements in source and remove must be maps. Any duplicate keys will
 // result in non associative behavior.
 func deltaSliceAssociative(source, remove []any) []any {
-	key := getAssociativeKey(source)
-	if key == "" || !hasAssociativeKey(remove, key) {
+	key := getCommonAssociativeKey(getAssociativeKeys(source), getAssociativeKeys(remove))
+	if key == "" {
 		return deltaSliceNonAssociative(source, remove)
 	}
 
