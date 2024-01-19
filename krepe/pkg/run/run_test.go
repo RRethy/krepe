@@ -16,35 +16,31 @@ func TestRun(t *testing.T) {
 		name     string
 		pkg      string
 		pipeline string
-		function string
 		wantErr  bool
 	}{
 		{
 			name:     "succeeds with valid run",
 			pkg:      samplePkgPath,
 			pipeline: "no-op-pipeline",
-			function: "",
 			wantErr:  false,
 		},
 		{
 			name:     "fails with invalid package",
 			pkg:      nonExistentPkgPath,
 			pipeline: "mypipeline",
-			function: "",
 			wantErr:  true,
 		},
 		{
 			name:     "fails with unknown pipeline",
 			pkg:      samplePkgPath,
 			pipeline: "unknown",
-			function: "",
 			wantErr:  true,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := Run(tt.pkg, tt.pipeline, tt.function)
+			err := Run(tt.pkg, tt.pipeline)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
