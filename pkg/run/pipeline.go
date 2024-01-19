@@ -1,14 +1,18 @@
 package run
 
+import (
+	"github.com/Shopify/krepe/pkg/pkg"
+)
+
 type pipeline struct {
-	pkg  string
+	pkg  *pkg.Pkg
 	name string
 }
 
-func newPipeline(pkg, name string) *pipeline {
+func newPipeline(pkg *pkg.Pkg, name string) *pipeline {
 	return &pipeline{pkg: pkg, name: name}
 }
 
 func (p *pipeline) run() error {
-	return nil
+	return p.pkg.RunPipeline(p.name)
 }

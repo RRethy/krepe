@@ -1,11 +1,15 @@
 package run
 
+import (
+	"github.com/Shopify/krepe/pkg/pkg"
+)
+
 type function struct {
-	pkg  string
+	pkg  *pkg.Pkg
 	name string
 }
 
-func newFunction(pkg, name string) *function {
+func newFunction(pkg *pkg.Pkg, name string) *function {
 	return &function{pkg: pkg, name: name}
 }
 
