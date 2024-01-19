@@ -31,15 +31,15 @@ func remove(obj any, path []string) (any, error) {
 
 	switch obj.(type) {
 	case map[string]any:
-		return removeMap(obj.(map[string]any), path[0], path[1:])
+		return removeInMap(obj.(map[string]any), path[0], path[1:])
 	case []any:
-		return removeArray(obj.([]any), path[0], path[1:])
+		return removeInArray(obj.([]any), path[0], path[1:])
 	default:
 		return obj, fmt.Errorf("cannot remove from non-map or non-array object with a json path")
 	}
 }
 
-func removeMap(obj map[string]any, ptr string, path []string) (any, error) {
+func removeInMap(obj map[string]any, ptr string, path []string) (any, error) {
 	if _, ok := obj[ptr]; !ok {
 		return obj, fmt.Errorf("key not found")
 	}
@@ -58,7 +58,7 @@ func removeMap(obj map[string]any, ptr string, path []string) (any, error) {
 	return obj, nil
 }
 
-func removeArray(arr []any, ptr string, path []string) (any, error) {
+func removeInArray(arr []any, ptr string, path []string) (any, error) {
 	var idx int
 	var err error
 	if idx, err = strconv.Atoi(ptr); err != nil {

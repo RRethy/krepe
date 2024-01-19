@@ -33,15 +33,15 @@ func add(obj any, path []string, value any) (any, error) {
 
 	switch obj.(type) {
 	case map[string]any:
-		return addMap(obj.(map[string]any), path[0], path[1:], value)
+		return addInMap(obj.(map[string]any), path[0], path[1:], value)
 	case []any:
-		return addArray(obj.([]any), path[0], path[1:], value)
+		return addInArray(obj.([]any), path[0], path[1:], value)
 	default:
 		return obj, fmt.Errorf("cannot add to non-map or non-array object with a json path")
 	}
 }
 
-func addMap(obj map[string]any, ptr string, path []string, value any) (map[string]any, error) {
+func addInMap(obj map[string]any, ptr string, path []string, value any) (map[string]any, error) {
 	if len(path) == 0 {
 		obj[ptr] = value
 		return obj, nil
@@ -56,7 +56,7 @@ func addMap(obj map[string]any, ptr string, path []string, value any) (map[strin
 	return obj, nil
 }
 
-func addArray(arr []any, ptr string, path []string, value any) (any, error) {
+func addInArray(arr []any, ptr string, path []string, value any) (any, error) {
 	var idx int
 	var err error
 	if ptr == "-" {
