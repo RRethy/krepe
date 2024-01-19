@@ -72,6 +72,16 @@ func (p *Pkg) RunPipelineByName(name string) error {
 				return fmt.Errorf("failed to run pipeline `%s` on resource `%s`: %w", name, resource.Fname(), err)
 			}
 		}
+
+		for _, pkg := range p.packages {
+			err := pkg.RunPipelineByName(name)
+			if err != nil {
+				return fmt.Errorf("failed to run pipeline `%s` on pkg `%s`: %w", name, pkg.name, err)
+			}
+
+			// TODO: run pipeline on pkg
+		}
+
 		return nil
 	} else {
 		return fmt.Errorf("failed to get pipeline `%s`", name)
