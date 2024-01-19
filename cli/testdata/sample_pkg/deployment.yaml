@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: my-app
   labels:
     app: my-app
+  name: my-app
 spec:
   replicas: 3
   selector:
@@ -15,7 +15,7 @@ spec:
         app: my-app
     spec:
       containers:
-      - name: my-app
-        image: my-app:1.0.0
-        ports:
-        - containerPort: 8080
+        - image: my-app:1.0.0
+          name: my-app
+          ports:
+            - containerPort: 8080

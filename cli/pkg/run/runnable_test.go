@@ -6,10 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	nonExistentPkgPath = "../../testdata/non_existent_pkg"
-)
-
 func TestNewRunnable(t *testing.T) {
 	tests := []struct {
 		name     string

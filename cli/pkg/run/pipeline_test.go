@@ -8,8 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const samplePkgPath = "../../testdata/sample_pkg"
-
 func TestPipelineRun(t *testing.T) {
 	tmpDir := t.TempDir()
 	pkg, err := pkg.NewPkgFromPath(samplePkgPath)
