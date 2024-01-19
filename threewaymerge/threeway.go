@@ -1,6 +1,7 @@
 package threewaymerge
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -57,7 +58,7 @@ func threeWayMergeAny(origin, local, upstream any) any {
 // threeWayMergeMap returns the result of a recursive 3-way merge on each key
 // in local or upstream based on the presence of the key in origin, local, and
 // upstream.
-func threeWayMergeMap(origin, local, upstream map[string]any) any {
+func threeWayMergeMap(origin, local, upstream map[string]any) map[string]any {
 	keepKeys := make(map[string]struct{})
 	for k := range local {
 		keepKeys[k] = struct{}{}
@@ -79,6 +80,7 @@ func threeWayMergeMap(origin, local, upstream map[string]any) any {
 			res[key] = upstreamVal
 		} else if originOk && localOk && !upstreamOk {
 			val := delta(localVal, originVal)
+			fmt.Println("val", val == nil, "localVal", localVal, "originVal", originVal)
 			if val != nil {
 				res[key] = val
 			}
@@ -96,7 +98,7 @@ func threeWayMergeMap(origin, local, upstream map[string]any) any {
 // threeWayMergeSlice returns the result of performing a 3-way merge on origin,
 // local, and upstream. The algorithm used depends on whether origin, local, and
 // upstream are associative.
-func threeWayMergeSlice(origin, local, upstream []any) any {
+func threeWayMergeSlice(origin, local, upstream []any) []any {
 	if isAssociativeSlice(origin) && isAssociativeSlice(local) && isAssociativeSlice(upstream) {
 		return threeWayMergeSliceAssociative(origin, local, upstream)
 	}
@@ -109,7 +111,7 @@ func threeWayMergeSlice(origin, local, upstream []any) any {
 // An element only present in upstream will be returned as-is at the end of the slice.
 // An element present in both local and upstream will be 2-way merged recursively.
 // An element present in origin, local, and upstream will be 3-way merged recursively.
-func threeWayMergeSliceAssociative(origin, local, upstream []any) any {
+func threeWayMergeSliceAssociative(origin, local, upstream []any) []any {
 	key := getCommonAssociativeKey(getAssociativeKeys(origin), getAssociativeKeys(local), getAssociativeKeys(upstream))
 	if key == "" {
 		return threeWayMergeSliceNonAssociative(origin, local, upstream)
@@ -195,8 +197,12 @@ func threeWayMergeSliceAssociative(origin, local, upstream []any) any {
 
 // threeWayMergeSliceNonAssociative merges origin, local, and upstream elements
 // using the 3-way merge scalar algorithm.
-func threeWayMergeSliceNonAssociative(origin, local, upstream []any) any {
-	return threeWayMergeScalar(origin, local, upstream)
+func threeWayMergeSliceNonAssociative(origin, local, upstream []any) []any {
+	if reflect.DeepEqual(origin, upstream) {
+		return local
+	}
+
+	return upstream
 }
 
 // threeWayMergeScalar returns the upstream value iff upstream has

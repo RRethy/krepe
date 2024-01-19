@@ -14,7 +14,7 @@ type deltaTest[T mergeable] struct {
 	want   any
 }
 
-func runDeltaTests[T mergeable](t *testing.T, deltaFunc func(T, T) any, tests []deltaTest[T]) {
+func runDeltaTests[T mergeable](t *testing.T, deltaFunc func(T, T) T, tests []deltaTest[T]) {
 	t.Helper()
 
 	for _, test := range tests {
@@ -152,6 +152,12 @@ func TestDelta(t *testing.T) {
 				2,
 			},
 		},
+		{
+			name:   "same values",
+			source: map[string]any{"a": 1, "b": 2},
+			remove: map[string]any{"a": 1, "b": 2},
+			want:   nil,
+		},
 	})
 }
 
@@ -181,6 +187,18 @@ func TestDeltaMap(t *testing.T) {
 			remove: map[string]any{"b": 3, "c": 4},
 			want:   map[string]any{"a": 1, "b": 2, "c": 3},
 		},
+		{
+			name:   "same values",
+			source: map[string]any{"a": 1, "b": 2},
+			remove: map[string]any{"a": 1, "b": 2},
+			want:   map[string]any(nil),
+		},
+		{
+			name:   "null key",
+			source: map[string]any{"a": 1, "b": 2},
+			remove: map[string]any{"a": nil, "b": 2},
+			want:   map[string]any{"a": 1},
+		},
 	})
 }
 
@@ -202,7 +220,7 @@ func TestDeltaSlice(t *testing.T) {
 			name:   "non-associative slice that matches",
 			source: []any{1, 2, 3},
 			remove: []any{1, 2, 3},
-			want:   nil,
+			want:   []any(nil),
 		},
 		{
 			name: "associative slice with no remove slice associative key",
@@ -283,7 +301,7 @@ func TestDeltaSliceNonAssociative(t *testing.T) {
 			name:   "matches",
 			source: []any{1, 2, 3},
 			remove: []any{1, 2, 3},
-			want:   nil,
+			want:   []any(nil),
 		},
 	})
 }

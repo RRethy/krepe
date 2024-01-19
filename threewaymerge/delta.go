@@ -24,15 +24,29 @@ func delta(source, remove any) any {
 		if !ok {
 			return source
 		}
-		return deltaMap(sourceTyped, removeMap)
+
+		res := deltaMap(sourceTyped, removeMap)
+		if res == nil {
+			return nil
+		}
+		return res
 	case []any:
 		removeArr, ok := remove.([]any)
 		if !ok {
 			return source
 		}
-		return deltaSlice(sourceTyped, removeArr)
+
+		res := deltaSlice(sourceTyped, removeArr)
+		if res == nil {
+			return nil
+		}
+		return res
 	default:
-		return deltaScalar(source, remove)
+		res := deltaScalar(source, remove)
+		if res == nil {
+			return nil
+		}
+		return res
 	}
 }
 
@@ -40,7 +54,7 @@ func delta(source, remove any) any {
 // A recursive delta is performed on each value in source using the
 // corresponding value in remove.
 // If the result is an empty map then nil is returned.
-func deltaMap(source, remove map[string]any) any {
+func deltaMap(source, remove map[string]any) map[string]any {
 	res := make(map[string]any)
 
 	for k, v := range source {
@@ -62,7 +76,7 @@ func deltaMap(source, remove map[string]any) any {
 
 // deltaSlice returns the difference between source slice and remove slice.
 // The algorithm used depends on whether or not the slices are associative.
-func deltaSlice(source, remove []any) any {
+func deltaSlice(source, remove []any) []any {
 	if isAssociativeSlice(source) && isAssociativeSlice(remove) {
 		return deltaSliceAssociative(source, remove)
 	}
@@ -70,17 +84,11 @@ func deltaSlice(source, remove []any) any {
 	return deltaSliceNonAssociative(source, remove)
 }
 
-// deltaSliceNonAssociative returns nil iff source and remove are the same,
-// otherwise source is returned.
-func deltaSliceNonAssociative(source, remove []any) any {
-	return deltaScalar(source, remove)
-}
-
 // deltaSliceAssociative removes the elements from source that are present in
 // remove. Comparison is done by the value of the common associative key. Both
 // source and remove must be associative slices or the non-associative
 // algorithm is used.
-func deltaSliceAssociative(source, remove []any) any {
+func deltaSliceAssociative(source, remove []any) []any {
 	key := getCommonAssociativeKey(getAssociativeKeys(source), getAssociativeKeys(remove))
 	if key == "" {
 		return deltaSliceNonAssociative(source, remove)
@@ -119,6 +127,15 @@ func deltaSliceAssociative(source, remove []any) any {
 	}
 
 	return result
+}
+
+// deltaSliceNonAssociative returns nil iff source and remove are the same,
+// otherwise source is returned.
+func deltaSliceNonAssociative(source, remove []any) []any {
+	if reflect.DeepEqual(source, remove) {
+		return nil
+	}
+	return source
 }
 
 // deltaScalar returns nil iff source and remove are the same,

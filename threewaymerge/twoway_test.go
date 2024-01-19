@@ -14,7 +14,7 @@ type twoWayMergeTest[T mergeable] struct {
 	want     any
 }
 
-func runTwoWayMergeTests[T mergeable](t *testing.T, mergeFunc func(T, T) any, tests []twoWayMergeTest[T]) {
+func runTwoWayMergeTests[T mergeable](t *testing.T, mergeFunc func(T, T) T, tests []twoWayMergeTest[T]) {
 	t.Helper()
 
 	for _, test := range tests {
