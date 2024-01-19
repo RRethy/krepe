@@ -1,20 +1,49 @@
 package imports
 
+import (
+	"errors"
+	"strings"
+
+	"github.com/Shopify/krepe/krepe/pkg/yaml"
+)
+
+var (
+	_ yaml.InterfaceUnmarshaler = &Pkg{}
+	_ yaml.InterfaceMarshaler   = &Pkg{}
+)
+
 type Pkg struct {
-	url  string
-	name string
+	url     string
+	version string
+	name    string
 }
 
 type RawPkg struct {
-	Url  string `yaml:"url,omitempty"`
+	Tag  string `yaml:"tag,omitempty"`
 	Name string `yaml:"name,omitempty"`
 }
 
-func NewPkg(url string, name string) (*Pkg, error) {
+func NewPkg(tag string, name string) (*Pkg, error) {
+	parts := strings.Split(tag, "@")
+	if len(parts) != 2 {
+		return nil, errors.New("tag must be in the format <url>@<version>")
+	}
+
+	url, version := parts[0], parts[1]
+
+	if name == "" {
+		urlParts := strings.Split(url, "/")
+		name = urlParts[len(urlParts)-1]
+		if name == "" {
+			return nil, errors.New("could not parse name from url")
+		}
+	}
+
 	return &Pkg{
-		url:  url,
-		name: name,
-	}, nil // TODO
+		url:     url,
+		version: version,
+		name:    name,
+	}, nil
 }
 
 func (p *Pkg) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -23,7 +52,7 @@ func (p *Pkg) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
-	newPkg, err := NewPkg(raw.Url, raw.Name)
+	newPkg, err := NewPkg(raw.Tag, raw.Name)
 	if err != nil {
 		return err
 	}
@@ -34,7 +63,7 @@ func (p *Pkg) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (p *Pkg) MarshalYAML() (interface{}, error) {
 	return RawPkg{
-		Url:  p.url,
+		Tag:  p.url + "@" + p.version,
 		Name: p.name,
 	}, nil
 }

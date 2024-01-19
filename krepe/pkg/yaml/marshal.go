@@ -11,6 +11,8 @@ const (
 	indent = 2
 )
 
+// TODO: try out the custom decoder for ordered maps and comments
+
 type BytesMarshaler yaml.BytesMarshaler
 type InterfaceMarshaler yaml.InterfaceMarshaler
 
