@@ -36,5 +36,10 @@ func move(obj any, from []string, path []string) (any, error) {
 		return nil, err
 	}
 
-	return add(obj, path, removed)
+	newObj, err := add(obj, path, removed)
+	if err != nil {
+		add(obj, from, removed)
+		return nil, err
+	}
+	return newObj, nil
 }
