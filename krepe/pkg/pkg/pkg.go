@@ -108,6 +108,30 @@ func (p *Pkg) AddPackage(pkg *Pkg, pkgImport *imports.Pkg) error {
 	return nil
 }
 
+func (p *Pkg) UpdatePackage(pkg *Pkg, pkgImport *imports.Pkg) error {
+	pkg.name = pkgImport.Name()
+
+	if !p.ContainsPkg(pkgImport) {
+		return fmt.Errorf("package `%s` does not exist", pkg.name)
+	}
+
+	for i, pkg := range p.packages {
+		if pkg.name == pkgImport.Name() {
+			// TODO: 3-way merge
+			p.packages[i] = pkg
+			break
+		}
+	}
+
+	for i, pkgImport := range p.Krepe.Imports.Packages {
+		if pkgImport.Name() == pkgImport.Name() {
+			p.Krepe.Imports.Packages[i] = pkgImport
+		}
+	}
+
+	return nil
+}
+
 func (p *Pkg) Write(dir string) error {
 	pkgPath := filepath.Join(dir, p.name)
 

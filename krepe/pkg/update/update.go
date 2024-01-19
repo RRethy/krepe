@@ -1,4 +1,4 @@
-package install
+package update
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 )
 
-func Install(pkgPath, url, name string) error {
+func Update(pkgPath, url, name string) error {
 	absPath, err := filepath.Abs(pkgPath)
 	if err != nil {
 		return fmt.Errorf("getting absolute path: %w", err)
@@ -18,12 +18,12 @@ func Install(pkgPath, url, name string) error {
 		return err
 	}
 
-	installer, err := NewInstaller()
+	updater, err := NewUpdater()
 	if err != nil {
 		return err
 	}
 
-	err = installer.Install(p, url, name)
+	err = updater.Update(p, url, name)
 	if err != nil {
 		return err
 	}
