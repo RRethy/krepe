@@ -9,14 +9,10 @@ import (
 type SetNamespace struct{}
 
 func (f *SetNamespace) Run(res *resource.Resource, configMap map[string]any) error {
-	if v, ok := configMap["namespace"]; ok {
-		if ns, ok := v.(string); ok {
-			res.SetNamespace(ns)
-		} else {
-			return fmt.Errorf("invalid type for namespace key in configMap: %T", v)
-		}
-	} else {
-		return fmt.Errorf("missing namespace key in configMap")
+	ns, ok := configMap["namespace"].(string)
+	if !ok {
+		return fmt.Errorf("failed to get a key `namespace` with type `string` form configMap")
 	}
+	res.SetNamespace(ns)
 	return nil
 }
