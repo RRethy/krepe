@@ -7,14 +7,14 @@ GOTEST=go test
 GOMOD=go mod
 
 .PHONY: build
-build: build-krepe build-jsonpatch build-threewaymerge
+build: build-krepe build-jsonpatch build-threewaymerge build-deepishcopy
 
 .PHONY: build-%
 build-%:
 	$(GOBUILD) -C $*
 
 .PHONY: test
-test: test-krepe test-jsonpatch test-threewaymerge
+test: test-krepe test-jsonpatch test-threewaymerge test-deepishcopy
 
 .PHONY: test-%
 test-%:
@@ -26,7 +26,7 @@ clean:
 	rm -f $(BINARY_PATH)
 
 .PHONY: tidy
-tidy: tidy-krepe tidy-jsonpatch tidy-threewaymerge
+tidy: tidy-krepe tidy-jsonpatch tidy-threewaymerge tidy-deepishcopy
 
 .PHONY: tidy-%
 tidy-%:
