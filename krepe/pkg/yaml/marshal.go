@@ -16,14 +16,14 @@ const (
 type BytesMarshaler yaml.BytesMarshaler
 type InterfaceMarshaler yaml.InterfaceMarshaler
 
-// Marshal is a wrapper for yaml.MarshalWithOptions which sets the indent
+// Marshal returns [yaml.Marshal] with various configurations.
 func Marshal(v any) ([]byte, error) {
 	return yaml.MarshalWithOptions(v, yaml.IndentSequence(true), yaml.Indent(indent))
 }
 
-// MarshalCompatibilityShim is a shim for yaml.v3 which is needed for types
-// which don't support go-yaml's Marshaler interface.
-// E.g. orderedmap.OrderedMap
+// MarshalCompatibilityShim is a shim for yaml.v3,
+// this is needed for types which don't support go-yaml's Marshaler interface.
+// E.g. orderedmap.OrderedMap.
 func MarshalCompatibilityShim(v any) ([]byte, error) {
 	var buf bytes.Buffer
 	encoder := yamlv3.NewEncoder(&buf)
