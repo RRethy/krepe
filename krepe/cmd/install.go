@@ -6,32 +6,32 @@ import (
 )
 
 var (
-	installPkg  string
-	installName string
+	installPkgName string
+	installCmd     = &cobra.Command{
+		Use:   "install",
+		Short: "Import a package",
+		Long: `Import a pacakge.
+
+Usage:
+  install [packageRef]
+
+Arguments:
+  packageRef  The reference to a package in the form 'github.com/$OWNER/$REPO[$PATH]@$TAG'. This argument is required.
+
+Example:
+  install 'github.com/Owner/Repo/path/to/package@v1.0.0'`,
+		Args: cobra.MinimumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			err := install.Install(pkgPath, args[0], installPkgName)
+			if err != nil {
+				panic(err)
+			}
+		},
+	}
 )
-
-// installCmd represents the install command
-var installCmd = &cobra.Command{
-	Use:   "install",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Args: cobra.MinimumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		err := install.Install(installPkg, args[0], installName)
-		if err != nil {
-			panic(err)
-		}
-	},
-}
 
 func init() {
 	rootCmd.AddCommand(installCmd)
 
-	installCmd.Flags().StringVarP(&installName, "name", "n", "", "TODO")
-	installCmd.Flags().StringVarP(&installPkg, "", "C", ".", "TODO")
+	installCmd.Flags().StringVarP(&installPkgName, "name", "n", "", "name override of the package being installed")
 }
