@@ -5,15 +5,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var pipeline string
-var function string
-var pkg string
+var (
+	runPipeline string
+	runFunction string
+	runPkg      string
+)
 
 var runCmd = &cobra.Command{
 	Use:   "run",
 	Short: "run a pipeline or function on a package",
 	Run: func(cmd *cobra.Command, args []string) {
-		err := run.Run(pkg, pipeline, function)
+		err := run.Run(runPkg, runPipeline, runFunction)
 		if err != nil {
 			panic(err)
 		}
@@ -23,7 +25,7 @@ var runCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(runCmd)
 
-	runCmd.Flags().StringVarP(&pipeline, "pipeline", "p", "default", "name of the pipeline to run")
-	runCmd.Flags().StringVarP(&function, "function", "f", "", "name of the function to run")
-	runCmd.Flags().StringVar(&pkg, "pkg", ".", "path to the package to run")
+	runCmd.Flags().StringVarP(&runPipeline, "pipeline", "p", "default", "name of the pipeline to run")
+	runCmd.Flags().StringVarP(&runFunction, "function", "f", "", "name of the function to run")
+	runCmd.Flags().StringVar(&runPkg, "pkg", ".", "path to the package to run")
 }

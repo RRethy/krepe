@@ -6,6 +6,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	installUrl  string
+	installPkg  string
+	installName string
+)
+
 // installCmd represents the install command
 var installCmd = &cobra.Command{
 	Use:   "install",
@@ -32,5 +38,7 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	installCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	installCmd.Flags().StringVar("url", false, "TODO")
+	installCmd.Flags().StringVar("pkg", false, "TODO")
+	installCmd.Flags().StringVar("name", false, "TODO")
 }
