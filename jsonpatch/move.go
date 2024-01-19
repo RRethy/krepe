@@ -31,5 +31,10 @@ func (m *Move) Apply(obj any) (any, error) {
 }
 
 func move(obj any, from []string, path []string) (any, error) {
-	panic("not implemented")
+	obj, removed, err := remove(obj, from)
+	if err != nil {
+		return obj, err
+	}
+
+	return add(obj, path, removed)
 }

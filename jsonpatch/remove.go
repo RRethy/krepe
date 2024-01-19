@@ -21,12 +21,13 @@ func NewRemove(path string) (*Remove, error) {
 }
 
 func (r *Remove) Apply(obj any) (any, error) {
-	return remove(obj, r.path)
+	obj, _, err := remove(obj, r.path)
+	return obj, err
 }
 
-func remove(obj any, path []string) (any, error) {
+func remove(obj any, path []string) (any, any, error) {
 	if len(path) == 0 {
-		return nil, nil
+		return nil, obj, nil
 	}
 
 	switch obj.(type) {
@@ -35,47 +36,48 @@ func remove(obj any, path []string) (any, error) {
 	case []any:
 		return removeInArray(obj.([]any), path[0], path[1:])
 	default:
-		return obj, fmt.Errorf("cannot remove from non-map or non-array object with a json path")
+		return obj, nil, fmt.Errorf("cannot remove from non-map or non-array object with a json path")
 	}
 }
 
-func removeInMap(obj map[string]any, ptr string, path []string) (any, error) {
-	if _, ok := obj[ptr]; !ok {
-		return obj, fmt.Errorf("key not found")
+func removeInMap(obj map[string]any, ptr string, path []string) (any, any, error) {
+	removed, ok := obj[ptr]
+	if !ok {
+		return obj, nil, fmt.Errorf("key not found")
 	}
 
 	if len(path) == 0 {
 		delete(obj, ptr)
-		return obj, nil
+		return obj, removed, nil
 	}
 
-	newVal, err := remove(obj[ptr], path)
+	newVal, removed, err := remove(obj[ptr], path)
 	if err != nil {
-		return obj, err
+		return obj, removed, err
 	}
 
 	obj[ptr] = newVal
-	return obj, nil
+	return obj, removed, nil
 }
 
-func removeInArray(arr []any, ptr string, path []string) (any, error) {
+func removeInArray(arr []any, ptr string, path []string) (any, any, error) {
 	var idx int
 	var err error
 	if idx, err = strconv.Atoi(ptr); err != nil {
-		return arr, err
+		return arr, nil, err
 	} else if idx < 0 || idx >= len(arr) {
-		return arr, fmt.Errorf("index out of bounds: %d", idx)
+		return arr, nil, fmt.Errorf("index out of bounds: %d", idx)
 	}
 
 	if len(path) == 0 {
-		return append(arr[:idx], arr[idx+1:]...), nil
+		return append(arr[:idx], arr[idx+1:]...), arr[idx], nil
 	}
 
-	newVal, err := remove(arr[idx], path)
+	newVal, removed, err := remove(arr[idx], path)
 	if err != nil {
-		return arr, err
+		return arr, removed, err
 	}
 
 	arr[idx] = newVal
-	return arr, nil
+	return arr, removed, nil
 }
