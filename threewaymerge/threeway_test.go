@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"golang.design/x/reflect"
 )
 
 type threeWayMergeTest[T mergeable] struct {
@@ -19,8 +20,14 @@ func runThreeWayMergeTests[T mergeable](t *testing.T, threeWayMergeFunc func(T, 
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			originCopy := reflect.DeepCopy(test.origin)
+			localCopy := reflect.DeepCopy(test.local)
+			upstreamCopy := reflect.DeepCopy(test.upstream)
 			got := threeWayMergeFunc(test.origin, test.local, test.upstream)
 			assert.Equal(t, test.want, got)
+			assert.Equal(t, originCopy, test.origin, "origin should not be mutated")
+			assert.Equal(t, localCopy, test.local, "local should not be mutated")
+			assert.Equal(t, upstreamCopy, test.upstream, "upstream should not be mutated")
 		})
 	}
 }
