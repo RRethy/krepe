@@ -7,11 +7,13 @@ import (
 	"golang.design/x/reflect"
 )
 
+// Copy is a JSON patch operation that copies a value from one location to another.
 type Copy struct {
 	from []string
 	path []string
 }
 
+// NewCopy parses the from and path and creates a new Copy struct.
 func NewCopy(from, path string) (*Copy, error) {
 	fromArr, err := pathToArray(from)
 	if err != nil {
@@ -28,6 +30,7 @@ func NewCopy(from, path string) (*Copy, error) {
 	}, nil
 }
 
+// Apply applies the Copy operation to the given object, and returns the modified object.
 func (c *Copy) Apply(obj any) (any, error) {
 	obj, err := copy(obj, c.from, c.path)
 	if err != nil {

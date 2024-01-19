@@ -4,11 +4,13 @@ import (
 	"fmt"
 )
 
+// Move is a JSON patch operation that moves a value from one location to another.
 type Move struct {
 	from []string
 	path []string
 }
 
+// NewMove parses the from and path and creates a new Move struct.
 func NewMove(from, path string) (*Move, error) {
 	fromPath, err := pathToArray(from)
 	if err != nil {
@@ -26,6 +28,7 @@ func NewMove(from, path string) (*Move, error) {
 	}, nil
 }
 
+// Apply applies the Move operation to the given object, and returns the modified object.
 func (m *Move) Apply(obj any) (any, error) {
 	obj, err := move(obj, m.from, m.path)
 	if err != nil {

@@ -5,11 +5,13 @@ import (
 	"strconv"
 )
 
+// Add is a JSON patch operation that adds a value to a JSON object or array.
 type Add struct {
 	path  []string
 	value any
 }
 
+// NewAdd parses the path and creates a new Add struct.
 func NewAdd(path string, value any) (*Add, error) {
 	pathArr, err := pathToArray(path)
 	if err != nil {
@@ -22,6 +24,7 @@ func NewAdd(path string, value any) (*Add, error) {
 	}, nil
 }
 
+// Apply applies the Add operation to the given object, and returns the modified object.
 func (a *Add) Apply(obj any) (any, error) {
 	obj, err := add(obj, a.path, a.value)
 	if err != nil {

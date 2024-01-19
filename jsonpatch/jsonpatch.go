@@ -4,10 +4,12 @@ import (
 	"fmt"
 )
 
+// JsonPatch is a JSON patch operation according to RFC 6902.
 type JsonPatch interface {
 	Apply(obj any) (any, error)
 }
 
+// NewJsonPatch parses the given JSON patch operation and returns a JsonPatch struct.
 func NewJsonPatch(op, from, path string, value any) (JsonPatch, error) {
 	switch op {
 	case "add":
