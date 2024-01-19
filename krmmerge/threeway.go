@@ -41,8 +41,6 @@ func threeWayMergeAny(origin, local, upstream any) any {
 
 		return threeWayMergeScalar(origin, local, upstream)
 	}
-
-	return nil
 }
 
 func threeWayMergeMap(origin, local, upstream map[string]any) map[string]any {
@@ -82,7 +80,7 @@ func threeWayMergeMap(origin, local, upstream map[string]any) map[string]any {
 	return res
 }
 
-func threeWayMergeSlice(origin, local, upstream []any) []any {
+func threeWayMergeSlice(origin, local, upstream []any) any {
 	if isAssociativeSlice(origin) && isAssociativeSlice(local) && isAssociativeSlice(upstream) {
 		return threeWayMergeSliceAssociative(origin, local, upstream)
 	}
@@ -90,16 +88,88 @@ func threeWayMergeSlice(origin, local, upstream []any) []any {
 	return threeWayMergeSliceNonAssociative(origin, local, upstream)
 }
 
-func threeWayMergeSliceAssociative(origin, local, upstream []any) []any {
-	// key := getCommonAssociativeKey(getAssociativeKeys(origin), getAssociativeKeys(local), getAssociativeKeys(upstream))
+func threeWayMergeSliceAssociative(origin, local, upstream []any) any {
+	key := getCommonAssociativeKey(getAssociativeKeys(origin), getAssociativeKeys(local), getAssociativeKeys(upstream))
+	if key == "" {
+		return threeWayMergeSliceNonAssociative(origin, local, upstream)
+	}
 
-	return nil
+	type twoElemTuple struct {
+		local    any
+		upstream any
+	}
+	keysToRemove := make(map[string]any)
+	keysToMerge := make(map[string]twoElemTuple)
+	keysToAdd := make(map[string]any)
+
+	for _, elem := range origin {
+		elemMap, ok := elem.(map[string]any)
+		if !ok {
+			return threeWayMergeSliceNonAssociative(origin, local, upstream)
+		}
+
+		keyVal, ok := elemMap[key].(string)
+		if !ok {
+			return threeWayMergeSliceNonAssociative(origin, local, upstream)
+		}
+
+		keysToRemove[keyVal] = elem
+	}
+
+	for _, elem := range upstream {
+		elemMap, ok := elem.(map[string]any)
+		if !ok {
+			return threeWayMergeSliceNonAssociative(origin, local, upstream)
+		}
+
+		keyVal, ok := elemMap[key].(string)
+		if !ok {
+			return threeWayMergeSliceNonAssociative(origin, local, upstream)
+		}
+
+		if localElem, ok := keysToRemove[keyVal]; ok {
+			delete(keysToRemove, keyVal)
+			keysToMerge[keyVal] = twoElemTuple{
+				local:    localElem,
+				upstream: elem,
+			}
+		} else {
+			keysToAdd[keyVal] = elem
+		}
+	}
+
+	var result []any
+	for _, elem := range local {
+		elemMap, ok := elem.(map[string]any)
+		if !ok {
+			return threeWayMergeSliceNonAssociative(origin, local, upstream)
+		}
+
+		keyVal, ok := elemMap[key].(string)
+		if !ok {
+			return threeWayMergeSliceNonAssociative(origin, local, upstream)
+		}
+
+		if _, ok := keysToRemove[keyVal]; ok {
+			continue
+		}
+
+		if keepTuple, ok := keysToMerge[keyVal]; ok {
+			result = append(result, threeWayMergeAny(keepTuple.local, elem, keepTuple.upstream))
+		} else if addElem, ok := keysToAdd[keyVal]; ok {
+			result = append(result, twoWayMerge(elem, addElem))
+		} else {
+			result = append(result, elem)
+		}
+	}
+
+	return result
 }
 
-func threeWayMergeSliceNonAssociative(origin, local, upstream []any) []any {
-	return nil
+func threeWayMergeSliceNonAssociative(origin, local, upstream []any) any {
+	return threeWayMergeScalar(origin, local, upstream)
 }
 
 func threeWayMergeScalar(origin, local, upstream any) any {
-	return nil
+	return upstream
 }
