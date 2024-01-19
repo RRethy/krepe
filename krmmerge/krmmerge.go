@@ -6,6 +6,10 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
+type mergeable interface {
+	any | map[string]any | []any
+}
+
 // KrmMerge is a 3-tuple of origin, local, and upstream resources.
 // These can be used to merge them into a single resource.
 type KrmMerge struct {
@@ -86,7 +90,12 @@ func (k *KrmMerge) threeWayMergeRoot() (*unstructured.Unstructured, error) {
 		return nil, fmt.Errorf("version mismatch: origin=%s, local=%s, upstream=%s", originGVK.Version, localGVK.Version, upstreamGVK.Version)
 	}
 
-	return &unstructured.Unstructured{
-		Object: threeWayMergeMap(k.origin.Object, k.local.Object, k.upstream.Object),
-	}, nil
+	obj := threeWayMergeMap(k.origin.Object, k.local.Object, k.upstream.Object)
+	if objMap, ok := obj.(map[string]any); ok {
+		return &unstructured.Unstructured{
+			Object: objMap,
+		}, nil
+	}
+
+	return nil, nil
 }

@@ -23,7 +23,7 @@ func threeWayMergeAny(origin, local, upstream any) any {
 			return local
 		}
 
-		originMap, ok := local.(map[string]any)
+		originMap, ok := origin.(map[string]any)
 		if !ok {
 			return twoWayMergeMap(localTyped, upstreamMap)
 		}
@@ -57,7 +57,7 @@ func threeWayMergeAny(origin, local, upstream any) any {
 // threeWayMergeMap returns the result of a recursive 3-way merge on each key
 // in local or upstream based on the presence of the key in origin, local, and
 // upstream.
-func threeWayMergeMap(origin, local, upstream map[string]any) map[string]any {
+func threeWayMergeMap(origin, local, upstream map[string]any) any {
 	keepKeys := make(map[string]struct{})
 	for k := range local {
 		keepKeys[k] = struct{}{}
@@ -83,7 +83,6 @@ func threeWayMergeMap(origin, local, upstream map[string]any) map[string]any {
 				res[key] = val
 			}
 		} else if originOk && !localOk && upstreamOk {
-			res[key] = upstreamVal
 		} else if !originOk && localOk && upstreamOk {
 			res[key] = twoWayMerge(localVal, upstreamVal)
 		} else if originOk && localOk && upstreamOk {
@@ -117,7 +116,7 @@ func threeWayMergeSliceAssociative(origin, local, upstream []any) any {
 	}
 
 	type twoElemTuple struct {
-		local    any
+		origin   any
 		upstream any
 	}
 	keysToRemove := make(map[string]any)
@@ -149,10 +148,10 @@ func threeWayMergeSliceAssociative(origin, local, upstream []any) any {
 			return threeWayMergeSliceNonAssociative(origin, local, upstream)
 		}
 
-		if localElem, ok := keysToRemove[keyVal]; ok {
+		if originElem, ok := keysToRemove[keyVal]; ok {
 			delete(keysToRemove, keyVal)
 			keysToMerge[keyVal] = twoElemTuple{
-				local:    localElem,
+				origin:   originElem,
 				upstream: elem,
 			}
 		} else {
@@ -177,12 +176,18 @@ func threeWayMergeSliceAssociative(origin, local, upstream []any) any {
 		}
 
 		if keepTuple, ok := keysToMerge[keyVal]; ok {
-			result = append(result, threeWayMergeAny(keepTuple.local, elem, keepTuple.upstream))
+			delete(keysToMerge, keyVal)
+			result = append(result, threeWayMergeAny(keepTuple.origin, elem, keepTuple.upstream))
 		} else if addElem, ok := keysToAdd[keyVal]; ok {
+			delete(keysToAdd, keyVal)
 			result = append(result, twoWayMerge(elem, addElem))
 		} else {
 			result = append(result, elem)
 		}
+	}
+
+	for _, elem := range keysToAdd {
+		result = append(result, elem)
 	}
 
 	return result

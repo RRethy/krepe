@@ -6,13 +6,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type twoWayMergeTest[T mergeable] struct {
+	name     string
+	local    T
+	upstream T
+	want     any
+}
+
+func runTwoWayMergeTests[T mergeable](t *testing.T, mergeFunc func(T, T) any, tests []twoWayMergeTest[T]) {
+	t.Helper()
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := mergeFunc(test.local, test.upstream)
+			assert.Equal(t, test.want, got)
+		})
+	}
+}
+
 func TestTwoWayMerge(t *testing.T) {
-	tests := []struct {
-		name     string
-		local    any
-		upstream any
-		want     any
-	}{
+	runTwoWayMergeTests(t, twoWayMerge, []twoWayMergeTest[any]{
 		{
 			name:     "scalars",
 			local:    "foo",
@@ -46,23 +59,11 @@ func TestTwoWayMerge(t *testing.T) {
 			upstream: []any{"baz", "qux"},
 			want:     []any{"baz", "qux"},
 		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			got := twoWayMerge(test.local, test.upstream)
-			assert.Equal(t, test.want, got)
-		})
-	}
+	})
 }
 
 func TestTwoWayMergeMap(t *testing.T) {
-	tests := []struct {
-		name     string
-		local    map[string]any
-		upstream map[string]any
-		want     any
-	}{
+	runTwoWayMergeTests(t, twoWayMergeMap, []twoWayMergeTest[map[string]any]{
 		{
 			name: "disjoint maps",
 			local: map[string]any{
@@ -170,23 +171,11 @@ func TestTwoWayMergeMap(t *testing.T) {
 				},
 			},
 		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			got := twoWayMergeMap(test.local, test.upstream)
-			assert.Equal(t, test.want, got)
-		})
-	}
+	})
 }
 
 func TestTwoWayMergeSlice(t *testing.T) {
-	tests := []struct {
-		name     string
-		local    []any
-		upstream []any
-		want     any
-	}{
+	runTwoWayMergeTests(t, twoWayMergeSlice, []twoWayMergeTest[[]any]{
 		{
 			name: "no local slice associative key",
 			local: []any{
@@ -249,23 +238,11 @@ func TestTwoWayMergeSlice(t *testing.T) {
 				map[string]any{"g": "h"},
 			},
 		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			got := twoWayMergeSlice(test.local, test.upstream)
-			assert.Equal(t, test.want, got)
-		})
-	}
+	})
 }
 
 func TestTwoWayMergeSliceAssociative(t *testing.T) {
-	tests := []struct {
-		name     string
-		local    []any
-		upstream []any
-		want     any
-	}{
+	runTwoWayMergeTests(t, twoWayMergeSliceAssociative, []twoWayMergeTest[[]any]{
 		{
 			name: "no local slice associative key",
 			local: []any{
@@ -344,23 +321,11 @@ func TestTwoWayMergeSliceAssociative(t *testing.T) {
 				map[string]any{"name": "qux", "d": 1, "e": 2, "f": 3},
 			},
 		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			got := twoWayMergeSliceAssociative(test.local, test.upstream)
-			assert.Equal(t, test.want, got)
-		})
-	}
+	})
 }
 
 func TestTwoWayMergeSliceNonAssociative(t *testing.T) {
-	tests := []struct {
-		name     string
-		local    []any
-		upstream []any
-		want     any
-	}{
+	runTwoWayMergeTests(t, twoWayMergeSliceNonAssociative, []twoWayMergeTest[[]any]{
 		{
 			name:     "matching slices",
 			local:    []any{"foo", "bar"},
@@ -373,23 +338,11 @@ func TestTwoWayMergeSliceNonAssociative(t *testing.T) {
 			upstream: []any{"baz", "qux"},
 			want:     []any{"baz", "qux"},
 		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			got := twoWayMergeSliceNonAssociative(test.local, test.upstream)
-			assert.Equal(t, test.want, got)
-		})
-	}
+	})
 }
 
 func TestTwoWayMergeScalar(t *testing.T) {
-	tests := []struct {
-		name     string
-		local    any
-		upstream any
-		want     any
-	}{
+	runTwoWayMergeTests(t, twoWayMergeScalar, []twoWayMergeTest[any]{
 		{
 			name:     "matching scalars",
 			local:    "foo",
@@ -402,12 +355,5 @@ func TestTwoWayMergeScalar(t *testing.T) {
 			upstream: "bar",
 			want:     "bar",
 		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			got := twoWayMergeScalar(test.local, test.upstream)
-			assert.Equal(t, test.want, got)
-		})
-	}
+	})
 }

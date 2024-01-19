@@ -6,13 +6,26 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type deltaTest[T mergeable] struct {
+	name   string
+	source T
+	remove T
+	want   any
+}
+
+func runDeltaTests[T mergeable](t *testing.T, deltaFunc func(T, T) any, tests []deltaTest[T]) {
+	t.Helper()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := deltaFunc(tt.source, tt.remove)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func TestDelta(t *testing.T) {
-	tests := []struct {
-		name   string
-		source any
-		remove any
-		want   any
-	}{
+	runDeltaTests(t, delta, []deltaTest[any]{
 		{
 			name:   "map with matching keys but different values",
 			source: map[string]any{"a": 1, "b": 2, "c": 3},
@@ -134,23 +147,11 @@ func TestDelta(t *testing.T) {
 				2,
 			},
 		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := delta(tt.source, tt.remove)
-			assert.Equal(t, tt.want, got)
-		})
-	}
+	})
 }
 
 func TestDeltaMap(t *testing.T) {
-	tests := []struct {
-		name   string
-		source map[string]any
-		remove map[string]any
-		want   any
-	}{
+	runDeltaTests(t, deltaMap, []deltaTest[map[string]any]{
 		{
 			name:   "map with matching keys but different values",
 			source: map[string]any{"a": 1, "b": 2, "c": 3},
@@ -175,23 +176,11 @@ func TestDeltaMap(t *testing.T) {
 			remove: map[string]any{"b": 3, "c": 4},
 			want:   map[string]any{"a": 1, "b": 2, "c": 3},
 		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := deltaMap(tt.source, tt.remove)
-			assert.Equal(t, tt.want, got)
-		})
-	}
+	})
 }
 
 func TestDeltaSlice(t *testing.T) {
-	tests := []struct {
-		name   string
-		source []any
-		remove []any
-		want   any
-	}{
+	runDeltaTests(t, deltaSlice, []deltaTest[[]any]{
 		{
 			name:   "non-associative slice that doesn't match",
 			source: []any{1, 2, 3},
@@ -268,23 +257,11 @@ func TestDeltaSlice(t *testing.T) {
 				map[string]any{"name": "bar", "a": 4, "b": 5, "c": 6},
 			},
 		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := deltaSlice(tt.source, tt.remove)
-			assert.Equal(t, tt.want, got)
-		})
-	}
+	})
 }
 
 func TestDeltaSliceNonAssociative(t *testing.T) {
-	tests := []struct {
-		name   string
-		source []any
-		remove []any
-		want   any
-	}{
+	runDeltaTests(t, deltaSliceNonAssociative, []deltaTest[[]any]{
 		{
 			name:   "doesn't match",
 			source: []any{1, 2, 3},
@@ -303,23 +280,11 @@ func TestDeltaSliceNonAssociative(t *testing.T) {
 			remove: []any{1, 2, 3},
 			want:   nil,
 		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := deltaSliceNonAssociative(tt.source, tt.remove)
-			assert.Equal(t, tt.want, got)
-		})
-	}
+	})
 }
 
 func TestDeltaSliceAssociative(t *testing.T) {
-	tests := []struct {
-		name   string
-		source []any
-		remove []any
-		want   any
-	}{
+	runDeltaTests(t, deltaSliceAssociative, []deltaTest[[]any]{
 		{
 			name: "no remove slice associative key",
 			source: []any{
@@ -378,23 +343,11 @@ func TestDeltaSliceAssociative(t *testing.T) {
 				map[string]any{"name": "bar", "a": 4, "b": 5, "c": 6},
 			},
 		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := deltaSliceAssociative(tt.source, tt.remove)
-			assert.Equal(t, tt.want, got)
-		})
-	}
+	})
 }
 
 func TestDeltaScalar(t *testing.T) {
-	tests := []struct {
-		name   string
-		source any
-		remove any
-		want   any
-	}{
+	runDeltaTests(t, deltaScalar, []deltaTest[any]{
 		{
 			name:   "match",
 			source: 5,
@@ -407,12 +360,5 @@ func TestDeltaScalar(t *testing.T) {
 			remove: 10,
 			want:   5,
 		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := deltaScalar(tt.source, tt.remove)
-			assert.Equal(t, tt.want, got)
-		})
-	}
+	})
 }
