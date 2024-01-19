@@ -1,4 +1,4 @@
-.PHONY: build test clean
+.PHONY: build test test-krepe test-jsonpatch clean tidy
 
 BINARY_NAME=krepe
 BINARY_PATH=./krepe/$(BINARY_NAME)
