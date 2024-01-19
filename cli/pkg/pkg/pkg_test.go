@@ -6,8 +6,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	samplePkgPath = "../../testdata/sample_pkg"
+)
+
 func TestNewPkgFromPath(t *testing.T) {
-	pkg, err := NewPkgFromPath("../../testdata/sample_pkg")
+	pkg, err := NewPkgFromPath(samplePkgPath)
 	assert.NoError(t, err)
 	assert.NotNil(t, pkg)
 	assert.Equal(t, "sample_pkg", pkg.name)

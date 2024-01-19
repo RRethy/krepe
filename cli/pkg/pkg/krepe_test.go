@@ -8,8 +8,12 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+const (
+	krepeFile = "../../testdata/sample_pkg/krepe.yaml"
+)
+
 func TestNewKrepeFromPath(t *testing.T) {
-	k, err := NewKrepeFromPath("../../testdata/sample_pkg/krepe.yaml")
+	k, err := NewKrepeFromPath(krepeFile)
 	assert.NoError(t, err)
 	assert.NotNil(t, k)
 	assert.Equal(t, &imports.Imports{
