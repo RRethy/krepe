@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -79,4 +80,17 @@ func TestNewKrepeFromPath(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestKrepeWrite(t *testing.T) {
+	krepe, _ := NewKrepeFromPath(krepeFile)
+	wantYaml, _ := os.ReadFile(krepeFile)
+
+	tmpDir := t.TempDir()
+	err := krepe.Write(tmpDir)
+	assert.NoError(t, err)
+
+	got, err := os.ReadFile(tmpDir + "/krepe.yaml")
+	assert.NoError(t, err)
+	assert.Equal(t, string(wantYaml), string(got))
 }

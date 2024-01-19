@@ -8,8 +8,9 @@ import (
 )
 
 type Step struct {
-	name string
-	fn   function.Function
+	name      string
+	fn        function.Function
+	configMap map[string]any
 }
 
 type RawStep struct {
@@ -30,7 +31,15 @@ func (m *Step) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 	m.fn = f
 	m.name = raw.Function
+	m.configMap = raw.ConfigMap
 	return nil
+}
+
+func (m *Step) MarshalYAML() (interface{}, error) {
+	return RawStep{
+		Function:  m.name,
+		ConfigMap: m.configMap,
+	}, nil
 }
 
 func (s *Step) Run(res *resource.Resource) error {
