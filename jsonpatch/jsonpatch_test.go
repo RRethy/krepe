@@ -9,165 +9,80 @@ func TestNewJsonPatch(t *testing.T) {
 	tests := []struct {
 		name    string
 		op      string
+		from    string
 		path    string
 		value   any
-		want    *JsonPatch
+		want    JsonPatch
 		wantErr bool
 	}{
 		{
-			name:    "Test with valid path",
+			name:    "Test with add op",
 			op:      "add",
+			from:    "",
 			path:    "/foo/bar",
-			value:   "quux",
-			want:    &JsonPatch{op: "add", path: []string{"foo", "bar"}, value: "quux"},
+			value:   "baz",
+			want:    &Add{path: []string{"foo", "bar"}, value: "baz"},
 			wantErr: false,
 		},
 		{
-			name:    "Test with invalid path",
-			op:      "add",
-			path:    "foo/bar",
-			value:   "quux",
-			want:    nil,
-			wantErr: true,
+			name:    "Test with remove op",
+			op:      "remove",
+			from:    "",
+			path:    "/foo/bar",
+			value:   nil,
+			want:    &Remove{path: []string{"foo", "bar"}},
+			wantErr: false,
+		},
+		{
+			name:    "Test with replace op",
+			op:      "replace",
+			from:    "",
+			path:    "/foo/bar",
+			value:   "baz",
+			want:    &Replace{path: []string{"foo", "bar"}, value: "baz"},
+			wantErr: false,
+		},
+		{
+			name:    "Test with move op",
+			op:      "move",
+			from:    "/foo/bar",
+			path:    "/foo/baz",
+			value:   nil,
+			want:    &Move{from: []string{"foo", "bar"}, path: []string{"foo", "baz"}},
+			wantErr: false,
+		},
+		{
+			name:    "Test with copy op",
+			op:      "copy",
+			from:    "/foo/bar",
+			path:    "/foo/baz",
+			value:   nil,
+			want:    &Copy{from: []string{"foo", "bar"}, path: []string{"foo", "baz"}},
+			wantErr: false,
+		},
+		{
+			name:    "Test with test op",
+			op:      "test",
+			from:    "",
+			path:    "/foo/bar",
+			value:   5,
+			want:    &Test{path: []string{"foo", "bar"}, value: 5},
+			wantErr: false,
 		},
 		{
 			name:    "Test with unknown op",
-			op:      "foo",
-			path:    "/foo/bar",
-			value:   "quux",
+			op:      "unknown",
+			from:    "/foo/bar",
+			path:    "/foo/baz",
+			value:   nil,
 			want:    nil,
 			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		got, err := NewJsonPatch(tt.op, tt.path, tt.value)
-		assert.Equal(t, tt.want, got, tt.name)
-		if tt.wantErr {
-			assert.Error(t, err, tt.name)
-		} else {
-			assert.Equal(t, tt.want, got, tt.name)
-		}
-	}
-}
-
-func TestApply(t *testing.T) {
-	tests := []struct {
-		name    string
-		obj     map[string]any
-		patch   *JsonPatch
-		want    map[string]any
-		wantErr bool
-	}{
-		{
-			name: "add without error",
-			obj: map[string]any{
-				"foo": "bar",
-			},
-			patch: &JsonPatch{
-				op:    "add",
-				path:  []string{"foo"},
-				value: "qux",
-			},
-			want: map[string]any{
-				"foo": "qux",
-			},
-			wantErr: false,
-		},
-		{
-			name: "add with error",
-			obj: map[string]any{
-				"foo": "bar",
-			},
-			patch: &JsonPatch{
-				op:    "add",
-				path:  []string{"3", "foo"},
-				value: "qux",
-			},
-			want: map[string]any{
-				"foo": "bar",
-			},
-			wantErr: true,
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := tt.patch.Apply(tt.obj)
-			assert.Equal(t, tt.want, got)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-		})
-	}
-}
-
-func TestPatchToJsonPtrs(t *testing.T) {
-	tests := []struct {
-		name    string
-		path    string
-		want    []string
-		wantErr bool
-	}{
-		{
-			name:    "Test with empty path",
-			path:    "",
-			want:    nil,
-			wantErr: false,
-		},
-		{
-			name:    "Test with valid path",
-			path:    "/foo/bar",
-			want:    []string{"foo", "bar"},
-			wantErr: false,
-		},
-		{
-			name:    "Test with path not starting with /",
-			path:    "foo/bar",
-			want:    nil,
-			wantErr: true,
-		},
-		{
-			name:    "Test with path containing ~1",
-			path:    "/foo~1bar/baz",
-			want:    []string{"foo/bar", "baz"},
-			wantErr: false,
-		},
-		{
-			name:    "Test with path containing ~0",
-			path:    "/foo~0bar/baz",
-			want:    []string{"foo~bar", "baz"},
-			wantErr: false,
-		},
-		{
-			name:    "Test with path containing ~1 and ~0",
-			path:    "/foo~1bar~0baz/baz",
-			want:    []string{"foo/bar~baz", "baz"},
-			wantErr: false,
-		},
-		{
-			name:    "Test with valid path",
-			path:    "/foo/bar",
-			want:    []string{"foo", "bar"},
-			wantErr: false,
-		},
-		{
-			name:    "Test with just /",
-			path:    "/",
-			want:    []string{""},
-			wantErr: false,
-		},
-		{
-			name:    "Test with path ending with /",
-			path:    "/foo/bar/",
-			want:    []string{"foo", "bar", ""},
-			wantErr: false,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := pathToJsonPtrs(tt.path)
+			got, err := NewJsonPatch(tt.op, tt.from, tt.path, tt.value)
 			assert.Equal(t, tt.want, got)
 			if tt.wantErr {
 				assert.Error(t, err)

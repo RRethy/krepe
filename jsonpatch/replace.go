@@ -5,6 +5,27 @@ import (
 	"strconv"
 )
 
+type Replace struct {
+	path  []string
+	value any
+}
+
+func NewReplace(path string, value any) (*Replace, error) {
+	pathArr, err := pathToJsonPtrs(path)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing path: %s", err)
+	}
+
+	return &Replace{
+		path:  pathArr,
+		value: value,
+	}, nil
+}
+
+func (r *Replace) Apply(obj any) (any, error) {
+	return replace(obj, r.path, r.value)
+}
+
 func replace(obj any, ptrs []string, value any) (any, error) {
 	if len(ptrs) == 0 {
 		return value, nil

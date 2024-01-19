@@ -5,6 +5,27 @@ import (
 	"strconv"
 )
 
+type Add struct {
+	path  []string
+	value any
+}
+
+func NewAdd(path string, value any) (*Add, error) {
+	pathArr, err := pathToJsonPtrs(path)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing path: %s", err)
+	}
+
+	return &Add{
+		path:  pathArr,
+		value: value,
+	}, nil
+}
+
+func (a *Add) Apply(obj any) (any, error) {
+	return add(obj, a.path, a.value)
+}
+
 func add(obj any, ptrs []string, value any) (any, error) {
 	if len(ptrs) == 0 {
 		return value, nil

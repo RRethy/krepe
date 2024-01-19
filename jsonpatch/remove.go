@@ -5,6 +5,25 @@ import (
 	"strconv"
 )
 
+type Remove struct {
+	path []string
+}
+
+func NewRemove(path string) (*Remove, error) {
+	pathArr, err := pathToJsonPtrs(path)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing path: %s", err)
+	}
+
+	return &Remove{
+		path: pathArr,
+	}, nil
+}
+
+func (r *Remove) Apply(obj any) (any, error) {
+	return remove(obj, r.path)
+}
+
 func remove(obj any, ptrs []string) (any, error) {
 	if len(ptrs) == 0 {
 		return nil, nil
