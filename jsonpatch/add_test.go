@@ -94,32 +94,8 @@ func TestAdd(t *testing.T) {
 			value: "qux",
 			want: map[string]any{
 				"foo": "bar",
-				"baz": map[string]any{
-					"baz2": "qux",
-				},
 			},
-			wantErr: false,
-		},
-		{
-			name: "add to map with non existent ptr long path",
-			obj: map[string]any{
-				"foo": "bar",
-			},
-			path:  "/baz/baz2/baz3/baz4/baz5",
-			value: "qux",
-			want: map[string]any{
-				"foo": "bar",
-				"baz": map[string]any{
-					"baz2": map[string]any{
-						"baz3": map[string]any{
-							"baz4": map[string]any{
-								"baz5": "qux",
-							},
-						},
-					},
-				},
-			},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "add to array",
@@ -156,7 +132,7 @@ func TestAdd(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "add to array overwrite first element",
+			name: "add to array doesn't overwrite first element",
 			obj: map[string]any{
 				"foo": []any{
 					"bar",
@@ -167,6 +143,7 @@ func TestAdd(t *testing.T) {
 			want: map[string]any{
 				"foo": []any{
 					"qux",
+					"bar",
 				},
 			},
 			wantErr: false,
@@ -183,30 +160,9 @@ func TestAdd(t *testing.T) {
 			want: map[string]any{
 				"foo": []any{
 					"bar",
-					nil,
-					"qux",
 				},
 			},
-			wantErr: false,
-		},
-		{
-			name: "add to array with large index out of range",
-			obj: map[string]any{
-				"foo": []any{
-					"bar",
-				},
-			},
-			path:  "/foo/3",
-			value: "qux",
-			want: map[string]any{
-				"foo": []any{
-					"bar",
-					nil,
-					nil,
-					"qux",
-				},
-			},
-			wantErr: false,
+			wantErr: true,
 		},
 		{
 			name: "add with arrays and maps",
@@ -233,6 +189,7 @@ func TestAdd(t *testing.T) {
 						"quux": []any{
 							"corge",
 							"qux",
+							"grault",
 						},
 					},
 					"baz",
@@ -269,23 +226,7 @@ func TestAdd(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "add fails if expecting map",
-			obj: map[string]any{
-				"foo": []any{
-					"bar",
-				},
-			},
-			path:  "/foo/bar",
-			value: "baz",
-			want: map[string]any{
-				"foo": []any{
-					"bar",
-				},
-			},
-			wantErr: true,
-		},
-		{
-			name: "add fails if expecting array",
+			name: "add allows integer keys",
 			obj: map[string]any{
 				"foo": map[string]any{
 					"bar": "baz",
@@ -293,6 +234,23 @@ func TestAdd(t *testing.T) {
 			},
 			path:  "/foo/1",
 			value: "baz",
+			want: map[string]any{
+				"foo": map[string]any{
+					"bar": "baz",
+					"1":   "baz",
+				},
+			},
+			wantErr: false,
+		},
+		{
+			name: "add fails if key not in map",
+			obj: map[string]any{
+				"foo": map[string]any{
+					"bar": "baz",
+				},
+			},
+			path:  "/bar/baz",
+			value: "qux",
 			want: map[string]any{
 				"foo": map[string]any{
 					"bar": "baz",

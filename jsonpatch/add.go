@@ -10,59 +10,50 @@ func add(obj any, ptrs []string, value any) (any, error) {
 		return value, nil
 	}
 
-	if _, err := strconv.Atoi(ptrs[0]); err == nil || ptrs[0] == "-" {
-		return addArray(obj, ptrs[0], ptrs[1:], value)
-	} else {
-		return addMap(obj, ptrs[0], ptrs[1:], value)
-	}
-}
-
-func addMap(obj any, ptr string, ptrs []string, value any) (any, error) {
-	var m map[string]any
 	switch obj.(type) {
 	case map[string]any:
-		m = obj.(map[string]any)
-	case nil:
-		m = make(map[string]any)
+		return addMap(obj.(map[string]any), ptrs[0], ptrs[1:], value)
+	case []any:
+		return addArray(obj.([]any), ptrs[0], ptrs[1:], value)
 	default:
-		return obj, fmt.Errorf("cannot add to non-map object with a non-number json ptr")
+		return obj, fmt.Errorf("cannot add to non-map or non-array object with a json ptr")
 	}
-
-	newVal, err := add(m[ptr], ptrs, value)
-	if err != nil {
-		return obj, err
-	}
-
-	m[ptr] = newVal
-	return m, nil
 }
 
-func addArray(obj any, ptr any, ptrs []string, value any) (any, error) {
-	var arr []any
-	switch obj.(type) {
-	case []any:
-		arr = obj.([]any)
-	case nil:
-	default:
-		return obj, fmt.Errorf("cannot add to non-array object with a number json ptr")
+func addMap(obj map[string]any, ptr string, ptrs []string, value any) (map[string]any, error) {
+	if len(ptrs) == 0 {
+		obj[ptr] = value
+		return obj, nil
 	}
-
-	var idx int
-	if ptr == "-" {
-		idx = len(arr)
-	} else if n, err := strconv.Atoi(ptr.(string)); err == nil {
-		idx = n
-	} else {
-		return obj, fmt.Errorf("unexpected error parsing array index: %s", ptr)
-	}
-
-	if len(arr) <= idx {
-		arr = append(arr, make([]any, idx-len(arr)+1)...)
-	}
-
-	newVal, err := add(arr[idx], ptrs, value)
+	newVal, err := add(obj[ptr], ptrs, value)
 	if err != nil {
 		return obj, err
+	}
+	obj[ptr] = newVal
+	return obj, nil
+}
+
+func addArray(arr []any, ptr string, ptrs []string, value any) (any, error) {
+	var idx int
+	var err error
+	if ptr == "-" {
+		idx = len(arr)
+	} else if idx, err = strconv.Atoi(ptr); err != nil {
+		return arr, fmt.Errorf("failed to add to array: %w", err)
+	} else if idx < 0 || idx > len(arr) {
+		return arr, fmt.Errorf("failed to add to array: index out of bounds: %d", idx)
+	}
+
+	if len(ptrs) == 0 {
+		return append(arr[:idx], append([]any{value}, arr[idx:]...)...), nil
+	}
+
+	if idx == len(arr) {
+		return arr, fmt.Errorf("failed to add to array: index out of bounds: %d", idx)
+	}
+	newVal, err := add(arr[idx], ptrs, value)
+	if err != nil {
+		return arr, err
 	}
 
 	arr[idx] = newVal

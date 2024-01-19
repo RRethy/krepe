@@ -5,14 +5,19 @@ import (
 	"strings"
 )
 
-type opString string
+type opType string
 
 const (
-	addOp opString = "add"
+	addOp     opType = "add"
+	removeOp  opType = "remove"
+	replaceOp opType = "replace"
+	moveOp    opType = "move"
+	copyOp    opType = "copy"
+	testOp    opType = "test"
 )
 
 type JsonPatch struct {
-	op    opString
+	op    opType
 	path  []string
 	value any
 }
@@ -23,14 +28,19 @@ func NewJsonPatch(op, path string, value any) (*JsonPatch, error) {
 		return nil, fmt.Errorf("error parsing path: %s", err)
 	}
 
-	switch opString(op) {
+	switch opType(op) {
 	case addOp:
+	case removeOp:
+	case replaceOp:
+	case moveOp:
+	case copyOp:
+	case testOp:
 	default:
 		return nil, fmt.Errorf("unknown op: %s", op)
 	}
 
 	return &JsonPatch{
-		op:    opString(op),
+		op:    opType(op),
 		path:  ptrs,
 		value: value,
 	}, nil
@@ -45,6 +55,20 @@ func (jp *JsonPatch) Apply(obj any) (any, error) {
 			return obj, fmt.Errorf("failed applying 'add': %s", err)
 		}
 		return obj, nil
+	case removeOp:
+		obj, err = remove(obj, jp.path)
+		if err != nil {
+			return obj, fmt.Errorf("failed applying 'remove': %s", err)
+		}
+		return obj, nil
+	case replaceOp:
+		panic("unimplemented")
+	case moveOp:
+		panic("unimplemented")
+	case copyOp:
+		panic("unimplemented")
+	case testOp:
+		panic("unimplemented")
 	default:
 		panic("unreachable")
 	}

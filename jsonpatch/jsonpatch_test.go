@@ -80,7 +80,7 @@ func TestApply(t *testing.T) {
 			},
 			patch: &JsonPatch{
 				op:    "add",
-				path:  []string{"3"},
+				path:  []string{"3", "foo"},
 				value: "qux",
 			},
 			want: map[string]any{
@@ -90,13 +90,15 @@ func TestApply(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		got, err := tt.patch.Apply(tt.obj)
-		assert.Equal(t, tt.want, got, tt.name)
-		if tt.wantErr {
-			assert.Error(t, err, tt.name)
-		} else {
-			assert.NoError(t, err, tt.name)
-		}
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := tt.patch.Apply(tt.obj)
+			assert.Equal(t, tt.want, got)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+			}
+		})
 	}
 }
 
