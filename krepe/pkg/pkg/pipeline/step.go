@@ -69,3 +69,11 @@ func (s *Step) Run(res *resource.Resource) error {
 func (s *Step) Name() string {
 	return s.name
 }
+
+func (s *Step) Matches(res *resource.Resource) bool {
+	if s.target == nil {
+		return true
+	}
+
+	return s.target.Matches(res)
+}
