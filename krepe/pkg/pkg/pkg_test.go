@@ -6,6 +6,7 @@ import (
 
 	"github.com/RRethy/krepe/krepe/pkg/git"
 	"github.com/RRethy/krepe/krepe/pkg/pkg/imports"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/pipeline"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -72,6 +73,54 @@ func TestPkgRunPipelineByName(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			err := tt.pkg.RunPipelineByName(tt.pipeline)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				tt.validate(tt.pkg)
+			}
+		})
+	}
+}
+
+func TestPkgRunPipeline(t *testing.T) {
+	pkg, err := NewPkgFromPath(samplePkgPath)
+	assert.NoError(t, err)
+	goodPipeline, ok := pkg.Krepe.Pipelines.Get("mypipeline")
+	assert.True(t, ok)
+	badPipeline, ok := pkg.Krepe.Pipelines.Get("badpipeline")
+	assert.True(t, ok)
+
+	tests := []struct {
+		name     string
+		pkg      *Pkg
+		validate func(*Pkg)
+		pipeline pipeline.Pipeline
+		wantErr  bool
+	}{
+		{
+			name: "succeeds with valid pipeline",
+			pkg:  pkg,
+			validate: func(pkg *Pkg) {
+				assert.Equal(t, "bar", pkg.resources[0].GetLabels()["foo"])
+				assert.Equal(t, "bar", pkg.resources[1].GetLabels()["foo"])
+				assert.Equal(t, "bar", pkg.resources[2].GetLabels()["foo"])
+			},
+			pipeline: goodPipeline,
+			wantErr:  false,
+		},
+		{
+			name:     "fails with bad pipeline",
+			pkg:      pkg,
+			validate: func(pkg *Pkg) {},
+			pipeline: badPipeline,
+			wantErr:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := tt.pkg.RunPipeline(tt.pipeline)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {

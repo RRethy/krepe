@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/RRethy/krepe/krepe/pkg/pkg/imports"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/pipeline"
 	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
@@ -66,26 +67,33 @@ func NewPkgFromPath(pkgPath string) (*Pkg, error) {
 
 func (p *Pkg) RunPipelineByName(name string) error {
 	if pipeline, ok := p.Krepe.Pipelines.Get(name); ok {
-		for _, resource := range p.resources {
-			err := pipeline.Run(resource)
-			if err != nil {
-				return fmt.Errorf("failed to run pipeline `%s` on resource `%s`: %w", name, resource.Fname(), err)
-			}
-		}
-
-		for _, pkg := range p.packages {
-			err := pkg.RunPipelineByName(name)
-			if err != nil {
-				return fmt.Errorf("failed to run pipeline `%s` on pkg `%s`: %w", name, pkg.name, err)
-			}
-
-			// TODO: run pipeline on pkg
-		}
-
-		return nil
+		return p.RunPipeline(pipeline)
 	} else {
 		return fmt.Errorf("failed to get pipeline `%s`", name)
 	}
+}
+
+func (p *Pkg) RunPipeline(pipeline pipeline.Pipeline) error {
+	for _, resource := range p.resources {
+		err := pipeline.Run(resource)
+		if err != nil {
+			return fmt.Errorf("failed to run pipeline on resource `%s`: %w", resource.Fname(), err)
+		}
+	}
+
+	for _, pkg := range p.packages {
+		err := pkg.RunPipeline(pipeline)
+		if err != nil {
+			return fmt.Errorf("failed to run pipeline on pkg `%s`: %w", pkg.name, err)
+		}
+
+		err = pkg.RunPipeline(pipeline)
+		if err != nil {
+			return fmt.Errorf("failed to run pipeline on pkg `%s`: %w", pkg.name, err)
+		}
+	}
+
+	return nil
 }
 
 func (p *Pkg) AddPackage(pkg *Pkg, pkgImport *imports.Pkg) error {
