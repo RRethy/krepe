@@ -23,6 +23,8 @@ type runTest struct {
 }
 
 func runWithConfigMapTests(t *testing.T, fn Function, tests []configMapTest) {
+	t.Helper()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fn, err := fn.WithConfigMap(tt.configMap)
@@ -38,6 +40,8 @@ func runWithConfigMapTests(t *testing.T, fn Function, tests []configMapTest) {
 }
 
 func runRunTests(t *testing.T, fn Function, tests []runTest) {
+	t.Helper()
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			fn, err := fn.WithConfigMap(tt.configMap)

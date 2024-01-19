@@ -31,6 +31,8 @@ func (pt *patchTest) run(t *testing.T) {
 }
 
 func runPatchTests(t *testing.T, tests []*patchTest) {
+	t.Helper()
+
 	for _, tt := range tests {
 		tt.run(t)
 	}
