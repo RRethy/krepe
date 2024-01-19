@@ -6,9 +6,17 @@ imports:
   - service.yaml
   - ingress.yaml
 pipelines:
-  badpipeline:
-  - function: run-fail
+  - name: mypipeline
+    steps:
+    - function: set-labels
+      configMap:
+        foo: bar
+  - name: badpipeline
+    steps:
+pipelines:
   mypipeline:
   - function: set-labels
     configMap:
       foo: bar
+  badpipeline:
+  - function: run-fail

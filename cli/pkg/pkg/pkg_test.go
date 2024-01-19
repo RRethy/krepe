@@ -77,3 +77,6 @@ func TestPkgRunPipelineByName(t *testing.T) {
 		})
 	}
 }
+
+func TestPkgWrite(t *testing.T) {
+}

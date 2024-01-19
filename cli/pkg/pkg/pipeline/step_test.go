@@ -68,6 +68,26 @@ configMap:
 	}
 }
 
+func TestStepMarshalYAML(t *testing.T) {
+	setLabelsFn, _ := function.NewFunction("set-labels", map[string]any{
+		"foo": "bar",
+	})
+	step := &Step{
+		name: "set-labels",
+		fn:   setLabelsFn,
+		configMap: map[string]any{
+			"foo": "bar",
+		},
+	}
+
+	got, err := yaml.Marshal(step)
+	assert.NoError(t, err)
+	assert.Equal(t, `function: set-labels
+configMap:
+  foo: bar
+`, string(got))
+}
+
 func TestStepRun(t *testing.T) {
 	setLabelsFn, _ := function.NewFunction("set-labels", map[string]any{
 		"foo": "bar",

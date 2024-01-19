@@ -5,6 +5,12 @@ import (
 
 	"github.com/Shopify/krepe/cli/pkg/pkg/function"
 	"github.com/Shopify/krepe/cli/pkg/pkg/resource"
+	"github.com/goccy/go-yaml"
+)
+
+var (
+	_ yaml.InterfaceUnmarshaler = &Step{}
+	_ yaml.InterfaceMarshaler   = &Step{}
 )
 
 type Step struct {

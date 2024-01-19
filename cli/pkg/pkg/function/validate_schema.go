@@ -12,6 +12,7 @@ func (f *ValidateSchema) WithConfigMap(configMap map[string]any) (Function, erro
 	return f, nil
 }
 
+// use https://github.com/goccy/go-yaml#51-print-customized-error-with-yaml-source-code
 func (f *ValidateSchema) Run(res *resource.Resource) error {
 	return nil
 }

@@ -15,11 +15,8 @@ type Krepe struct {
 	metav1.TypeMeta   `yaml:",inline"`
 	metav1.ObjectMeta `yaml:"metadata,omitempty"`
 
-	Imports *imports.Imports `yaml:"imports,omitempty"`
-	// TODO(RRethy): the ordering here is alphabetical, but we should probably
-	//               have a way to maintain ordering.
-	// https://github.com/wk8/go-ordered-map
-	Pipelines map[string]pipeline.Pipeline `yaml:"pipelines,omitempty"`
+	Imports   *imports.Imports    `yaml:"imports,omitempty"`
+	Pipelines *pipeline.Pipelines `yaml:"pipelines,omitempty"`
 }
 
 func NewKrepeFromPath(krepePath string) (*Krepe, error) {
@@ -37,6 +34,7 @@ func NewKrepeFromPath(krepePath string) (*Krepe, error) {
 	return k, nil
 }
 
+// TODO(RRethy): better indentation
 func (k *Krepe) Write(dir string) error {
 	path := filepath.Join(dir, "krepe.yaml")
 

@@ -61,7 +61,7 @@ func NewPkgFromPath(pkgPath string) (*Pkg, error) {
 }
 
 func (p *Pkg) RunPipelineByName(name string) error {
-	if pipeline, ok := p.krepe.Pipelines[name]; ok {
+	if pipeline, ok := p.krepe.Pipelines.Get(name); ok {
 		for _, resource := range p.resources {
 			err := pipeline.Run(resource)
 			if err != nil {
