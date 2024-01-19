@@ -40,9 +40,9 @@ func twoWayMergeMap(local, upstream map[string]any) any {
 func twoWayMergeSlice(local, upstream []any) any {
 	if isAssociativeSlice(local) && isAssociativeSlice(upstream) {
 		return twoWayMergeSliceAssociative(local, upstream)
-	} else {
-		return twoWayMergeSliceNonAssociative(local, upstream)
 	}
+
+	return twoWayMergeSliceNonAssociative(local, upstream)
 }
 
 func twoWayMergeSliceAssociative(local, upstream []any) any {

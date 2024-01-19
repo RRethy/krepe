@@ -50,9 +50,9 @@ func deltaMap(source, remove map[string]any) any {
 func deltaSlice(source, remove []any) any {
 	if isAssociativeSlice(source) && isAssociativeSlice(remove) {
 		return deltaSliceAssociative(source, remove)
-	} else {
-		return deltaSliceNonAssociative(source, remove)
 	}
+
+	return deltaSliceNonAssociative(source, remove)
 }
 
 // deltaSliceNonAssociative returns nil iff source and remove are the same,
