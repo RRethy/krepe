@@ -13,7 +13,7 @@ type Krepe struct {
 	metav1.TypeMeta   `yaml:",inline"`
 	metav1.ObjectMeta `yaml:"metadata,omitempty"`
 
-	Imports   []*imports.Imports   `yaml:"imports,omitempty"`
+	Imports   *imports.Imports     `yaml:"imports,omitempty"`
 	Pipelines []*pipeline.Pipeline `yaml:"pipelines,omitempty"`
 }
 
