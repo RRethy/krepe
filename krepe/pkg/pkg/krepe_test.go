@@ -8,9 +8,9 @@ import (
 )
 
 const (
-	krepeFile            = "../../testdata/sample_pkg/krepe.yaml"
-	badKrepeFile         = "../../testdata/bad_krepe_file_pkg/krepe.yaml"
-	nonExistentKrepeFile = "../../testdata/non_existent_pkg/krepe.yaml"
+	krepeFile            = "../../testdata/packages/sample_pkg/krepe.yaml"
+	badKrepeFile         = "../../testdata/packages/bad_krepe_file_pkg/krepe.yaml"
+	nonExistentKrepeFile = "../../testdata/packages/non_existent_pkg/krepe.yaml"
 )
 
 func TestNewKrepeFromPath(t *testing.T) {

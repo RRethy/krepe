@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	samplePkgPath = "../../testdata/sample_pkg"
+	samplePkgPath = "../../testdata/packages/sample_pkg"
 )
 
 func TestNewPkgFromPath(t *testing.T) {

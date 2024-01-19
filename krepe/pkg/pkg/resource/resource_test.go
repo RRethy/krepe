@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	deploymentFile = "../../../testdata/sample_pkg/deployment.yaml"
+	deploymentFile = "../../../testdata/packages/sample_pkg/deployment.yaml"
 )
 
 func TestNewResourceFromPath(t *testing.T) {

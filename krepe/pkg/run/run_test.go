@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	samplePkgPath      = "../../testdata/sample_pkg"
-	nonExistentPkgPath = "../../testdata/non_existent_pkg"
+	samplePkgPath      = "../../testdata/packages/sample_pkg"
+	nonExistentPkgPath = "../../testdata/packages/non_existent_pkg"
 )
 
 func TestRun(t *testing.T) {

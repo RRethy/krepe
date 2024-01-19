@@ -11,11 +11,10 @@ import (
 )
 
 const (
-	// TODO: use testdata/packages
-	samplePkgPath                 = "../../testdata/sample_pkg"
-	nonExistentPkgPath            = "../../testdata/non_existent_pkg"
-	samplePkgNameWithPkgInstalled = "../../testdata/sample_pkg_with_pkg_installed"
-	pacakgesDirName               = "../../testdata"
+	samplePkgPath                 = "../../testdata/packages/sample_pkg"
+	nonExistentPkgPath            = "../../testdata/packages/non_existent_pkg"
+	samplePkgNameWithPkgInstalled = "../../testdata/packages/sample_pkg_with_pkg_installed"
+	pacakgesDirName               = "../../testdata/packages"
 )
 
 type fakeCache struct {
