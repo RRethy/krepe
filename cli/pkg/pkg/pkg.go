@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Shopify/krepe/cli/pkg/pkg/pipeline"
 	"github.com/Shopify/krepe/cli/pkg/pkg/resource"
 )
 
@@ -75,6 +74,32 @@ func (p *Pkg) RunPipelineByName(name string) error {
 	}
 }
 
-func (p *Pkg) RunPipeline(pipeline pipeline.Pipeline) error {
+func (p *Pkg) Write(dir string) error {
+	pkgPath := filepath.Join(dir, p.name)
+
+	err := os.MkdirAll(pkgPath, 0755)
+	if err != nil {
+		return fmt.Errorf("failed to create pkg directory `%s`: %w", pkgPath, err)
+	}
+
+	err = p.krepe.Write(pkgPath)
+	if err != nil {
+		return fmt.Errorf("failed to write krepe.yaml in pkg directory `%s`: %w", pkgPath, err)
+	}
+
+	for _, resource := range p.resources {
+		err = resource.Write(pkgPath)
+		if err != nil {
+			return fmt.Errorf("failed to write resource `%s` in pkg directory `%s`: %w", resource.Fname(), pkgPath, err)
+		}
+	}
+
+	for _, pkg := range p.packages {
+		err = pkg.Write(pkgPath)
+		if err != nil {
+			return fmt.Errorf("failed to write pkg `%s` in pkg directory `%s`: %w", pkg.name, pkgPath, err)
+		}
+	}
+
 	return nil
 }

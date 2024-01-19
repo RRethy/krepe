@@ -43,3 +43,19 @@ func NewResourceFromBytes(fname string, bytes []byte) (*Resource, error) {
 func (r *Resource) Fname() string {
 	return r.fname
 }
+
+func (r *Resource) Write(dir string) error {
+	path := filepath.Join(dir, r.fname)
+
+	data, err := yaml.Marshal(r.Object)
+	if err != nil {
+		return fmt.Errorf("marshalling resource: %w", err)
+	}
+
+	err = os.WriteFile(path, data, 0644)
+	if err != nil {
+		return fmt.Errorf("writing resource to file: %w", err)
+	}
+
+	return nil
+}

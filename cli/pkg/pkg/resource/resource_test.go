@@ -2,9 +2,11 @@ package resource
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 const (
@@ -37,4 +39,36 @@ func TestResourceFname(t *testing.T) {
 	r, err := NewResourceFromPath(deploymentFile)
 	assert.NoError(t, err)
 	assert.Equal(t, "deployment.yaml", r.Fname())
+}
+
+func TestResourceWrite(t *testing.T) {
+	tmpDir := t.TempDir()
+	r := &Resource{
+		fname: "test.yaml",
+		Unstructured: unstructured.Unstructured{
+			Object: map[string]interface{}{
+				"apiVersion": "v1",
+				"kind":       "Pod",
+				"metadata": map[string]interface{}{
+					"name":      "test-pod",
+					"namespace": "default",
+				},
+			},
+		},
+	}
+
+	wantYaml := "apiVersion: v1\nkind: Pod\nmetadata:\n  name: test-pod\n  namespace: default\n"
+
+	err := r.Write(tmpDir)
+	assert.NoError(t, err)
+
+	got, err := os.ReadFile(filepath.Join(tmpDir, r.fname))
+	assert.NoError(t, err)
+	assert.Equal(t, wantYaml, string(got))
+
+	r.fname = "testdir"
+	err = os.Mkdir(filepath.Join(tmpDir, r.fname), 0755)
+	assert.NoError(t, err)
+	err = r.Write(tmpDir)
+	assert.Error(t, err)
 }

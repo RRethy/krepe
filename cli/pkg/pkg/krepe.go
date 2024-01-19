@@ -31,3 +31,7 @@ func NewKrepeFromPath(krepePath string) (*Krepe, error) {
 
 	return k, nil
 }
+
+func (k *Krepe) Write(dir string) error {
+	return nil
+}

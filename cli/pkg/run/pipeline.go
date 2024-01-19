@@ -14,6 +14,15 @@ func newPipeline(pkg *pkg.Pkg, name string) *pipeline {
 }
 
 func (p *pipeline) run() error {
+	err := p.pkg.RunPipelineByName(p.name)
+	if err != nil {
+		return err
+	}
+
+	// err = p.pkg.Write(dir)
+	// if err != nil {
+	// 	return err
+	// }
+
 	return nil
-	// return p.pkg.RunPipeline(p.name)
 }
