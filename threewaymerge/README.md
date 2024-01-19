@@ -39,3 +39,9 @@ null values
 input should not be modified, but memory may be shared
 removing the value vs null
     what happens with deployment.spec.replica and the default value (thinking interaction with hpa)
+test that input isn't modified
+	// ConvertToVersion takes the provided object and converts it the provided version. This
+	// method does not mutate the in object, but the in and out object might share data structures,
+	// i.e. the out object cannot be mutated without mutating the in object as well.
+	// This method is similar to Convert() but handles specific details of choosing the correct
+	// output version.

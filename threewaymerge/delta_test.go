@@ -1,4 +1,4 @@
-package krmmerge
+package threewaymerge
 
 import (
 	"testing"

@@ -1,4 +1,4 @@
-package krmmerge
+package threewaymerge
 
 // twoWayMerge returns the result of performing a 2-way merge on local
 // and upstream.

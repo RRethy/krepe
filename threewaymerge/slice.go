@@ -1,4 +1,4 @@
-package krmmerge
+package threewaymerge
 
 var (
 	// TODO(RRethy): this is a bit of a hack, but it works for now, we should try
