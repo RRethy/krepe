@@ -7,9 +7,9 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 	"github.com/RRethy/krepe/krepe/pkg/yaml"
 	"github.com/stretchr/testify/assert"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-// TODO: test Target
 func TestStepUnmarshallYAML(t *testing.T) {
 	setLabelsFn, _ := function.NewFunction("set-labels", map[string]any{
 		"foo": "bar",
@@ -166,6 +166,68 @@ func TestStepRun(t *testing.T) {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.want, tt.inputResource.Object)
 			}
+		})
+	}
+}
+
+func TestStepMatches(t *testing.T) {
+	tests := []struct {
+		name   string
+		step   *Step
+		resObj map[string]any
+		want   bool
+	}{
+		{
+			name: "succeeds with matching target",
+			step: &Step{
+				target: &Target{
+					Kind: "Pod",
+				},
+			},
+			resObj: map[string]any{
+				"apiVersion": "v1",
+				"kind":       "Pod",
+				"metadata": map[string]any{
+					"name":      "test-pod",
+					"namespace": "default",
+				},
+			},
+			want: true,
+		},
+		{
+			name: "fails with non-matching target",
+			step: &Step{
+				target: &Target{
+					Kind: "Pod",
+				},
+			},
+			resObj: map[string]any{
+				"apiVersion": "v1",
+				"kind":       "Deployment",
+			},
+			want: false,
+		},
+		{
+			name: "succeeds with empty target",
+			step: &Step{
+				target: nil,
+			},
+			resObj: map[string]any{
+				"apiVersion": "v1",
+				"kind":       "Deployment",
+			},
+			want: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.step.Matches(&resource.Resource{
+				Unstructured: unstructured.Unstructured{
+					Object: tt.resObj,
+				},
+			})
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
