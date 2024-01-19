@@ -15,6 +15,8 @@ require (
 
 replace github.com/RRethy/krepe/jsonpatch => ../jsonpatch
 
+replace github.com/RRethy/krepe/krmmerge => ../krmmerge
+
 require (
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
