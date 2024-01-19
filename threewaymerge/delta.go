@@ -59,9 +59,13 @@ func deltaMap(source, remove map[string]any) map[string]any {
 
 	for k, v := range source {
 		if removeVal, ok := remove[k]; ok {
-			newVal := delta(v, removeVal)
-			if newVal != nil {
-				res[k] = newVal
+			if v == nil && removeVal != nil {
+				res[k] = v
+			} else {
+				newVal := delta(v, removeVal)
+				if newVal != nil {
+					res[k] = newVal
+				}
 			}
 		} else {
 			res[k] = v

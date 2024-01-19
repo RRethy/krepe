@@ -107,6 +107,20 @@ func TestThreeWayMergeAny(t *testing.T) {
 			upstream: map[string]any{"a": 1, "b": 2},
 			want:     2,
 		},
+		{
+			name:     "origin upstream nil but local map",
+			origin:   nil,
+			local:    map[string]any{"a": 1, "b": 2},
+			upstream: nil,
+			want:     map[string]any{"a": 1, "b": 2},
+		},
+		{
+			name:     "upstream nil but origin local slice",
+			origin:   []any{1, 2, 3},
+			local:    []any{4, 5, 6},
+			upstream: nil,
+			want:     nil,
+		},
 	})
 }
 
@@ -244,6 +258,34 @@ func TestThreeWayMergeMap(t *testing.T) {
 			local:    map[string]any{"foo": 1, "bar": 3},
 			upstream: map[string]any{"foo": 1, "bar": 4},
 			want:     map[string]any{"foo": 1, "bar": 4},
+		},
+		{
+			name:     "key changed in local with nil",
+			origin:   map[string]any{"foo": 1},
+			local:    map[string]any{"foo": nil},
+			upstream: map[string]any{"foo": 1},
+			want:     map[string]any{"foo": nil},
+		},
+		{
+			name:     "key changed in upstream with nil",
+			origin:   map[string]any{"foo": 1},
+			local:    map[string]any{"foo": 1},
+			upstream: map[string]any{"foo": nil},
+			want:     map[string]any{"foo": nil},
+		},
+		{
+			name:     "key changed in local and upstream with nil",
+			origin:   map[string]any{"foo": 1},
+			local:    map[string]any{"foo": nil},
+			upstream: map[string]any{"foo": nil},
+			want:     map[string]any{"foo": nil},
+		},
+		{
+			name:     "key changed in local with scalar and upstream with nil",
+			origin:   map[string]any{"foo": 1},
+			local:    map[string]any{"foo": 2},
+			upstream: map[string]any{"foo": nil},
+			want:     map[string]any{"foo": nil},
 		},
 	})
 }

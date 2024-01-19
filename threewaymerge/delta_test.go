@@ -194,7 +194,13 @@ func TestDeltaMap(t *testing.T) {
 			want:   map[string]any(nil),
 		},
 		{
-			name:   "null key",
+			name:   "null value in source",
+			source: map[string]any{"a": nil, "b": 2},
+			remove: map[string]any{"a": 1, "b": 2},
+			want:   map[string]any{"a": nil},
+		},
+		{
+			name:   "null value in source",
 			source: map[string]any{"a": 1, "b": 2},
 			remove: map[string]any{"a": nil, "b": 2},
 			want:   map[string]any{"a": 1},

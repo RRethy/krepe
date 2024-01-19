@@ -64,6 +64,18 @@ func TestTwoWayMerge(t *testing.T) {
 			upstream: []any{"baz", "qux"},
 			want:     []any{"baz", "qux"},
 		},
+		{
+			name:     "nil upstream",
+			local:    "foo",
+			upstream: nil,
+			want:     nil,
+		},
+		{
+			name:     "nil upstream it local map",
+			local:    map[string]any{"foo": "bar"},
+			upstream: nil,
+			want:     nil,
+		},
 	})
 }
 

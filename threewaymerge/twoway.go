@@ -11,6 +11,10 @@ package threewaymerge
 // local and upstream are not modified but the result may share memory with
 // local and upstream.
 func twoWayMerge(local, upstream any) any {
+	if upstream == nil {
+		return nil
+	}
+
 	switch localTyped := local.(type) {
 	case map[string]any:
 		upstreamMap, ok := upstream.(map[string]any)

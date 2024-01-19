@@ -1,7 +1,6 @@
 package threewaymerge
 
 import (
-	"fmt"
 	"reflect"
 )
 
@@ -17,6 +16,13 @@ import (
 // origin, local, and upstream are not modified but the result may share memory with
 // origin, local, and upstream.
 func threeWayMergeAny(origin, local, upstream any) any {
+	if upstream == nil {
+		if origin == nil {
+			return local
+		}
+		return nil
+	}
+
 	switch localTyped := local.(type) {
 	case map[string]any:
 		upstreamMap, ok := upstream.(map[string]any)
@@ -80,7 +86,6 @@ func threeWayMergeMap(origin, local, upstream map[string]any) map[string]any {
 			res[key] = upstreamVal
 		} else if originOk && localOk && !upstreamOk {
 			val := delta(localVal, originVal)
-			fmt.Println("val", val == nil, "localVal", localVal, "originVal", originVal)
 			if val != nil {
 				res[key] = val
 			}
