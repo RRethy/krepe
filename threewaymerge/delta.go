@@ -11,8 +11,7 @@ import (
 //   - If source and remove are slices then deltaSlice algorithm is used.
 //   - If source and remove are scalars then deltaScalar algorithm is used.
 //
-// source and remove are not modified but the result may share memory with
-// source and remove.
+// source and remove are not modified but the result may share memory with source and remove.
 func delta(source, remove any) any {
 	if reflect.TypeOf(source) != reflect.TypeOf(remove) {
 		return source
@@ -51,8 +50,7 @@ func delta(source, remove any) any {
 }
 
 // deltaMap returns the difference between source map and remove map.
-// A recursive delta is performed on each value in source using the
-// corresponding value in remove.
+// A recursive delta is performed on each value in source using the corresponding value in remove.
 // If the result is an empty map then nil is returned.
 func deltaMap(source, remove map[string]any) map[string]any {
 	res := make(map[string]any)
@@ -88,10 +86,9 @@ func deltaSlice(source, remove []any) []any {
 	return deltaSliceNonAssociative(source, remove)
 }
 
-// deltaSliceAssociative removes the elements from source that are present in
-// remove. Comparison is done by the value of the common associative key. Both
-// source and remove must be associative slices or the non-associative
-// algorithm is used.
+// deltaSliceAssociative removes the elements from source that are present in remove.
+// Comparison is done by the value of the common associative key.
+// Both source and remove must be associative slices or the non-associative algorithm is used.
 func deltaSliceAssociative(source, remove []any) []any {
 	key := getCommonAssociativeKey(getAssociativeKeys(source), getAssociativeKeys(remove))
 	if key == "" {

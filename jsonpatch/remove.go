@@ -5,12 +5,12 @@ import (
 	"strconv"
 )
 
-// Remove is a JSON patch operation that removes a value from a JSON object or array.
+// Remove is a JSON patch operation that removes a value from a location within an object.
 type Remove struct {
 	path []string
 }
 
-// NewRemove parses the path and creates a new Remove struct.
+// NewRemove returns a Remove struct with the parsed path.
 func NewRemove(path string) (*Remove, error) {
 	pathArr, err := pathToArray(path)
 	if err != nil {
@@ -22,7 +22,7 @@ func NewRemove(path string) (*Remove, error) {
 	}, nil
 }
 
-// Apply applies the Remove operation to the given object, and returns the modified object.
+// Apply returns a new object that is the result of applying the Remove operation to obj.
 func (r *Remove) Apply(obj any) (any, error) {
 	obj, _, err := remove(obj, r.path)
 	if err != nil {

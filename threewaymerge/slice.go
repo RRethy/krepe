@@ -4,12 +4,12 @@ var (
 	// TODO(RRethy): this is a bit of a hack, but it works for now, we should try
 	// to use openapi
 	associativeKeys = []string{
+		"type",
+		"name",
 		"mountPath",
 		"devicePath",
 		"ip",
-		"type",
 		"topologyKey",
-		"name",
 		"containerPort",
 	}
 )
@@ -33,8 +33,7 @@ func isAssociativeSlice(slice []any) bool {
 	return true
 }
 
-// getAssociativeKeys returns the keys that are common to all elements in the
-// slice which we design as potential associative keys.
+// getAssociativeKeys returns the associative keys that are common to all elements in the slice.
 func getAssociativeKeys(slice []any) []string {
 	if len(slice) == 0 {
 		return nil
@@ -69,8 +68,8 @@ func getAssociativeKeys(slice []any) []string {
 	return res
 }
 
-// hasAssociativeKey returns true if the slice contains the given key as an
-// associative key, otherwise false.
+// hasAssociativeKey returns true if the slice contains the given key as an associative key,
+// otherwise false.
 func hasAssociativeKey(slice []any, key string) bool {
 	values := make(map[string]struct{}, len(slice))
 
@@ -96,8 +95,8 @@ func hasAssociativeKey(slice []any, key string) bool {
 	return len(values) == len(slice)
 }
 
-// getCommonAssociativeKey returns the highest priority associative key that is
-// common to all elements in the slice, otherwise "".
+// getCommonAssociativeKey returns the highest priority associative key in all slices,
+// otherwise "".
 func getCommonAssociativeKey(keyss ...[]string) string {
 	commonKeys := getCommonAssociativeKeys(keyss)
 	if len(commonKeys) == 0 {
@@ -107,8 +106,7 @@ func getCommonAssociativeKey(keyss ...[]string) string {
 	return commonKeys[0]
 }
 
-// getCommonAssociativeKeys returns the associative keys that
-// are common to all slices.
+// getCommonAssociativeKeys returns the associative keys that are common to all slices.
 func getCommonAssociativeKeys(keyss [][]string) []string {
 	if len(keyss) == 0 {
 		return nil

@@ -5,13 +5,13 @@ import (
 	"reflect"
 )
 
-// Test is a JSON patch operation that tests a value at a location.
+// Test is a JSON patch operation that asserts a value at a location within an object.
 type Test struct {
 	path  []string
 	value any
 }
 
-// NewTest parses the path and creates a new Test struct.
+// NewTest returns a Test struct with the parsed path and value.
 func NewTest(path string, value any) (*Test, error) {
 	pathArr, err := pathToArray(path)
 	if err != nil {
@@ -24,7 +24,7 @@ func NewTest(path string, value any) (*Test, error) {
 	}, nil
 }
 
-// Apply applies the Test operation to the given object, and returns the modified object.
+// Apply returns a new object that is the result of applying the Test operation to obj.
 func (t *Test) Apply(obj any) (any, error) {
 	got, err := get(obj, t.path)
 	if err != nil {

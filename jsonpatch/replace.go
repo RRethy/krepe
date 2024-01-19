@@ -5,13 +5,13 @@ import (
 	"strconv"
 )
 
-// Replace is a JSON patch operation that replaces a value in a JSON object or array.
+// Replace is a JSON patch operation that replaces a value at a location within an object.
 type Replace struct {
 	path  []string
 	value any
 }
 
-// NewReplace parses the path and creates a new Replace struct.
+// NewReplace returns a Replace struct with the parsed path and value.
 func NewReplace(path string, value any) (*Replace, error) {
 	pathArr, err := pathToArray(path)
 	if err != nil {
@@ -24,7 +24,7 @@ func NewReplace(path string, value any) (*Replace, error) {
 	}, nil
 }
 
-// Apply applies the Replace operation to the given object, and returns the modified object.
+// Apply returns a new object that is the result of applying the Replace operation to obj.
 func (r *Replace) Apply(obj any) (any, error) {
 	obj, err := replace(obj, r.path, r.value)
 	if err != nil {

@@ -1,15 +1,13 @@
 package threewaymerge
 
-// twoWayMerge returns the result of performing a 2-way merge on local
-// and upstream.
+// twoWayMerge returns the result of performing a 2-way merge on local and upstream.
 // If local and upstream are not the same type then local is returned.
 // If local and upstream are the same type then the following rules apply:
 //   - If local and upstream are maps then twoWayMergeMap algorithm is used.
 //   - If local and upstream are slices then twoWayMergeSlice algorithm is used.
 //   - If local and upstream are scalars then twoWayMergeScalar algorithm is used.
 //
-// local and upstream are not modified but the result may share memory with
-// local and upstream.
+// local and upstream are not modified but the result may share memory with local and upstream.
 func twoWayMerge(local, upstream any) any {
 	if upstream == nil {
 		return nil
@@ -33,8 +31,7 @@ func twoWayMerge(local, upstream any) any {
 	}
 }
 
-// twoWayMergeMap returns the result of a recursive merge on each value in
-// local using the corresponding value in upstream.
+// twoWayMergeMap returns the result of a recursive merge on each value in local.
 func twoWayMergeMap(local, upstream map[string]any) map[string]any {
 	result := make(map[string]any)
 
@@ -53,9 +50,8 @@ func twoWayMergeMap(local, upstream map[string]any) map[string]any {
 	return result
 }
 
-// twoWayMergeSlice returns the result of performing a 2-way merge on local and
-// upstream. The algorithm used depends on whether local and upstream are
-// associative.
+// twoWayMergeSlice returns the result of performing a 2-way merge on local and upstream.
+// The algorithm used depends on whether local and upstream are associative.
 func twoWayMergeSlice(local, upstream []any) []any {
 	if isAssociativeSlice(local) && isAssociativeSlice(upstream) {
 		return twoWayMergeSliceAssociative(local, upstream)
@@ -64,10 +60,10 @@ func twoWayMergeSlice(local, upstream []any) []any {
 	return twoWayMergeSliceNonAssociative(local, upstream)
 }
 
-// twoWayMergeSliceAssociative merges local and upstream using their associative
-// key. An element present only in local will be returned as-is. An element
-// present only in upstream will be returned as-is at the end of the slice. An
-// element present in both local and upstream will be 2-way merged recursively.
+// twoWayMergeSliceAssociative merges local and upstream using their associative key.
+// An element present only in local will be returned as-is.
+// An element present only in upstream will be returned as-is at the end of the slice.
+// An element present in both local and upstream will be 2-way merged recursively.
 func twoWayMergeSliceAssociative(local, upstream []any) []any {
 	key := getCommonAssociativeKey(getAssociativeKeys(local), getAssociativeKeys(upstream))
 	if key == "" {
@@ -128,8 +124,7 @@ func twoWayMergeSliceAssociative(local, upstream []any) []any {
 	return result
 }
 
-// twoWayMergeSliceNonAssociative merges local and upstream using the 2-way
-// merge scalar algorithm.
+// twoWayMergeSliceNonAssociative returns the upstream slice.
 func twoWayMergeSliceNonAssociative(local, upstream []any) []any {
 	return upstream
 }
