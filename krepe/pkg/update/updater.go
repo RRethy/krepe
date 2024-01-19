@@ -34,7 +34,7 @@ func NewUpdater(options ...Option) (*Updater, error) {
 
 	i := &Updater{
 		git,
-		pkg.NewMerger(),
+		&merger.PkgMerger{},
 	}
 	for _, option := range options {
 		option(i)
@@ -76,11 +76,7 @@ func (updater *Updater) Update(p *pkg.Pkg, url, name string) error {
 	}
 
 	localPkg, _ := p.GetPkg(pkgName)
-	newPkg, err := updater.merger.Merge(originPkg, localPkg, upstreamPkg)
-	if err != nil {
-		return err
-	}
-
+	newPkg := updater.merger.ThreeWayMerge(originPkg, localPkg, upstreamPkg)
 	err = p.UpdatePackage(newPkg, upstreamPkgImport)
 	if err != nil {
 		return err

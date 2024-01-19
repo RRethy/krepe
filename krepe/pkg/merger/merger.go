@@ -1,5 +1,6 @@
 package merger
 
 type Merger[T any] interface {
-	Merge(origin, local, upstream T) (T, error)
+	TwoWayMerge(local, upstream T) T
+	ThreeWayMerge(origin, local, upstream T) T
 }

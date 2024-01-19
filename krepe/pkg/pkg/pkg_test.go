@@ -19,7 +19,7 @@ func TestNewPkgFromPath(t *testing.T) {
 	pkg, err := NewPkgFromPath(samplePkgPath)
 	assert.NoError(t, err)
 	assert.NotNil(t, pkg)
-	assert.Equal(t, "sample_pkg", pkg.name)
+	assert.Equal(t, "sample_pkg", pkg.Name)
 	assert.Equal(t, "krepe.io/v1, Kind=Krepe", pkg.Krepe.GroupVersionKind().String())
 	var fnames []string
 	for _, r := range pkg.resources {
@@ -213,8 +213,8 @@ func TestPkgWrite(t *testing.T) {
 	err := pkg.Write(tmpDir)
 	assert.NoError(t, err)
 
-	got, _ := NewPkgFromPath(filepath.Join(tmpDir, pkg.name))
-	assert.Equal(t, pkg.name, got.name)
+	got, _ := NewPkgFromPath(filepath.Join(tmpDir, pkg.Name))
+	assert.Equal(t, pkg.Name, got.Name)
 	assert.Equal(t, pkg.Krepe, got.Krepe)
 	var gotResources []string
 	for _, r := range got.resources {
@@ -227,11 +227,11 @@ func TestPkgWrite(t *testing.T) {
 	assert.Equal(t, wantResources, gotResources)
 	var gotPackages []string
 	for _, p := range got.packages {
-		gotPackages = append(gotPackages, p.name)
+		gotPackages = append(gotPackages, p.Name)
 	}
 	var wantPackages []string
 	for _, p := range pkg.packages {
-		wantPackages = append(wantPackages, p.name)
+		wantPackages = append(wantPackages, p.Name)
 	}
 	assert.Equal(t, wantPackages, gotPackages)
 }

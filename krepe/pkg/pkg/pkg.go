@@ -11,7 +11,7 @@ import (
 )
 
 type Pkg struct {
-	name      string
+	Name      string
 	Krepe     *Krepe
 	resources []*resource.Resource
 	packages  []*Pkg
@@ -54,7 +54,7 @@ func NewPkgFromPathWithName(pkgPath, name string) (*Pkg, error) {
 	}
 
 	return &Pkg{
-		name:      name,
+		Name:      name,
 		Krepe:     krepe,
 		resources: resources,
 		packages:  packages,
@@ -84,12 +84,12 @@ func (p *Pkg) RunPipeline(pipeline pipeline.Pipeline) error {
 	for _, pkg := range p.packages {
 		err := pkg.RunPipeline(pipeline)
 		if err != nil {
-			return fmt.Errorf("failed to run pipeline on pkg `%s`: %w", pkg.name, err)
+			return fmt.Errorf("failed to run pipeline on pkg `%s`: %w", pkg.Name, err)
 		}
 
 		err = pkg.RunPipeline(pipeline)
 		if err != nil {
-			return fmt.Errorf("failed to run pipeline on pkg `%s`: %w", pkg.name, err)
+			return fmt.Errorf("failed to run pipeline on pkg `%s`: %w", pkg.Name, err)
 		}
 	}
 
@@ -97,10 +97,10 @@ func (p *Pkg) RunPipeline(pipeline pipeline.Pipeline) error {
 }
 
 func (p *Pkg) AddPackage(pkg *Pkg, pkgImport *imports.Pkg) error {
-	pkg.name = pkgImport.Name()
+	pkg.Name = pkgImport.Name()
 
 	if p.ContainsPkg(pkgImport) {
-		return fmt.Errorf("package `%s` already exists", pkg.name)
+		return fmt.Errorf("package `%s` already exists", pkg.Name)
 	}
 
 	p.packages = append(p.packages, pkg)
@@ -109,10 +109,10 @@ func (p *Pkg) AddPackage(pkg *Pkg, pkgImport *imports.Pkg) error {
 }
 
 func (p *Pkg) UpdatePackage(newPkg *Pkg, pkgImport *imports.Pkg) error {
-	newPkg.name = pkgImport.Name()
+	newPkg.Name = pkgImport.Name()
 
 	for i, pkg := range p.packages {
-		if pkg.name == pkgImport.Name() {
+		if pkg.Name == pkgImport.Name() {
 			p.packages[i] = newPkg
 			break
 		}
@@ -128,7 +128,7 @@ func (p *Pkg) UpdatePackage(newPkg *Pkg, pkgImport *imports.Pkg) error {
 }
 
 func (p *Pkg) Write(dir string) error {
-	pkgPath := filepath.Join(dir, p.name)
+	pkgPath := filepath.Join(dir, p.Name)
 
 	err := os.MkdirAll(pkgPath, 0755)
 	if err != nil {
@@ -150,7 +150,7 @@ func (p *Pkg) Write(dir string) error {
 	for _, pkg := range p.packages {
 		err = pkg.Write(pkgPath)
 		if err != nil {
-			return fmt.Errorf("failed to write pkg `%s` in pkg directory `%s`: %w", pkg.name, pkgPath, err)
+			return fmt.Errorf("failed to write pkg `%s` in pkg directory `%s`: %w", pkg.Name, pkgPath, err)
 		}
 	}
 
@@ -179,7 +179,7 @@ func (p *Pkg) GetPkgImport(name string) (pkgImport *imports.Pkg, ok bool) {
 
 func (p *Pkg) GetPkg(name string) (pkg *Pkg, ok bool) {
 	for _, pkg := range p.packages {
-		if pkg.name == name {
+		if pkg.Name == name {
 			return pkg, true
 		}
 	}
