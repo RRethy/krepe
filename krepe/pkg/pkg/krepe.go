@@ -34,6 +34,10 @@ func NewKrepeFromPath(krepePath string) (*Krepe, error) {
 	return k, nil
 }
 
+// func (k *Krepe) AddImport(i *imports.Import) {
+// 	k.Imports.AddImport(i)
+// }
+
 func (k *Krepe) Write(dir string) error {
 	path := filepath.Join(dir, "krepe.yaml")
 

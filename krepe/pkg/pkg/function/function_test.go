@@ -3,6 +3,7 @@ package function
 import (
 	"testing"
 
+	"github.com/Shopify/krepe/krepe/pkg/pkg/resource"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -10,6 +11,14 @@ type configMapTest struct {
 	name      string
 	configMap map[string]any
 	wantFn    Function
+	wantErr   bool
+}
+
+type runTest struct {
+	name      string
+	configMap map[string]any
+	res       *resource.Resource
+	validate  func(t *testing.T, res *resource.Resource)
 	wantErr   bool
 }
 
@@ -23,6 +32,22 @@ func runWithConfigMapTests(t *testing.T, fn Function, tests []configMapTest) {
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, tt.wantFn, fn)
+			}
+		})
+	}
+}
+
+func runRunTests(t *testing.T, fn Function, tests []runTest) {
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			fn, err := fn.WithConfigMap(tt.configMap)
+			assert.NoError(t, err)
+			err = fn.Run(tt.res)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				tt.validate(t, tt.res)
 			}
 		})
 	}

@@ -9,7 +9,9 @@ import (
 // TODO: force these to be Function
 var functions = map[string]Function{
 	"set-annotations": &SetAnnotations{},
+	"add-annotations": &AddAnnotations{},
 	"set-labels":      &SetLabels{},
+	"add-labels":      &AddLabels{},
 	"set-namespace":   &SetNamespace{},
 	"set-name":        &SetName{},
 	"validate-schema": &ValidateSchema{},
