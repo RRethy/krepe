@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -79,4 +80,30 @@ func TestPkgRunPipelineByName(t *testing.T) {
 }
 
 func TestPkgWrite(t *testing.T) {
+	tmpDir := t.TempDir()
+	pkg, _ := NewPkgFromPath(samplePkgPath)
+	err := pkg.Write(tmpDir)
+	assert.NoError(t, err)
+
+	got, _ := NewPkgFromPath(filepath.Join(tmpDir, pkg.name))
+	assert.Equal(t, pkg.name, got.name)
+	assert.Equal(t, pkg.krepe, got.krepe)
+	var gotResources []string
+	for _, r := range got.resources {
+		gotResources = append(gotResources, r.Fname())
+	}
+	var wantResources []string
+	for _, r := range pkg.resources {
+		wantResources = append(wantResources, r.Fname())
+	}
+	assert.Equal(t, wantResources, gotResources)
+	var gotPackages []string
+	for _, p := range got.packages {
+		gotPackages = append(gotPackages, p.name)
+	}
+	var wantPackages []string
+	for _, p := range pkg.packages {
+		wantPackages = append(wantPackages, p.name)
+	}
+	assert.Equal(t, wantPackages, gotPackages)
 }
