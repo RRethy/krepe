@@ -18,6 +18,7 @@ type Krepe struct {
 	Imports *imports.Imports `yaml:"imports,omitempty"`
 	// TODO(RRethy): the ordering here is alphabetical, but we should probably
 	//               have a way to maintain ordering.
+	// https://github.com/wk8/go-ordered-map
 	Pipelines map[string]pipeline.Pipeline `yaml:"pipelines,omitempty"`
 }
 
