@@ -27,7 +27,7 @@ func delta(source, remove any) any {
 	}
 }
 
-func deltaMap(source, remove map[string]any) map[string]any {
+func deltaMap(source, remove map[string]any) any {
 	res := make(map[string]any)
 
 	for k, v := range source {
@@ -47,7 +47,7 @@ func deltaMap(source, remove map[string]any) map[string]any {
 	return res
 }
 
-func deltaSlice(source, remove []any) []any {
+func deltaSlice(source, remove []any) any {
 	if isAssociativeSlice(source) && isAssociativeSlice(remove) {
 		return deltaSliceAssociative(source, remove)
 	} else {
@@ -57,7 +57,7 @@ func deltaSlice(source, remove []any) []any {
 
 // deltaSliceNonAssociative returns nil iff source and remove are the same,
 // otherwise source is returned.
-func deltaSliceNonAssociative(source, remove []any) []any {
+func deltaSliceNonAssociative(source, remove []any) any {
 	if len(source) != len(remove) {
 		return source
 	}
@@ -76,7 +76,7 @@ func deltaSliceNonAssociative(source, remove []any) []any {
 // found then a deep comparison is done.
 // All elements in source and remove must be maps. Any duplicate keys will
 // result in non associative behavior.
-func deltaSliceAssociative(source, remove []any) []any {
+func deltaSliceAssociative(source, remove []any) any {
 	key := getCommonAssociativeKey(getAssociativeKeys(source), getAssociativeKeys(remove))
 	if key == "" {
 		return deltaSliceNonAssociative(source, remove)

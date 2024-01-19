@@ -19,7 +19,7 @@ func twoWayMerge(local, upstream any) any {
 	}
 }
 
-func twoWayMergeMap(local, upstream map[string]any) map[string]any {
+func twoWayMergeMap(local, upstream map[string]any) any {
 	result := make(map[string]any)
 
 	for k, v := range local {
@@ -37,7 +37,7 @@ func twoWayMergeMap(local, upstream map[string]any) map[string]any {
 	return result
 }
 
-func twoWayMergeSlice(local, upstream []any) []any {
+func twoWayMergeSlice(local, upstream []any) any {
 	if isAssociativeSlice(local) && isAssociativeSlice(upstream) {
 		return twoWayMergeSliceAssociative(local, upstream)
 	} else {
@@ -45,22 +45,58 @@ func twoWayMergeSlice(local, upstream []any) []any {
 	}
 }
 
-func twoWayMergeSliceAssociative(local, upstream []any) []any {
-	key := getAssociativeKeys(local)
-	if len(key) == 0 {
+func twoWayMergeSliceAssociative(local, upstream []any) any {
+	key := getCommonAssociativeKey(getAssociativeKeys(local), getAssociativeKeys(upstream))
+	if key == "" {
 		return twoWayMergeSliceNonAssociative(local, upstream)
 	}
 
-	// result := make([]any, 0, len(local))
-	// for _, localElem := range local {
+	upstreamByKey := make(map[string]any, len(upstream))
+	for _, elem := range upstream {
+		elemMap, ok := elem.(map[string]any)
+		if !ok {
+			return twoWayMergeSliceNonAssociative(local, upstream)
+		}
+
+		keyVal, ok := elemMap[key].(string)
+		if !ok {
+			return twoWayMergeSliceNonAssociative(local, upstream)
+		}
+
+		upstreamByKey[keyVal] = elem
+	}
+
+	var result []any
+	for _, elem := range local {
+		elemMap, ok := elem.(map[string]any)
+		if !ok {
+			return twoWayMergeSliceNonAssociative(local, upstream)
+		}
+
+		keyVal, ok := elemMap[key].(string)
+		if !ok {
+			return twoWayMergeSliceNonAssociative(local, upstream)
+		}
+
+		if upstreamElem, ok := upstreamByKey[keyVal]; ok {
+			result = append(result, twoWayMerge(elem, upstreamElem))
+			delete(upstreamByKey, keyVal)
+		} else {
+			result = append(result, elem)
+		}
+	}
+
+	for _, elem := range upstreamByKey {
+		result = append(result, elem)
+	}
 
 	return nil
 }
 
-func twoWayMergeSliceNonAssociative(local, upstream []any) []any {
-	return nil
+func twoWayMergeSliceNonAssociative(local, upstream []any) any {
+	return twoWayMergeScalar(local, upstream)
 }
 
 func twoWayMergeScalar(local, upstream any) any {
-	return nil
+	return upstream
 }
