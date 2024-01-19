@@ -27,5 +27,5 @@ func init() {
 
 	runCmd.Flags().StringVarP(&runPipeline, "pipeline", "p", "default", "name of the pipeline to run")
 	runCmd.Flags().StringVarP(&runFunction, "function", "f", "", "name of the function to run")
-	runCmd.Flags().StringVar(&runPkg, "pkg", ".", "path to the package to run")
+	runCmd.Flags().StringVarP(&runPkg, "", "C", ".", "path to the package to run")
 }
