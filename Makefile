@@ -1,5 +1,3 @@
-.PHONY: build test test-krepe test-jsonpatch clean tidy
-
 BINARY_NAME=krepe
 BINARY_PATH=./krepe/$(BINARY_NAME)
 GOPATH=$(shell go env GOPATH)
@@ -9,23 +7,38 @@ GOCLEAN=go clean
 GOTEST=go test
 GOMOD=go mod
 
+.PHONY: build
 build:
 	$(GOBUILD) -C krepe -o $(BINARY_NAME) -v
+	$(GOBUILD) -C jsonpatch
 
+.PHONY: build-krepe
+build-krepe:
+	$(GOBUILD) -C krepe -o $(BINARY_NAME) -v
+
+.PHONY: build-jsonpatch
+build-jsonpatch:
+	$(GOBUILD) -C jsonpatch
+
+.PHONY: test
 test:
 	$(GOTEST) -C krepe ./...
 	$(GOTEST) -C jsonpatch ./...
 
-test-krepe:
-	$(GOTEST) -C krepe ./...
+.PHONY: test-%
+test-%:
+	$(GOTEST) -C $* ./...
 
-test-jsonpatch:
-	$(GOTEST) -C jsonpatch ./...
-
+.PHONY: clean
 clean:
 	$(GOCLEAN)
 	rm -f $(BINARY_PATH)
 
+.PHONY: tidy
 tidy:
 	$(GOMOD) -C krepe tidy
 	$(GOMOD) -C jsonpatch tidy
+
+.PHONY: tidy-%
+tidy-%:
+	$(GOMOD) -C $* tidy
