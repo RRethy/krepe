@@ -7,6 +7,8 @@ import (
 
 	"github.com/Shopify/krepe/krepe/pkg/pkg/imports"
 	"github.com/Shopify/krepe/krepe/pkg/pkg/resource"
+	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing"
 )
 
 type Pkg struct {
@@ -16,7 +18,7 @@ type Pkg struct {
 	packages  []*Pkg
 }
 
-func NewPkgFromPath(pkgPath string) (*Pkg, error) {
+func NewPkgFromPathWithName(pkgPath, name string) (*Pkg, error) {
 	if pkgPath == "/" {
 		return nil, fmt.Errorf("pkg path cannot be `/`")
 	}
@@ -29,7 +31,6 @@ func NewPkgFromPath(pkgPath string) (*Pkg, error) {
 		return nil, fmt.Errorf("pkg path is not a directory: %s", pkgPath)
 	}
 
-	name := filepath.Base(pkgPath)
 	krepe, err := NewKrepeFromPath(filepath.Join(pkgPath, "krepe.yaml"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse krepe.yaml in pkg path `%s`: %w", pkgPath, err)
@@ -61,6 +62,10 @@ func NewPkgFromPath(pkgPath string) (*Pkg, error) {
 	}, nil
 }
 
+func NewPkgFromPath(pkgPath string) (*Pkg, error) {
+	return NewPkgFromPathWithName(pkgPath, filepath.Base(pkgPath))
+}
+
 func (p *Pkg) RunPipelineByName(name string) error {
 	if pipeline, ok := p.Krepe.Pipelines.Get(name); ok {
 		for _, resource := range p.resources {
@@ -78,11 +83,46 @@ func (p *Pkg) RunPipelineByName(name string) error {
 func (p *Pkg) InstallPackage(url string, name string) error {
 	pkgImport, err := imports.NewPkg(url, name)
 	if err != nil {
-		return fmt.Errorf("failed to create pkg import `%s` from url `%s`: %w", name, url, err)
+		return fmt.Errorf("creating pkg import `%s` from url `%s`: %w", name, url, err)
 	}
 
+	// TODO: This is all temporary for a MVP
+	tmpDir := "/tmp"
+	pkgPath := filepath.Join(tmpDir, pkgImport.Name())
+
+	if _, err := os.Stat(pkgPath); err == nil {
+		if err := os.RemoveAll(pkgPath); err != nil {
+			return fmt.Errorf("removing existing pkg `%s`: %w", pkgPath, err)
+		}
+	}
+
+	repo, err := git.PlainClone(pkgPath, false, &git.CloneOptions{
+		URL:      pkgImport.URL(),
+		Progress: os.Stdout,
+	})
+	if err != nil {
+		return fmt.Errorf("cloning pkg from url `%s` to `%s`: %w", pkgImport.URL(), pkgPath, err)
+	}
+
+	wt, err := repo.Worktree()
+	if err != nil {
+		return err
+	}
+
+	err = wt.Checkout(&git.CheckoutOptions{
+		Branch: plumbing.ReferenceName("refs/tags/" + pkgImport.Version()),
+	})
+	if err != nil {
+		return fmt.Errorf("checking out tag `%s` in pkg `%s`: %w", pkgImport.Version(), pkgPath, err)
+	}
+
+	pkg, err := NewPkgFromPathWithName(pkgPath, pkgImport.Name())
+	if err != nil {
+		return fmt.Errorf("creating pkg from path `%s`: %w", pkgPath, err)
+	}
+
+	p.packages = append(p.packages, pkg)
 	p.Krepe.Imports.AddPackage(pkgImport)
-	// TODO
 	return nil
 }
 

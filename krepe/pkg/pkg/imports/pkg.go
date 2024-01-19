@@ -68,6 +68,14 @@ func (p *Pkg) MarshalYAML() (interface{}, error) {
 	}, nil
 }
 
+func (p *Pkg) URL() string {
+	return p.url
+}
+
+func (p *Pkg) Version() string {
+	return p.version
+}
+
 func (p *Pkg) Name() string {
 	return p.name
 }
