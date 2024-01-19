@@ -1,4 +1,4 @@
-module github.com/Shopify/krepe/jsonpatch
+module github.com/RRethy/krepe/jsonpatch
 
 go 1.21
 

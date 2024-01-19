@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/Shopify/krepe/krepe/pkg/install"
+	"github.com/RRethy/krepe/krepe/pkg/install"
 	"github.com/spf13/cobra"
 )
 
@@ -33,5 +33,6 @@ func init() {
 	rootCmd.AddCommand(installCmd)
 
 	installCmd.Flags().StringVarP(&installName, "name", "n", "", "TODO")
+	installCmd.Flags().StringVarP(&installUrl, "url", "", "", "TODO")
 	installCmd.Flags().StringVarP(&installPkg, "", "C", ".", "TODO")
 }

@@ -3,7 +3,7 @@ package run
 import (
 	"errors"
 
-	"github.com/Shopify/krepe/krepe/pkg/pkg"
+	"github.com/RRethy/krepe/krepe/pkg/pkg"
 )
 
 type runnable interface {

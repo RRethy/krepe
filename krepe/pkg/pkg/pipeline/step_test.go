@@ -3,9 +3,9 @@ package pipeline
 import (
 	"testing"
 
-	"github.com/Shopify/krepe/krepe/pkg/pkg/function"
-	"github.com/Shopify/krepe/krepe/pkg/pkg/resource"
-	"github.com/Shopify/krepe/krepe/pkg/yaml"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/function"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
+	"github.com/RRethy/krepe/krepe/pkg/yaml"
 	"github.com/stretchr/testify/assert"
 )
 

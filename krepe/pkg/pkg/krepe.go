@@ -5,9 +5,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Shopify/krepe/krepe/pkg/pkg/imports"
-	"github.com/Shopify/krepe/krepe/pkg/pkg/pipeline"
-	"github.com/Shopify/krepe/krepe/pkg/yaml"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/imports"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/pipeline"
+	"github.com/RRethy/krepe/krepe/pkg/yaml"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

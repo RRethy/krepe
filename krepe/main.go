@@ -1,6 +1,6 @@
 package main
 
-import "github.com/Shopify/krepe/krepe/cmd"
+import "github.com/RRethy/krepe/krepe/cmd"
 
 func main() {
 	cmd.Execute()

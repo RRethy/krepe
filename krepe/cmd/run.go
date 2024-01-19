@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/Shopify/krepe/krepe/pkg/run"
+	"github.com/RRethy/krepe/krepe/pkg/run"
 	"github.com/spf13/cobra"
 )
 

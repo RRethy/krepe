@@ -4,7 +4,7 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/Shopify/krepe/krepe/pkg/yaml"
+	"github.com/RRethy/krepe/krepe/pkg/yaml"
 )
 
 var (

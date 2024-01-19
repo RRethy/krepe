@@ -3,8 +3,8 @@ package pipeline
 import (
 	"testing"
 
-	"github.com/Shopify/krepe/krepe/pkg/pkg/function"
-	"github.com/Shopify/krepe/krepe/pkg/pkg/resource"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/function"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 	"github.com/stretchr/testify/assert"
 )
 

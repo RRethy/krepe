@@ -1,7 +1,7 @@
 package pipeline
 
 import (
-	"github.com/Shopify/krepe/krepe/pkg/pkg/resource"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
 type Pipeline []*Step

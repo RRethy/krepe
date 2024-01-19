@@ -3,7 +3,7 @@ package imports
 import (
 	"testing"
 
-	"github.com/Shopify/krepe/krepe/pkg/yaml"
+	"github.com/RRethy/krepe/krepe/pkg/yaml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,10 +17,10 @@ func TestNewPkg(t *testing.T) {
 	}{
 		{
 			name:    "valid tag with empty name",
-			tag:     "github.com/Shopify/krepe@v0.0.1",
+			tag:     "github.com/RRethy/krepe@v0.0.1",
 			pkgName: "",
 			want: &Pkg{
-				url:     "github.com/Shopify/krepe",
+				url:     "github.com/RRethy/krepe",
 				version: "v0.0.1",
 				name:    "krepe",
 			},
@@ -28,10 +28,10 @@ func TestNewPkg(t *testing.T) {
 		},
 		{
 			name:    "valid tag with valid name",
-			tag:     "github.com/Shopify/krepe@v0.0.1",
+			tag:     "github.com/RRethy/krepe@v0.0.1",
 			pkgName: "notkrepe",
 			want: &Pkg{
-				url:     "github.com/Shopify/krepe",
+				url:     "github.com/RRethy/krepe",
 				version: "v0.0.1",
 				name:    "notkrepe",
 			},
@@ -39,7 +39,7 @@ func TestNewPkg(t *testing.T) {
 		},
 		{
 			name:    "invalid tag with no @",
-			tag:     "github.com/Shopify/krepe",
+			tag:     "github.com/RRethy/krepe",
 			pkgName: "",
 			want:    nil,
 			wantErr: true,
@@ -75,10 +75,10 @@ func TestPkgUnmarshalYAML(t *testing.T) {
 	}{
 		{
 			name: "valid yaml",
-			yaml: `tag: github.com/Shopify/krepe@v0.0.1
+			yaml: `tag: github.com/RRethy/krepe@v0.0.1
 name: foo`,
 			want: &Pkg{
-				url:     "github.com/Shopify/krepe",
+				url:     "github.com/RRethy/krepe",
 				version: "v0.0.1",
 				name:    "foo",
 			},
@@ -92,7 +92,7 @@ name: foo`,
 		},
 		{
 			name:    "invalid pkg import",
-			yaml:    `tag: github.com/Shopify/krepe`,
+			yaml:    `tag: github.com/RRethy/krepe`,
 			want:    nil,
 			wantErr: true,
 		},
@@ -113,11 +113,11 @@ name: foo`,
 }
 
 func TestPkgMarshalYAML(t *testing.T) {
-	want := `tag: github.com/Shopify/krepe@v0.0.1
+	want := `tag: github.com/RRethy/krepe@v0.0.1
 name: foo
 `
 	pkg := &Pkg{
-		url:     "github.com/Shopify/krepe",
+		url:     "github.com/RRethy/krepe",
 		version: "v0.0.1",
 		name:    "foo",
 	}

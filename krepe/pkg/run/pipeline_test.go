@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Shopify/krepe/krepe/pkg/pkg"
+	"github.com/RRethy/krepe/krepe/pkg/pkg"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -3,8 +3,8 @@ package function
 import (
 	"fmt"
 
-	"github.com/Shopify/krepe/jsonpatch"
-	"github.com/Shopify/krepe/krepe/pkg/pkg/resource"
+	"github.com/RRethy/krepe/jsonpatch"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
 type JsonPatch struct {

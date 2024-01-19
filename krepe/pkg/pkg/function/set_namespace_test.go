@@ -3,7 +3,7 @@ package function
 import (
 	"testing"
 
-	"github.com/Shopify/krepe/krepe/pkg/pkg/resource"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )

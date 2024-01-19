@@ -3,7 +3,7 @@ package function
 import (
 	_ "fmt"
 
-	"github.com/Shopify/krepe/krepe/pkg/pkg/resource"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
 type TagImage struct{}

@@ -3,7 +3,7 @@ package function
 import (
 	"errors"
 
-	"github.com/Shopify/krepe/krepe/pkg/pkg/resource"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
 type RunFail struct{}

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/Shopify/krepe/krepe/pkg/pkg"
+	"github.com/RRethy/krepe/krepe/pkg/pkg"
 )
 
 func Install(pkgPath, url, name string) error {

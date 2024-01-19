@@ -1,7 +1,7 @@
 package run
 
 import (
-	"github.com/Shopify/krepe/krepe/pkg/pkg"
+	"github.com/RRethy/krepe/krepe/pkg/pkg"
 )
 
 type function struct {

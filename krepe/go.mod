@@ -1,9 +1,9 @@
-module github.com/Shopify/krepe/krepe
+module github.com/RRethy/krepe/krepe
 
 go 1.21
 
 require (
-	github.com/Shopify/krepe/jsonpatch v0.0.0-00010101000000-000000000000
+	github.com/RRethy/krepe/jsonpatch v0.0.0-00010101000000-000000000000
 	github.com/goccy/go-yaml v1.11.0
 	github.com/spf13/cobra v1.7.0
 	github.com/stretchr/testify v1.8.4
@@ -12,13 +12,14 @@ require (
 	k8s.io/apimachinery v0.28.1
 )
 
-replace github.com/Shopify/krepe/jsonpatch => ../jsonpatch
+replace github.com/RRethy/krepe/jsonpatch => ../jsonpatch
 
 require (
 	dario.cat/mergo v1.0.0 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ProtonMail/go-crypto v0.0.0-20230828082145-3c4c8a2d2371 // indirect
 	github.com/acomagu/bufpipe v1.0.4 // indirect
+	github.com/adrg/xdg v0.4.0 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/cloudflare/circl v1.3.3 // indirect

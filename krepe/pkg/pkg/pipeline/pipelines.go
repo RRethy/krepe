@@ -1,7 +1,7 @@
 package pipeline
 
 import (
-	"github.com/Shopify/krepe/krepe/pkg/yaml"
+	"github.com/RRethy/krepe/krepe/pkg/yaml"
 	"github.com/wk8/go-ordered-map/v2"
 )
 

@@ -1,7 +1,7 @@
 package function
 
 import (
-	"github.com/Shopify/krepe/krepe/pkg/pkg/resource"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
 type Succeed struct{}
