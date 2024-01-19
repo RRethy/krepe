@@ -187,6 +187,7 @@ func TestGetCommonAssociativeKey(t *testing.T) {
 		name  string
 		keys1 []string
 		keys2 []string
+		keys3 []string
 		want  string
 	}{
 		{
@@ -231,12 +232,27 @@ func TestGetCommonAssociativeKey(t *testing.T) {
 			keys2: []string{"type", "name", "name"},
 			want:  "name",
 		},
+		{
+			name:  "three slices",
+			keys1: []string{"name", "type"},
+			keys2: []string{"type", "mountPath", "name"},
+			keys3: []string{"type", "name"},
+			want:  "name",
+		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := getCommonAssociativeKey(test.keys1, test.keys2)
+			var got string
+			if len(test.keys3) > 0 {
+				got = getCommonAssociativeKey(test.keys1, test.keys2, test.keys3)
+			} else {
+				got = getCommonAssociativeKey(test.keys1, test.keys2)
+			}
 			assert.Equal(t, test.want, got)
 		})
 	}
+}
+
+func TestGetCommonAssociativeKeys(t *testing.T) {
 }

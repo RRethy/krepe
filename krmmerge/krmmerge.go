@@ -79,12 +79,7 @@ func (k *KrmMerge) threeWayMergeRoot() (*unstructured.Unstructured, error) {
 		return nil, fmt.Errorf("version mismatch: origin=%s, local=%s, upstream=%s", originGVK.Version, localGVK.Version, upstreamGVK.Version)
 	}
 
-	m, err := threeWayMergeMap(k.origin.Object, k.local.Object, k.upstream.Object)
-	if err != nil {
-		return nil, err
-	}
-
 	return &unstructured.Unstructured{
-		Object: m,
+		Object: threeWayMergeMap(k.origin.Object, k.local.Object, k.upstream.Object),
 	}, nil
 }
