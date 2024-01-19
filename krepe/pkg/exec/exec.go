@@ -1,13 +1,15 @@
 package exec
 
 import (
+	"bytes"
 	"fmt"
 	"os/exec"
 )
 
 type Exec struct {
-	cmd string
-	dir string
+	cmd       string
+	dir       string
+	stdouterr *bytes.Buffer
 }
 
 type Option func(*Exec)
@@ -24,6 +26,12 @@ func WithDir(dir string) Option {
 	}
 }
 
+func WithStdouterr(stdouterr *bytes.Buffer) Option {
+	return func(e *Exec) {
+		e.stdouterr = stdouterr
+	}
+}
+
 func NewExec(options ...Option) *Exec {
 	exec := &Exec{}
 	for _, option := range options {
@@ -35,7 +43,13 @@ func NewExec(options ...Option) *Exec {
 func (e *Exec) Run(args ...string) ([]byte, error) {
 	cmd := exec.Command(e.cmd, args...)
 	cmd.Dir = e.dir
-	out, err := cmd.CombinedOutput()
-	fmt.Println(string(out))
-	return out, err
+	if e.stdouterr != nil {
+		cmd.Stdout = e.stdouterr
+		cmd.Stderr = e.stdouterr
+		err := cmd.Run()
+		fmt.Println("stdouterr:", e.stdouterr.String())
+		return e.stdouterr.Bytes(), err
+	} else {
+		return cmd.CombinedOutput()
+	}
 }
