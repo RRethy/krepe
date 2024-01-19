@@ -7,17 +7,13 @@ import (
 	"github.com/Shopify/krepe/pkg/pkg/resource"
 )
 
-var functions = map[string]function.Function{
-	"set-annotations": &function.SetAnnotations{},
-}
-
 type Step struct {
 	Function  string         `yaml:"function,omitempty"`
 	ConfigMap map[string]any `yaml:"configMap,omitempty"`
 }
 
 func (s *Step) Run(res *resource.Resource) error {
-	f, ok := functions[s.Function]
+	f, ok := function.Functions[s.Function]
 	if !ok {
 		return fmt.Errorf("function `%s` not found", s.Function)
 	}
