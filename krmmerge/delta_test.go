@@ -47,7 +47,7 @@ func TestDelta(t *testing.T) {
 			name:   "non-associative slice that matches",
 			source: []any{1, 2, 3},
 			remove: []any{1, 2, 3},
-			want:   []any(nil),
+			want:   nil,
 		},
 		{
 			name: "associative slice with no remove slice associative key",
@@ -149,7 +149,7 @@ func TestDeltaMap(t *testing.T) {
 		name   string
 		source map[string]any
 		remove map[string]any
-		want   map[string]any
+		want   any
 	}{
 		{
 			name:   "map with matching keys but different values",
@@ -190,7 +190,7 @@ func TestDeltaSlice(t *testing.T) {
 		name   string
 		source []any
 		remove []any
-		want   []any
+		want   any
 	}{
 		{
 			name:   "non-associative slice that doesn't match",
@@ -208,7 +208,7 @@ func TestDeltaSlice(t *testing.T) {
 			name:   "non-associative slice that matches",
 			source: []any{1, 2, 3},
 			remove: []any{1, 2, 3},
-			want:   []any(nil),
+			want:   nil,
 		},
 		{
 			name: "associative slice with no remove slice associative key",
@@ -283,7 +283,7 @@ func TestDeltaSliceNonAssociative(t *testing.T) {
 		name   string
 		source []any
 		remove []any
-		want   []any
+		want   any
 	}{
 		{
 			name:   "doesn't match",
@@ -301,7 +301,7 @@ func TestDeltaSliceNonAssociative(t *testing.T) {
 			name:   "matches",
 			source: []any{1, 2, 3},
 			remove: []any{1, 2, 3},
-			want:   []any(nil),
+			want:   nil,
 		},
 	}
 
@@ -318,7 +318,7 @@ func TestDeltaSliceAssociative(t *testing.T) {
 		name   string
 		source []any
 		remove []any
-		want   []any
+		want   any
 	}{
 		{
 			name: "no remove slice associative key",

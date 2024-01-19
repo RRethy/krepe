@@ -86,11 +86,23 @@ func twoWayMergeSliceAssociative(local, upstream []any) any {
 		}
 	}
 
-	for _, elem := range upstreamByKey {
-		result = append(result, elem)
+	for _, elem := range upstream {
+		elemMap, ok := elem.(map[string]any)
+		if !ok {
+			return twoWayMergeSliceNonAssociative(local, upstream)
+		}
+
+		keyVal, ok := elemMap[key].(string)
+		if !ok {
+			return twoWayMergeSliceNonAssociative(local, upstream)
+		}
+
+		if _, ok := upstreamByKey[keyVal]; ok {
+			result = append(result, elem)
+		}
 	}
 
-	return nil
+	return result
 }
 
 func twoWayMergeSliceNonAssociative(local, upstream []any) any {
