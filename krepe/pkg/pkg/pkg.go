@@ -78,7 +78,6 @@ func (p *Pkg) RunPipelineByName(name string) error {
 	}
 }
 
-// TODO: test
 func (p *Pkg) AddPackage(pkg *Pkg, pkgImport *imports.Pkg) error {
 	if pkgImport.Name() != pkg.name {
 		return fmt.Errorf("package name `%s` does not match import name `%s`", pkg.name, pkgImport.Name())

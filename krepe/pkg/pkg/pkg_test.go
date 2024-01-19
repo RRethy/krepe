@@ -83,6 +83,55 @@ func TestPkgRunPipelineByName(t *testing.T) {
 }
 
 func TestPkgAddPackage(t *testing.T) {
+	tests := []struct {
+		name       string
+		pkgPath    string
+		newPkgPath string
+		newPkgName string
+		wantErr    bool
+	}{
+		{
+			name:       "succeeds with valid pkg add",
+			pkgPath:    samplePkgPath,
+			newPkgPath: samplePkgPath,
+			newPkgName: "sample_pkg",
+			wantErr:    false,
+		},
+		{
+			name:       "fails with invalid pkg add",
+			pkgPath:    samplePkgPath,
+			newPkgPath: samplePkgPath,
+			newPkgName: "foo",
+			wantErr:    true,
+		},
+		{
+			name:       "fails with duplicate pkg add",
+			pkgPath:    samplePkgWithPkgInstalledPath,
+			newPkgPath: samplePkgPath,
+			newPkgName: "sample_pkg",
+			wantErr:    true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			pkg, err := NewPkgFromPath(tt.pkgPath)
+			assert.NoError(t, err)
+			newPkg, err := NewPkgFromPath(tt.newPkgPath)
+			assert.NoError(t, err)
+			repoRef, err := git.NewRepoRefFromString("github.com/RRethy/" + tt.newPkgName + "@v0.0.1")
+			assert.NoError(t, err)
+			pkgImport := imports.NewPkg(repoRef, "")
+
+			err = pkg.AddPackage(newPkg, pkgImport)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.True(t, pkg.ContainsPkg(pkgImport))
+			}
+		})
+	}
 }
 
 func TestPkgContainsPkg(t *testing.T) {
