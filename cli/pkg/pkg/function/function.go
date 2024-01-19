@@ -9,11 +9,12 @@ var Functions = map[string]Function{
 	"set-labels":      &SetLabels{},
 	"set-namespace":   &SetNamespace{},
 	"set-name":        &SetName{},
-	"set-field":       &SetField{},
 	"validate-schema": &ValidateSchema{},
 	"tag-image":       &TagImage{},
+	"jsonpatch":       &JsonPatch{},
 }
 
+// TODO: parsing the configMap should happen BEFORE we execute the function
 type Function interface {
 	Run(res *resource.Resource, configMap map[string]any) error
 }
