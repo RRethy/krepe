@@ -1,0 +1,16 @@
+kind: Krepe
+apiVersion: krepe.io/v1
+imports:
+  files:
+    - deployment.yaml
+    - service.yaml
+    - ingress.yaml
+pipelines:
+  mypipeline:
+    - function: set-labels
+      configMap:
+        foo: bar
+  badpipeline:
+    - function: run-fail
+  no-op-pipeline:
+    - function: succeed

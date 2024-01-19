@@ -78,12 +78,13 @@ func (p *Pkg) RunPipelineByName(name string) error {
 	}
 }
 
+// TODO: test
 func (p *Pkg) AddPackage(pkg *Pkg, pkgImport *imports.Pkg) error {
 	if pkgImport.Name() != pkg.name {
 		return fmt.Errorf("package name `%s` does not match import name `%s`", pkg.name, pkgImport.Name())
 	}
 
-	if p.PkgExists(pkg.name) {
+	if p.ContainsPkg(pkgImport) {
 		return fmt.Errorf("package `%s` already exists", pkg.name)
 	}
 
@@ -122,9 +123,15 @@ func (p *Pkg) Write(dir string) error {
 	return nil
 }
 
-func (p *Pkg) PkgExists(other string) bool {
+func (p *Pkg) ContainsPkg(other *imports.Pkg) bool {
 	for _, pkg := range p.packages {
-		if pkg.name == other {
+		if pkg.name == other.Name() {
+			return true
+		}
+	}
+
+	for _, pkgImport := range p.Krepe.Imports.Packages {
+		if pkgImport.Name() == other.Name() {
 			return true
 		}
 	}

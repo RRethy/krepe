@@ -1,7 +1,6 @@
 package install
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/RRethy/krepe/krepe/pkg/cache"
@@ -22,18 +21,7 @@ func NewInstaller(git git.Client, cache cache.Cache) *Installer {
 	}
 }
 
-func (i *Installer) Install(pkgPath, url, name string) error {
-	absPath, err := filepath.Abs(pkgPath)
-	if err != nil {
-		return fmt.Errorf("getting absolute path: %w", err)
-	}
-	dir := filepath.Dir(absPath)
-
-	p, err := pkg.NewPkgFromPath(pkgPath)
-	if err != nil {
-		return err
-	}
-
+func (i *Installer) Install(p *pkg.Pkg, url, name string) error {
 	ref, err := git.NewRepoRefFromString(url)
 	if err != nil {
 		return err
@@ -53,11 +41,6 @@ func (i *Installer) Install(pkgPath, url, name string) error {
 	}
 
 	err = p.AddPackage(newPkg, pkgImport)
-	if err != nil {
-		return err
-	}
-
-	err = p.Write(dir)
 	if err != nil {
 		return err
 	}
