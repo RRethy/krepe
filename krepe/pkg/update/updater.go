@@ -34,23 +34,38 @@ func NewUpdater(options ...Option) (*Updater, error) {
 }
 
 func (updater *Updater) Update(p *pkg.Pkg, url, name string) error {
-	ref, err := git.NewPkgRefFromString(url)
+	upstreamRef, err := git.NewPkgRefFromString(url)
 	if err != nil {
 		return err
 	}
 
-	newPkgPath, err := updater.git.Clone(ref)
+	upstreamPkgPath, err := updater.git.Clone(upstreamRef)
 	if err != nil {
 		return err
 	}
 
-	newPkg, err := pkg.NewPkgFromPath(newPkgPath)
+	upstreamPkg, err := pkg.NewPkgFromPath(upstreamPkgPath)
 	if err != nil {
 		return err
 	}
 
-	pkgImport := imports.NewPkg(ref, name)
-	err = p.UpdatePackage(newPkg, pkgImport)
+	upstreamPkgImport := imports.NewPkg(upstreamRef, name)
+
+	originPkgImport := p.GetPkgImport(upstreamPkgImport.Name())
+	var originPkg *pkg.Pkg
+	if originPkgImport != nil {
+		originPkgPath, err := updater.git.Clone(originPkgImport.Ref)
+		if err != nil {
+			return err
+		}
+
+		originPkg, err = pkg.NewPkgFromPath(originPkgPath)
+		if err != nil {
+			return err
+		}
+	}
+
+	err = p.UpdatePackage(originPkg, upstreamPkg, upstreamPkgImport)
 	if err != nil {
 		return err
 	}

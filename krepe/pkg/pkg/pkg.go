@@ -108,11 +108,11 @@ func (p *Pkg) AddPackage(pkg *Pkg, pkgImport *imports.Pkg) error {
 	return nil
 }
 
-func (p *Pkg) UpdatePackage(pkg *Pkg, pkgImport *imports.Pkg) error {
-	pkg.name = pkgImport.Name()
+func (p *Pkg) UpdatePackage(origin *Pkg, upstream *Pkg, pkgImport *imports.Pkg) error {
+	upstream.name = pkgImport.Name()
 
 	if !p.ContainsPkg(pkgImport) {
-		return fmt.Errorf("package `%s` does not exist", pkg.name)
+		return p.AddPackage(upstream, pkgImport)
 	}
 
 	for i, pkg := range p.packages {
@@ -170,4 +170,14 @@ func (p *Pkg) ContainsPkg(other *imports.Pkg) bool {
 	}
 
 	return false
+}
+
+func (p *Pkg) GetPkgImport(name string) *imports.Pkg {
+	for _, pkgImport := range p.Krepe.Imports.Packages {
+		if pkgImport.Name() == name {
+			return pkgImport
+		}
+	}
+
+	return nil
 }

@@ -20,7 +20,7 @@ func TestPkgUnmarshalYAML(t *testing.T) {
 			yaml: `ref: github.com/RRethy/krepe@v0.0.1
 name: foo`,
 			want: &Pkg{
-				ref: &git.PkgRef{
+				Ref: &git.PkgRef{
 					Owner: "RRethy",
 					Repo:  "krepe",
 					Path:  nil,
@@ -64,7 +64,7 @@ func TestPkgMarshalYAML(t *testing.T) {
 name: foo
 `
 	pkg := &Pkg{
-		ref: &git.PkgRef{
+		Ref: &git.PkgRef{
 			Owner: "RRethy",
 			Repo:  "krepe",
 			Tag:   "v0.0.1",
