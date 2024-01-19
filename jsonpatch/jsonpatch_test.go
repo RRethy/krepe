@@ -33,8 +33,8 @@ func (pt *patchTest) run(t *testing.T) {
 func runPatchTests(t *testing.T, tests []*patchTest) {
 	t.Helper()
 
-	for _, tt := range tests {
-		tt.run(t)
+	for _, test := range tests {
+		test.run(t)
 	}
 }
 
@@ -113,11 +113,11 @@ func TestNewJsonPatch(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewJsonPatch(tt.op, tt.from, tt.path, tt.value)
-			assert.Equal(t, tt.want, got)
-			if tt.wantErr {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := NewJsonPatch(test.op, test.from, test.path, test.value)
+			assert.Equal(t, test.want, got)
+			if test.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)

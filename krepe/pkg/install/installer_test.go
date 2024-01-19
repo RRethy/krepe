@@ -74,12 +74,12 @@ func TestInstallerInstall(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.testName, func(t *testing.T) {
-			pkg, err := pkg.NewPkgFromPath(tt.pkgPath)
+	for _, test := range tests {
+		t.Run(test.testName, func(t *testing.T) {
+			pkg, err := pkg.NewPkgFromPath(test.pkgPath)
 			assert.Nil(t, err)
 
-			echo := exec.NewExec(exec.WithCmd(tt.cmd))
+			echo := exec.NewExec(exec.WithCmd(test.cmd))
 			git, err := git.NewGit(
 				git.WithExec(echo),
 				git.WithDir(pacakgesDirName),
@@ -89,12 +89,12 @@ func TestInstallerInstall(t *testing.T) {
 			installer, err := NewInstaller(WithGit(git))
 			assert.Nil(t, err)
 
-			err = installer.Install(pkg, tt.url, tt.name)
-			if tt.wantErr {
+			err = installer.Install(pkg, test.url, test.name)
+			if test.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.True(t, pkg.ContainsPkg(tt.wantPkg))
+				assert.True(t, pkg.ContainsPkg(test.wantPkg))
 			}
 		})
 	}

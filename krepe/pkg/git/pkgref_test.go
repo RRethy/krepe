@@ -49,14 +49,14 @@ func TestParsePkgRef(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewPkgRefFromString(tt.pkgRef)
-			if tt.wantErr {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := NewPkgRefFromString(test.pkgRef)
+			if test.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
+				assert.Equal(t, test.want, got)
 			}
 		})
 	}
@@ -92,10 +92,10 @@ func TestPkgRefString(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.pkgRef.String()
-			assert.Equal(t, tt.want, got)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := test.pkgRef.String()
+			assert.Equal(t, test.want, got)
 		})
 	}
 }
@@ -119,10 +119,10 @@ func TestPkgRefURL(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.pkgRef.URL()
-			assert.Equal(t, tt.want, got)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := test.pkgRef.URL()
+			assert.Equal(t, test.want, got)
 		})
 	}
 }

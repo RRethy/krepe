@@ -16,10 +16,10 @@ type deltaTest[T mergeable] struct {
 func runDeltaTests[T mergeable](t *testing.T, deltaFunc func(T, T) any, tests []deltaTest[T]) {
 	t.Helper()
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := deltaFunc(tt.source, tt.remove)
-			assert.Equal(t, tt.want, got)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := deltaFunc(test.source, test.remove)
+			assert.Equal(t, test.want, got)
 		})
 	}
 }

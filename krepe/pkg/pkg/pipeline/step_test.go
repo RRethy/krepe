@@ -75,17 +75,17 @@ configMap:
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
 			s := &Step{}
-			err := yaml.Unmarshal([]byte(tt.yaml), s)
-			if tt.wantErr {
+			err := yaml.Unmarshal([]byte(test.yaml), s)
+			if test.wantErr {
 				assert.Error(t, err)
 				assert.Nil(t, s.fn)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.wantName, s.name)
-				assert.Equal(t, tt.wantFn, s.fn)
+				assert.Equal(t, test.wantName, s.name)
+				assert.Equal(t, test.wantFn, s.fn)
 			}
 		})
 	}
@@ -157,14 +157,14 @@ func TestStepRun(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := tt.step.Run(tt.inputResource)
-			if tt.wantErr {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := test.step.Run(test.inputResource)
+			if test.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want, tt.inputResource.Object)
+				assert.Equal(t, test.want, test.inputResource.Object)
 			}
 		})
 	}
@@ -220,14 +220,14 @@ func TestStepMatches(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.step.Matches(&resource.Resource{
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := test.step.Matches(&resource.Resource{
 				Unstructured: unstructured.Unstructured{
-					Object: tt.resObj,
+					Object: test.resObj,
 				},
 			})
-			assert.Equal(t, tt.want, got)
+			assert.Equal(t, test.want, got)
 		})
 	}
 }

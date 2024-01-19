@@ -69,11 +69,11 @@ func TestPathToArray(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := pathToArray(tt.path)
-			assert.Equal(t, tt.want, got)
-			if tt.wantErr {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := pathToArray(test.path)
+			assert.Equal(t, test.want, got)
+			if test.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)

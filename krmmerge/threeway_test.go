@@ -17,10 +17,10 @@ type threeWayMergeTest[T mergeable] struct {
 func runThreeWayMergeTests[T mergeable](t *testing.T, threeWayMergeFunc func(T, T, T) any, tests []threeWayMergeTest[T]) {
 	t.Helper()
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := threeWayMergeFunc(tt.origin, tt.local, tt.upstream)
-			assert.Equal(t, tt.want, got)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := threeWayMergeFunc(test.origin, test.local, test.upstream)
+			assert.Equal(t, test.want, got)
 		})
 	}
 }

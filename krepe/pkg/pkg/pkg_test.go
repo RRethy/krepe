@@ -70,14 +70,14 @@ func TestPkgRunPipelineByName(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := tt.pkg.RunPipelineByName(tt.pipeline)
-			if tt.wantErr {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := test.pkg.RunPipelineByName(test.pipeline)
+			if test.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				tt.validate(tt.pkg)
+				test.validate(test.pkg)
 			}
 		})
 	}
@@ -118,14 +118,14 @@ func TestPkgRunPipeline(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := tt.pkg.RunPipeline(tt.pipeline)
-			if tt.wantErr {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := test.pkg.RunPipeline(test.pipeline)
+			if test.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				tt.validate(tt.pkg)
+				test.validate(test.pkg)
 			}
 		})
 	}
@@ -155,18 +155,18 @@ func TestPkgAddPackage(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			pkg, err := NewPkgFromPath(tt.pkgPath)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			pkg, err := NewPkgFromPath(test.pkgPath)
 			assert.NoError(t, err)
-			newPkg, err := NewPkgFromPath(tt.newPkgPath)
+			newPkg, err := NewPkgFromPath(test.newPkgPath)
 			assert.NoError(t, err)
-			repoRef, err := git.NewPkgRefFromString("github.com/RRethy/" + tt.newPkgName + "@v0.0.1")
+			repoRef, err := git.NewPkgRefFromString("github.com/RRethy/" + test.newPkgName + "@v0.0.1")
 			assert.NoError(t, err)
 			pkgImport := imports.NewPkg(repoRef, "")
 
 			err = pkg.AddPackage(newPkg, pkgImport)
-			if tt.wantErr {
+			if test.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
@@ -197,12 +197,12 @@ func TestPkgContainsPkg(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			repoRef, err := git.NewPkgRefFromString(tt.other)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			repoRef, err := git.NewPkgRefFromString(test.other)
 			assert.NoError(t, err)
 			pkgImport := imports.NewPkg(repoRef, "")
-			assert.Equal(t, tt.want, pkg.ContainsPkg(pkgImport))
+			assert.Equal(t, test.want, pkg.ContainsPkg(pkgImport))
 		})
 	}
 }

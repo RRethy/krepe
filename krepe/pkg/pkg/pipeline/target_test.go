@@ -73,15 +73,15 @@ kind: Deployment
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
 			got := &Target{}
-			err := yaml.Unmarshal([]byte(tt.yaml), got)
-			if tt.wantErr {
+			err := yaml.Unmarshal([]byte(test.yaml), got)
+			if test.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want, got)
+				assert.Equal(t, test.want, got)
 			}
 		})
 	}
@@ -95,14 +95,14 @@ func TestTargetMarshalYAML(t *testing.T) {
 		wantErr bool
 	}{}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := yaml.Marshal(tt.target)
-			if tt.wantErr {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got, err := yaml.Marshal(test.target)
+			if test.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.wantYml, string(got))
+				assert.Equal(t, test.wantYml, string(got))
 			}
 		})
 	}
@@ -272,14 +272,14 @@ func TestTargetMatches(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := tt.target.Matches(&resource.Resource{
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			got := test.target.Matches(&resource.Resource{
 				Unstructured: unstructured.Unstructured{
-					Object: tt.resObject,
+					Object: test.resObject,
 				},
 			})
-			assert.Equal(t, tt.want, got)
+			assert.Equal(t, test.want, got)
 		})
 	}
 }

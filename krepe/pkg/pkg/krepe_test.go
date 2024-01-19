@@ -56,21 +56,21 @@ func TestNewKrepeFromPath(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			k, err := NewKrepeFromPath(tt.file)
-			if tt.wantErr {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			k, err := NewKrepeFromPath(test.file)
+			if test.wantErr {
 				assert.Error(t, err)
 				assert.Nil(t, k)
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, k)
-				assert.Equal(t, tt.wantImportFiles, k.Imports.Files)
+				assert.Equal(t, test.wantImportFiles, k.Imports.Files)
 				var gotPkgs []string
 				for _, pkg := range k.Imports.Packages {
 					gotPkgs = append(gotPkgs, pkg.Name())
 				}
-				assert.Equal(t, tt.wantImportPackages, gotPkgs)
+				assert.Equal(t, test.wantImportPackages, gotPkgs)
 				gotPipelines := make(map[string][]string)
 				for pair := k.Pipelines.Oldest(); pair != nil; pair = pair.Next() {
 					pname := pair.Key
@@ -79,7 +79,7 @@ func TestNewKrepeFromPath(t *testing.T) {
 						gotPipelines[pname] = append(gotPipelines[pname], step.Name())
 					}
 				}
-				assert.Equal(t, tt.wantPipelines, gotPipelines)
+				assert.Equal(t, test.wantPipelines, gotPipelines)
 			}
 		})
 	}

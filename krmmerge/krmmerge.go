@@ -1,3 +1,7 @@
+// Package krmmerge provides a 3-way merge for KRM resources.
+//
+// TODO(RRethy): describe the 3-way merge algorithm.
+
 package krmmerge
 
 import (
@@ -5,10 +9,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
-
-type mergeable interface {
-	any | map[string]any | []any
-}
 
 // KrmMerge is a 3-tuple of origin, local, and upstream resources.
 // These can be used to merge them into a single resource.
@@ -18,6 +18,8 @@ type KrmMerge struct {
 	upstream *unstructured.Unstructured
 }
 
+// NewKrmMerge returns a new KrmMerge which can be used to perform a 3-way
+// merge on the origin, local, and upstream resources.
 func NewKrmMerge(
 	origin *unstructured.Unstructured,
 	local *unstructured.Unstructured,
@@ -31,7 +33,6 @@ func NewKrmMerge(
 }
 
 // Merge returns the result of performing a 3-way merge on the origin, local, and upstream resources.
-// The specifics of the 3-way merge algorithm are described in the README.
 func (k *KrmMerge) Merge() (*unstructured.Unstructured, error) {
 	// A resource missing from origin, local, and upstream will have nil returned.
 	if k.origin == nil && k.local == nil && k.upstream == nil {

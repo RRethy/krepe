@@ -25,15 +25,15 @@ type runTest struct {
 func runWithConfigMapTests(t *testing.T, fn Function, tests []configMapTest) {
 	t.Helper()
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			fn, err := fn.WithConfigMap(tt.configMap)
-			if tt.wantErr {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			fn, err := fn.WithConfigMap(test.configMap)
+			if test.wantErr {
 				assert.Error(t, err)
 				assert.Nil(t, fn)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.wantFn, fn)
+				assert.Equal(t, test.wantFn, fn)
 			}
 		})
 	}
@@ -42,16 +42,16 @@ func runWithConfigMapTests(t *testing.T, fn Function, tests []configMapTest) {
 func runRunTests(t *testing.T, fn Function, tests []runTest) {
 	t.Helper()
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			fn, err := fn.WithConfigMap(tt.configMap)
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			fn, err := fn.WithConfigMap(test.configMap)
 			assert.NoError(t, err)
-			err = fn.Run(tt.res)
-			if tt.wantErr {
+			err = fn.Run(test.res)
+			if test.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				tt.validate(t, tt.res)
+				test.validate(t, test.res)
 			}
 		})
 	}
@@ -98,15 +98,15 @@ func TestNewFunction(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			fn, err := NewFunction(tt.fnName, tt.configMap)
-			if tt.wantErr {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			fn, err := NewFunction(test.fnName, test.configMap)
+			if test.wantErr {
 				assert.Error(t, err)
 				assert.Nil(t, fn)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.wantFn, fn)
+				assert.Equal(t, test.wantFn, fn)
 			}
 		})
 	}

@@ -72,14 +72,14 @@ func TestPipelineRun(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := tt.pipeline.Run(tt.inputResource)
-			if tt.wantErr {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			err := test.pipeline.Run(test.inputResource)
+			if test.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.wantObject, tt.inputResource.Object)
+				assert.Equal(t, test.wantObject, test.inputResource.Object)
 			}
 		})
 	}

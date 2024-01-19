@@ -45,15 +45,15 @@ name: foo`,
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
 			pkg := &Pkg{}
-			err := yaml.Unmarshal([]byte(tt.yaml), pkg)
-			if tt.wantErr {
+			err := yaml.Unmarshal([]byte(test.yaml), pkg)
+			if test.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.want, pkg)
+				assert.Equal(t, test.want, pkg)
 			}
 		})
 	}
