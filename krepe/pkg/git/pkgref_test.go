@@ -115,7 +115,7 @@ func TestPkgRefURL(t *testing.T) {
 				Tag:   "v0.0.1",
 				Name:  "repoRef",
 			},
-			want: "https://github.com/RRethy/krepe/pkg/repoRef@v0.0.1",
+			want: "https://github.com/RRethy/krepe",
 		},
 	}
 

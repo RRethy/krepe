@@ -58,5 +58,5 @@ func (r *PkgRef) String() string {
 }
 
 func (r *PkgRef) URL() string {
-	return "https://" + r.String()
+	return "https://github.com/" + r.Owner + "/" + r.Repo
 }

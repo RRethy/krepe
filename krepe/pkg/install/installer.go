@@ -39,12 +39,12 @@ func (installer *Installer) Install(p *pkg.Pkg, url, name string) error {
 		return err
 	}
 
-	downloadPath, err := installer.git.Clone(ref)
+	newPkgPath, err := installer.git.Clone(ref)
 	if err != nil {
 		return err
 	}
 
-	newPkg, err := pkg.NewPkgFromPath(downloadPath)
+	newPkg, err := pkg.NewPkgFromPath(newPkgPath)
 	if err != nil {
 		return err
 	}

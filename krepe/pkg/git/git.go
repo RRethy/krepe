@@ -1,6 +1,7 @@
 package git
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -35,8 +36,11 @@ func NewGit(options ...Option) (*Git, error) {
 	}
 
 	g := &Git{
-		executable: exec.NewExec(exec.WithCmd("git")),
-		dir:        cachePath,
+		executable: exec.NewExec(
+			exec.WithCmd("git"),
+			exec.WithDir(cachePath),
+		),
+		dir: cachePath,
 	}
 	for _, option := range options {
 		option(g)
@@ -47,6 +51,7 @@ func NewGit(options ...Option) (*Git, error) {
 func (g *Git) Clone(ref *PkgRef) (string, error) {
 	cloned := true
 	clonePath := filepath.Join(g.dir, ref.Repo)
+	fmt.Println(clonePath)
 	var err error
 	if _, err = os.Stat(clonePath); err != nil {
 		if !os.IsNotExist(err) {
@@ -61,24 +66,24 @@ func (g *Git) Clone(ref *PkgRef) (string, error) {
 	}
 
 	if !cloned {
-		_, err := g.executable.Run("clone", ref.URL(), ".", "--depth", "1")
+		_, err := g.executable.Run("-C", clonePath, "clone", ref.URL(), ".", "--depth", "1")
 		if err != nil {
 			return "", err
 		}
 	}
 
-	_, err = g.executable.Run("rev-parse", ref.Tag)
+	_, err = g.executable.Run("-C", clonePath, "rev-parse", ref.Tag)
 	if err != nil {
-		_, err := g.executable.Run("fetch", "origin", "tag", ref.Tag)
+		_, err := g.executable.Run("-C", clonePath, "fetch", "origin", "tag", ref.Tag)
 		if err != nil {
 			return "", err
 		}
 	}
 
-	_, err = g.executable.Run("checkout", ref.Tag)
+	_, err = g.executable.Run("-C", clonePath, "checkout", ref.Tag)
 	if err != nil {
 		return "", err
 	}
 
-	return clonePath, nil
+	return filepath.Join(append([]string{clonePath}, ref.Path...)...), nil
 }

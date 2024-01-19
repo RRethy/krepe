@@ -1,6 +1,7 @@
 package exec
 
 import (
+	"fmt"
 	"os/exec"
 )
 
@@ -36,5 +37,6 @@ func (e *Exec) Run(args ...string) ([]byte, error) {
 	cmd := exec.Command(e.cmd, args...)
 	cmd.Dir = e.dir
 	out, err := cmd.CombinedOutput()
+	fmt.Println(string(out))
 	return out, err
 }

@@ -29,5 +29,6 @@ func Install(pkgPath, url, name string) error {
 	}
 
 	dir := filepath.Dir(absPath)
+	fmt.Println(dir)
 	return p.Write(dir)
 }
