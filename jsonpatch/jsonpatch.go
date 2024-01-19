@@ -5,19 +5,49 @@ import (
 	"strings"
 )
 
-func JSONPatch(obj any, op, path string, value any) (any, error) {
+type opString string
+
+const (
+	addOp opString = "add"
+)
+
+type JsonPatch struct {
+	op    opString
+	path  []string
+	value any
+}
+
+func NewJsonPatch(op, path string, value any) (*JsonPatch, error) {
 	ptrs, err := pathToJsonPtrs(path)
 	if err != nil {
-		return nil, err // TODO: wrap error
+		return nil, fmt.Errorf("error parsing path: %s", err)
 	}
 
-	switch op {
-	case "add":
-		return add(obj, ptrs, value)
-
+	switch opString(op) {
+	case addOp:
+	default:
+		return nil, fmt.Errorf("unknown op: %s", op)
 	}
 
-	return obj, nil
+	return &JsonPatch{
+		op:    opString(op),
+		path:  ptrs,
+		value: value,
+	}, nil
+}
+
+func (jp *JsonPatch) Apply(obj any) (any, error) {
+	var err error
+	switch jp.op {
+	case addOp:
+		obj, err = add(obj, jp.path, jp.value)
+		if err != nil {
+			return obj, fmt.Errorf("failed applying 'add': %s", err)
+		}
+		return obj, nil
+	default:
+		panic("unreachable")
+	}
 }
 
 func pathToJsonPtrs(path string) ([]string, error) {
