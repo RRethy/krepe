@@ -3,7 +3,6 @@ package pkg
 import (
 	"testing"
 
-	"github.com/Shopify/krepe/cli/pkg/pkg/imports"
 	"github.com/Shopify/krepe/cli/pkg/pkg/pipeline"
 	"github.com/stretchr/testify/assert"
 )
@@ -15,30 +14,61 @@ const (
 )
 
 func TestNewKrepeFromPath(t *testing.T) {
-	t.Run("succeeds with valid krepe file", func(t *testing.T) {
-		k, err := NewKrepeFromPath(krepeFile)
-		assert.NoError(t, err)
-		assert.NotNil(t, k)
-		assert.Equal(t, &imports.Imports{
-			Files: []string{
+	tests := []struct {
+		name               string
+		file               string
+		wantImportFiles    []string
+		wantImportPackages []string
+		wantPipelines      map[string]*pipeline.Pipeline
+		wantErr            bool
+	}{
+		{
+			name: "succeeds with valid krepe file",
+			file: krepeFile,
+			wantImportFiles: []string{
 				"deployment.yaml",
 				"service.yaml",
 				"ingress.yaml",
 			},
-			Packages: nil,
-		}, k.Imports)
-		assert.Equal(t, map[string]*pipeline.Pipeline(nil), k.Pipelines)
-	})
+			wantImportPackages: nil,
+			wantPipelines:      nil,
+			wantErr:            false,
+		},
+		{
+			name:               "fails with invalid krepe file",
+			file:               badKrepeFile,
+			wantImportFiles:    nil,
+			wantImportPackages: nil,
+			wantPipelines:      nil,
+			wantErr:            true,
+		},
+		{
+			name:               "fails with non-existent krepe file",
+			file:               nonExistentKrepeFile,
+			wantImportFiles:    nil,
+			wantImportPackages: nil,
+			wantPipelines:      nil,
+			wantErr:            true,
+		},
+	}
 
-	t.Run("fails with invalid krepe file", func(t *testing.T) {
-		k, err := NewKrepeFromPath(badKrepeFile)
-		assert.Error(t, err)
-		assert.Nil(t, k)
-	})
-
-	t.Run("fails with non-existent krepe file", func(t *testing.T) {
-		k, err := NewKrepeFromPath(nonExistentKrepeFile)
-		assert.Error(t, err)
-		assert.Nil(t, k)
-	})
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			k, err := NewKrepeFromPath(tt.file)
+			if tt.wantErr {
+				assert.Error(t, err)
+				assert.Nil(t, k)
+			} else {
+				assert.NoError(t, err)
+				assert.NotNil(t, k)
+				assert.Equal(t, tt.wantImportFiles, k.Imports.Files)
+				var gotPkgs []string
+				for _, pkg := range k.Imports.Packages {
+					gotPkgs = append(gotPkgs, *pkg.Url)
+				}
+				assert.Equal(t, tt.wantImportPackages, gotPkgs)
+				assert.Equal(t, tt.wantPipelines, k.Pipelines)
+			}
+		})
+	}
 }
