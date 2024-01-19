@@ -2,12 +2,14 @@ package update
 
 import (
 	"github.com/RRethy/krepe/krepe/pkg/git"
+	"github.com/RRethy/krepe/krepe/pkg/merger"
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 	"github.com/RRethy/krepe/krepe/pkg/pkg/imports"
 )
 
 type Updater struct {
-	git *git.Git
+	git    *git.Git
+	merger merger.Merger[*pkg.Pkg]
 }
 
 type Option func(*Updater)
@@ -15,6 +17,12 @@ type Option func(*Updater)
 func WithGit(git *git.Git) Option {
 	return func(updater *Updater) {
 		updater.git = git
+	}
+}
+
+func WithMerger(merger merger.Merger[*pkg.Pkg]) Option {
+	return func(updater *Updater) {
+		updater.merger = merger
 	}
 }
 
@@ -26,6 +34,7 @@ func NewUpdater(options ...Option) (*Updater, error) {
 
 	i := &Updater{
 		git,
+		pkg.NewMerger(),
 	}
 	for _, option := range options {
 		option(i)
@@ -50,10 +59,11 @@ func (updater *Updater) Update(p *pkg.Pkg, url, name string) error {
 	}
 
 	upstreamPkgImport := imports.NewPkg(upstreamRef, name)
+	pkgName := upstreamPkgImport.Name()
 
-	originPkgImport := p.GetPkgImport(upstreamPkgImport.Name())
+	originPkgImport, ok := p.GetPkgImport(pkgName)
 	var originPkg *pkg.Pkg
-	if originPkgImport != nil {
+	if ok {
 		originPkgPath, err := updater.git.Clone(originPkgImport.Ref)
 		if err != nil {
 			return err
@@ -65,7 +75,13 @@ func (updater *Updater) Update(p *pkg.Pkg, url, name string) error {
 		}
 	}
 
-	err = p.UpdatePackage(originPkg, upstreamPkg, upstreamPkgImport)
+	localPkg, _ := p.GetPkg(pkgName)
+	newPkg, err := updater.merger.Merge(originPkg, localPkg, upstreamPkg)
+	if err != nil {
+		return err
+	}
+
+	err = p.UpdatePackage(newPkg, upstreamPkgImport)
 	if err != nil {
 		return err
 	}

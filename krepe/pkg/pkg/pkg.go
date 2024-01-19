@@ -108,17 +108,12 @@ func (p *Pkg) AddPackage(pkg *Pkg, pkgImport *imports.Pkg) error {
 	return nil
 }
 
-func (p *Pkg) UpdatePackage(origin *Pkg, upstream *Pkg, pkgImport *imports.Pkg) error {
-	upstream.name = pkgImport.Name()
-
-	if !p.ContainsPkg(pkgImport) {
-		return p.AddPackage(upstream, pkgImport)
-	}
+func (p *Pkg) UpdatePackage(newPkg *Pkg, pkgImport *imports.Pkg) error {
+	newPkg.name = pkgImport.Name()
 
 	for i, pkg := range p.packages {
 		if pkg.name == pkgImport.Name() {
-			// TODO: 3-way merge
-			p.packages[i] = pkg
+			p.packages[i] = newPkg
 			break
 		}
 	}
@@ -172,12 +167,22 @@ func (p *Pkg) ContainsPkg(other *imports.Pkg) bool {
 	return false
 }
 
-func (p *Pkg) GetPkgImport(name string) *imports.Pkg {
+func (p *Pkg) GetPkgImport(name string) (pkgImport *imports.Pkg, ok bool) {
 	for _, pkgImport := range p.Krepe.Imports.Packages {
 		if pkgImport.Name() == name {
-			return pkgImport
+			return pkgImport, true
 		}
 	}
 
-	return nil
+	return nil, false
+}
+
+func (p *Pkg) GetPkg(name string) (pkg *Pkg, ok bool) {
+	for _, pkg := range p.packages {
+		if pkg.name == name {
+			return pkg, true
+		}
+	}
+
+	return nil, false
 }
