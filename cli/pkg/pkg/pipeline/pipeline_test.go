@@ -6,7 +6,6 @@ import (
 	"github.com/Shopify/krepe/cli/pkg/pkg/function"
 	"github.com/Shopify/krepe/cli/pkg/pkg/resource"
 	"github.com/stretchr/testify/assert"
-	"golang.design/x/reflect"
 )
 
 func TestPipelineRun(t *testing.T) {
@@ -79,16 +78,13 @@ func TestPipelineRun(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			origObject := reflect.DeepCopy(tt.inputResource.Object)
-			got, err := tt.pipeline.Run(tt.inputResource)
+			err := tt.pipeline.Run(tt.inputResource)
 			if tt.wantErr {
 				assert.Error(t, err)
-				assert.Nil(t, got)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.wantObject, got.Object)
+				assert.Equal(t, tt.wantObject, tt.inputResource.Object)
 			}
-			assert.Equal(t, origObject, tt.inputResource.Object)
 		})
 	}
 }

@@ -2,20 +2,18 @@ package pipeline
 
 import (
 	"github.com/Shopify/krepe/cli/pkg/pkg/resource"
-	"golang.design/x/reflect"
 )
 
 type Pipeline struct {
 	Steps []*Step `yaml:"steps,omitempty"`
 }
 
-func (p *Pipeline) Run(res *resource.Resource) (*resource.Resource, error) {
-	copied := reflect.DeepCopy(res)
+func (p *Pipeline) Run(res *resource.Resource) error {
 	for _, step := range p.Steps {
-		err := step.Run(copied)
+		err := step.Run(res)
 		if err != nil {
-			return nil, err
+			return err
 		}
 	}
-	return copied, nil
+	return nil
 }
