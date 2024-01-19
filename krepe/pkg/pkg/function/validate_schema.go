@@ -6,6 +6,10 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
+var (
+	_ Function = &ValidateSchema{}
+)
+
 type ValidateSchema struct{}
 
 func (f *ValidateSchema) WithConfigMap(configMap map[string]any) (Function, error) {

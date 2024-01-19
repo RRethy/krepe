@@ -6,6 +6,10 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
+var (
+	_ Function = &TagImage{}
+)
+
 type TagImage struct{}
 
 func (f *TagImage) WithConfigMap(configMap map[string]any) (Function, error) {

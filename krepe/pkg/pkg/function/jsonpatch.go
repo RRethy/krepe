@@ -7,6 +7,10 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
+var (
+	_ Function = &JsonPatch{}
+)
+
 type JsonPatch struct {
 	op    string
 	from  string

@@ -6,6 +6,10 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
+var (
+	_ Function = &SetAnnotations{}
+)
+
 type SetAnnotations struct {
 	annotations map[string]string
 }

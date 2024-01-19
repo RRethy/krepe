@@ -6,6 +6,10 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
+var (
+	_ Function = &SetNamespace{}
+)
+
 type SetNamespace struct {
 	namespace string
 }

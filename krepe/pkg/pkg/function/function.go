@@ -6,7 +6,6 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
-// TODO: force these to be Function
 var functions = map[string]Function{
 	"set-annotations": &SetAnnotations{},
 	"add-annotations": &AddAnnotations{},

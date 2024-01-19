@@ -6,6 +6,10 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
+var (
+	_ Function = &ConfigFail{}
+)
+
 type ConfigFail struct{}
 
 func (cf *ConfigFail) WithConfigMap(configMap map[string]any) (Function, error) {

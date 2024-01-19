@@ -6,6 +6,10 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
+var (
+	_ Function = &RunFail{}
+)
+
 type RunFail struct{}
 
 func (rf *RunFail) WithConfigMap(configMap map[string]any) (Function, error) {
