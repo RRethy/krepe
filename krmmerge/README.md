@@ -10,6 +10,7 @@ A resource present in origin and deleted from upstream will be deleted from loca
 A resource missing from origin and added in upstream will be added to local.
 A resource only in local will be kept without changes.
 A resource in both upstream and local will be merged into local.
+
 On the field level, the rules differ based on the type of field.
 
 For scalars and non-associative lists:
@@ -17,12 +18,14 @@ For scalars and non-associative lists:
 If the field is present in either upstream or local and the value is null, remove the field from local.
 If the field is unchanged between upstream and local, leave the local value unchanged.
 If the field has been changed in both upstream and local, update local with the value from upstream.
+
 For mappings:
 
 If the field is present in either upstream or local and the value is null, remove the field from local.
 If the field is present only in local, leave the local value unchanged.
 If the field is not present in local, add the delta between origin and upstream as the value in local.
 If the field is present in both upstream and local, recursively merge the values between local, upstream and origin.
+
 For associative lists:
 
 If the field is present in either upstream or local and the value is null, remove the field from local.

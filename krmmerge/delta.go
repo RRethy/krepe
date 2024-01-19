@@ -1,6 +1,7 @@
 package krmmerge
 
 import (
+	"fmt"
 	"reflect"
 )
 
@@ -15,10 +16,7 @@ func delta(source, remove any) any {
 	case []any:
 		return deltaSlice(source.([]any), remove.([]any))
 	default:
-		if reflect.DeepEqual(source, remove) {
-			return nil
-		}
-		return source
+		return deltaScalar(source, remove)
 	}
 }
 
@@ -50,6 +48,8 @@ func deltaSlice(source, remove []any) []any {
 	}
 }
 
+// deltaSliceNonAssociative returns nil iff source and remove are the same,
+// otherwise source is returned.
 func deltaSliceNonAssociative(source, remove []any) []any {
 	if len(source) != len(remove) {
 		return source
@@ -64,22 +64,56 @@ func deltaSliceNonAssociative(source, remove []any) []any {
 	return nil
 }
 
+// deltaSliceAssociative removes the elements from source that are present in remove.
+// The elements are compared by the value of the associate key, if no key is
+// found then a deep comparison is done.
+// All elements in source and remove must be maps. Any duplicate keys will
+// result in non associative behavior.
 func deltaSliceAssociative(source, remove []any) []any {
-	key := getAssociativeKey(append(source, remove...))
+	key := getAssociativeKey(source)
+	fmt.Println(">", key)
 	if key == "" {
 		return deltaSliceNonAssociative(source, remove)
 	}
 
-	removeByKey := make(map[string]any)
-	for _, v := range remove {
-		v, ok := v.(map[string]any)
+	removeByKey := make(map[string]map[string]any)
+	for _, elem := range remove {
+		elemMap, ok := elem.(map[string]any)
 		if !ok {
 			return deltaSliceNonAssociative(source, remove)
 		}
 
-		removeByKey[v[key].(string)] = v
+		key, ok := elemMap[key].(string)
+		if !ok {
+			return deltaSliceNonAssociative(source, remove)
+		}
+
+		removeByKey[key] = elemMap
 	}
 
 	var result []any
-	return nil
+	for _, elem := range source {
+		elemMap, ok := elem.(map[string]any)
+		if !ok {
+			return deltaSliceNonAssociative(source, remove)
+		}
+
+		key, ok := elemMap[key].(string)
+		if !ok {
+			return deltaSliceNonAssociative(source, remove)
+		}
+
+		if _, ok := removeByKey[key]; !ok {
+			result = append(result, elem)
+		}
+	}
+
+	return result
+}
+
+func deltaScalar(source, remove any) any {
+	if reflect.DeepEqual(source, remove) {
+		return nil
+	}
+	return source
 }

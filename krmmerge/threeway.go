@@ -6,36 +6,36 @@ func threeWayMergeAny(origin, local, upstream any) any {
 }
 
 func threeWayMergeMap(origin, local, upstream map[string]any) (map[string]any, error) {
-	keys := make(map[string]struct{})
+	keepKeys := make(map[string]struct{})
 	for k := range local {
-		keys[k] = struct{}{}
+		keepKeys[k] = struct{}{}
 	}
 	for k := range upstream {
-		keys[k] = struct{}{}
+		keepKeys[k] = struct{}{}
 	}
 
 	res := make(map[string]any)
-	for k := range keys {
-		originVal, originOk := origin[k]
-		localVal, localOk := local[k]
-		upstreamVal, upstreamOk := upstream[k]
+	for key := range keepKeys {
+		originVal, originOk := origin[key]
+		localVal, localOk := local[key]
+		upstreamVal, upstreamOk := upstream[key]
 
 		if originOk && !localOk && !upstreamOk {
 		} else if !originOk && localOk && !upstreamOk {
-			res[k] = localVal
+			res[key] = localVal
 		} else if !originOk && !localOk && upstreamOk {
-			res[k] = upstreamVal
+			res[key] = upstreamVal
 		} else if originOk && localOk && !upstreamOk {
 			val := delta(localVal, originVal)
 			if val != nil {
-				res[k] = val
+				res[key] = val
 			}
 		} else if originOk && !localOk && upstreamOk {
-			res[k] = upstreamVal
+			res[key] = upstreamVal
 		} else if !originOk && localOk && upstreamOk {
-			res[k] = twoWayMergeAny(localVal, upstreamVal)
+			res[key] = twoWayMerge(localVal, upstreamVal)
 		} else if originOk && localOk && upstreamOk {
-			res[k] = threeWayMergeAny(originVal, localVal, upstreamVal)
+			res[key] = threeWayMergeAny(originVal, localVal, upstreamVal)
 		}
 	}
 

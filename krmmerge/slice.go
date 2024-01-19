@@ -34,23 +34,32 @@ func isAssociativeSlice(slice []any) bool {
 }
 
 func getAssociativeKey(slice []any) string {
-	counts := make(map[string]int, len(associativeKeys))
-	for _, v := range slice {
-		v, ok := v.(map[string]any)
-		if !ok {
-			return ""
-		}
+	if len(slice) == 0 {
+		return ""
+	}
 
-		for _, k := range associativeKeys {
-			if _, ok := v[k]; ok {
-				counts[k]++
+	counts := make(map[string]map[string]struct{}, len(associativeKeys))
+	for _, key := range associativeKeys {
+		counts[key] = make(map[string]struct{})
+
+		for _, elem := range slice {
+			elemMap, ok := elem.(map[string]any)
+			if !ok {
+				return ""
 			}
+
+			keyVal, ok := elemMap[key].(string)
+			if !ok {
+				break
+			}
+
+			counts[key][keyVal] = struct{}{}
 		}
 	}
 
-	for _, k := range associativeKeys {
-		if counts[k] == len(slice) {
-			return k
+	for _, key := range associativeKeys {
+		if len(counts[key]) == len(slice) {
+			return key
 		}
 	}
 

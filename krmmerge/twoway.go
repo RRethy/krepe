@@ -1,5 +1,5 @@
 package krmmerge
 
-func twoWayMergeAny(local, upstream any) any {
+func twoWayMerge(local, upstream any) any {
 	return nil
 }
