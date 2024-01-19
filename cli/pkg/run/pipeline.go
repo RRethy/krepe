@@ -1,7 +1,7 @@
 package run
 
 import (
-	"github.com/Shopify/krepe/pkg/pkg"
+	"github.com/Shopify/krepe/cli/pkg/pkg"
 )
 
 type pipeline struct {

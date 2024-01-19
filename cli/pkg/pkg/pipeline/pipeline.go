@@ -1,7 +1,7 @@
 package pipeline
 
 import (
-	"github.com/Shopify/krepe/pkg/pkg/resource"
+	"github.com/Shopify/krepe/cli/pkg/pkg/resource"
 )
 
 type Pipeline struct {

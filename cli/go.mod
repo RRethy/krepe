@@ -1,4 +1,4 @@
-module github.com/Shopify/krepe
+module github.com/Shopify/krepe/cli
 
 go 1.20
 

@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/Shopify/krepe/pkg/pkg/pipeline"
-	"github.com/Shopify/krepe/pkg/pkg/resource"
+	"github.com/Shopify/krepe/cli/pkg/pkg/pipeline"
+	"github.com/Shopify/krepe/cli/pkg/pkg/resource"
 )
 
 type Pkg struct {
@@ -32,7 +32,7 @@ func NewPkgFromPath(pkgPath string) (*Pkg, error) {
 	name := filepath.Base(pkgPath)
 	krepe, err := NewKrepeFromPath(filepath.Join(pkgPath, "krepe.yaml"))
 	if err != nil {
-		return nil, fmt.Errorf("failed to create krepe in pkg path `%s`: %w", pkgPath, err)
+		return nil, fmt.Errorf("failed to parse krepe.yaml in pkg path `%s`: %w", pkgPath, err)
 	}
 
 	var resources []*resource.Resource

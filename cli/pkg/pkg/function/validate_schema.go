@@ -3,7 +3,7 @@ package function
 import (
 	_ "fmt"
 
-	"github.com/Shopify/krepe/pkg/pkg/resource"
+	"github.com/Shopify/krepe/cli/pkg/pkg/resource"
 )
 
 type ValidateSchema struct{}

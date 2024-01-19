@@ -3,7 +3,7 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/Shopify/krepe/pkg/run"
+	"github.com/Shopify/krepe/cli/pkg/run"
 	"github.com/spf13/cobra"
 )
 

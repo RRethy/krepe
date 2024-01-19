@@ -3,8 +3,8 @@ package pipeline
 import (
 	"fmt"
 
-	"github.com/Shopify/krepe/pkg/pkg/function"
-	"github.com/Shopify/krepe/pkg/pkg/resource"
+	"github.com/Shopify/krepe/cli/pkg/pkg/function"
+	"github.com/Shopify/krepe/cli/pkg/pkg/resource"
 )
 
 type Step struct {
