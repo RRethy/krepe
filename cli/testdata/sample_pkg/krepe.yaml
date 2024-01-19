@@ -5,3 +5,14 @@ imports:
     - deployment.yaml
     - service.yaml
     - ingress.yaml
+pipelines:
+  mypipeline:
+    - function: set-labels
+      configMap:
+        foo: bar
+  badpipeline:
+    - function: jsonpatch
+      configMap:
+        op: add
+        path: /foo/bar/baz
+        value: 1

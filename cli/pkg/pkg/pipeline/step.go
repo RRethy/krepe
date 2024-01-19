@@ -46,3 +46,7 @@ func (s *Step) Run(res *resource.Resource) error {
 
 	return nil
 }
+
+func (s *Step) Name() string {
+	return s.name
+}

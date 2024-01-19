@@ -3,7 +3,6 @@ package pkg
 import (
 	"testing"
 
-	"github.com/Shopify/krepe/cli/pkg/pkg/pipeline"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,7 +18,7 @@ func TestNewKrepeFromPath(t *testing.T) {
 		file               string
 		wantImportFiles    []string
 		wantImportPackages []string
-		wantPipelines      map[string]*pipeline.Pipeline
+		wantPipelines      map[string][]string
 		wantErr            bool
 	}{
 		{
@@ -31,8 +30,11 @@ func TestNewKrepeFromPath(t *testing.T) {
 				"ingress.yaml",
 			},
 			wantImportPackages: nil,
-			wantPipelines:      nil,
-			wantErr:            false,
+			wantPipelines: map[string][]string{
+				"mypipeline":  {"set-labels"},
+				"badpipeline": {"jsonpatch"},
+			},
+			wantErr: false,
 		},
 		{
 			name:               "fails with invalid krepe file",
@@ -67,7 +69,13 @@ func TestNewKrepeFromPath(t *testing.T) {
 					gotPkgs = append(gotPkgs, *pkg.Url)
 				}
 				assert.Equal(t, tt.wantImportPackages, gotPkgs)
-				assert.Equal(t, tt.wantPipelines, k.Pipelines)
+				gotPipelines := make(map[string][]string)
+				for pname, p := range k.Pipelines {
+					for _, step := range p {
+						gotPipelines[pname] = append(gotPipelines[pname], step.Name())
+					}
+				}
+				assert.Equal(t, tt.wantPipelines, gotPipelines)
 			}
 		})
 	}

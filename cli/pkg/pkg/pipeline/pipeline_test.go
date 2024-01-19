@@ -24,23 +24,21 @@ func TestPipelineRun(t *testing.T) {
 
 	tests := []struct {
 		name          string
-		pipeline      *Pipeline
+		pipeline      Pipeline
 		inputResource *resource.Resource
 		wantObject    map[string]any
 		wantErr       bool
 	}{
 		{
 			name: "succeeds with valid pipeline steps",
-			pipeline: &Pipeline{
-				Steps: []*Step{
-					{
-						name: "set-labels",
-						fn:   setLabelsFn,
-					},
-					{
-						name: "set-annotations",
-						fn:   setAnnotationsFn,
-					},
+			pipeline: []*Step{
+				{
+					name: "set-labels",
+					fn:   setLabelsFn,
+				},
+				{
+					name: "set-annotations",
+					fn:   setAnnotationsFn,
 				},
 			},
 			inputResource: startResource,
@@ -58,16 +56,14 @@ func TestPipelineRun(t *testing.T) {
 		},
 		{
 			name: "fails with any invalid pipeline step",
-			pipeline: &Pipeline{
-				Steps: []*Step{
-					{
-						name: "set-labels",
-						fn:   setLabelsFn,
-					},
-					{
-						name: "jsonpatch",
-						fn:   badjsonPatchFn,
-					},
+			pipeline: []*Step{
+				{
+					name: "set-labels",
+					fn:   setLabelsFn,
+				},
+				{
+					name: "jsonpatch",
+					fn:   badjsonPatchFn,
 				},
 			},
 			inputResource: startResource,
