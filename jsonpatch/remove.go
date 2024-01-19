@@ -21,10 +21,11 @@ func remove(obj any, ptrs []string) (any, error) {
 }
 
 func removeMap(obj map[string]any, ptr string, ptrs []string) (any, error) {
+	if _, ok := obj[ptr]; !ok {
+		return obj, fmt.Errorf("key not found")
+	}
+
 	if len(ptrs) == 0 {
-		if _, ok := obj[ptr]; !ok {
-			return obj, fmt.Errorf("cannot remove from map: key not found")
-		}
 		delete(obj, ptr)
 		return obj, nil
 	}
@@ -33,6 +34,7 @@ func removeMap(obj map[string]any, ptr string, ptrs []string) (any, error) {
 	if err != nil {
 		return obj, err
 	}
+
 	obj[ptr] = newVal
 	return obj, nil
 }
@@ -41,9 +43,9 @@ func removeArray(arr []any, ptr string, ptrs []string) (any, error) {
 	var idx int
 	var err error
 	if idx, err = strconv.Atoi(ptr); err != nil {
-		return arr, fmt.Errorf("failed to remove from array: %w", err)
+		return arr, err
 	} else if idx < 0 || idx >= len(arr) {
-		return arr, fmt.Errorf("failed to remove from array: index out of bounds: %d", idx)
+		return arr, fmt.Errorf("index out of bounds: %d", idx)
 	}
 
 	if len(ptrs) == 0 {
@@ -54,6 +56,7 @@ func removeArray(arr []any, ptr string, ptrs []string) (any, error) {
 	if err != nil {
 		return arr, err
 	}
+
 	arr[idx] = newVal
 	return arr, nil
 }

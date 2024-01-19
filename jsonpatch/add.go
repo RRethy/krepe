@@ -25,10 +25,12 @@ func addMap(obj map[string]any, ptr string, ptrs []string, value any) (map[strin
 		obj[ptr] = value
 		return obj, nil
 	}
+
 	newVal, err := add(obj[ptr], ptrs, value)
 	if err != nil {
 		return obj, err
 	}
+
 	obj[ptr] = newVal
 	return obj, nil
 }
@@ -39,9 +41,9 @@ func addArray(arr []any, ptr string, ptrs []string, value any) (any, error) {
 	if ptr == "-" {
 		idx = len(arr)
 	} else if idx, err = strconv.Atoi(ptr); err != nil {
-		return arr, fmt.Errorf("failed to add to array: %w", err)
+		return arr, err
 	} else if idx < 0 || idx > len(arr) {
-		return arr, fmt.Errorf("failed to add to array: index out of bounds: %d", idx)
+		return arr, fmt.Errorf("index out of bounds: %d", idx)
 	}
 
 	if len(ptrs) == 0 {
@@ -49,7 +51,7 @@ func addArray(arr []any, ptr string, ptrs []string, value any) (any, error) {
 	}
 
 	if idx == len(arr) {
-		return arr, fmt.Errorf("failed to add to array: index out of bounds: %d", idx)
+		return arr, fmt.Errorf("index out of bounds: %d", idx)
 	}
 	newVal, err := add(arr[idx], ptrs, value)
 	if err != nil {
