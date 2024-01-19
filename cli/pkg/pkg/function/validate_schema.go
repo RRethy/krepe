@@ -8,6 +8,10 @@ import (
 
 type ValidateSchema struct{}
 
-func (f *ValidateSchema) Run(res *resource.Resource, configMap map[string]any) error {
+func (f *ValidateSchema) WithConfigMap(configMap map[string]any) (Function, error) {
+	return f, nil
+}
+
+func (f *ValidateSchema) Run(res *resource.Resource) error {
 	return nil
 }

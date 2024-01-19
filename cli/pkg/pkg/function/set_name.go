@@ -6,13 +6,22 @@ import (
 	"github.com/Shopify/krepe/cli/pkg/pkg/resource"
 )
 
-type SetName struct{}
+type SetName struct {
+	name string
+}
 
-func (f *SetName) Run(res *resource.Resource, configMap map[string]any) error {
+func (sn *SetName) WithConfigMap(configMap map[string]any) (Function, error) {
 	name, ok := configMap["name"].(string)
 	if !ok {
-		return fmt.Errorf("failed to get a key `name` with type `string` form configMap")
+		return nil, fmt.Errorf("getting a key `name` with type `string` form configMap: %s", name)
 	}
-	res.SetName(name)
+
+	return &SetName{
+		name: name,
+	}, nil
+}
+
+func (sn *SetName) Run(res *resource.Resource) error {
+	res.SetName(sn.name)
 	return nil
 }

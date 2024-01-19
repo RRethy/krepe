@@ -8,6 +8,10 @@ import (
 
 type TagImage struct{}
 
-func (f *TagImage) Run(res *resource.Resource, configMap map[string]any) error {
+func (f *TagImage) WithConfigMap(configMap map[string]any) (Function, error) {
+	return f, nil
+}
+
+func (f *TagImage) Run(res *resource.Resource) error {
 	return nil
 }
