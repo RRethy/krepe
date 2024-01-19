@@ -10,51 +10,40 @@ func remove(obj any, ptrs []string) (any, error) {
 		return nil, nil
 	}
 
-	if idx, err := strconv.Atoi(ptrs[0]); err == nil {
-		return removeArray(obj, idx, ptrs[1:])
-	} else {
-		return removeMap(obj, ptrs[0], ptrs[1:])
+	switch obj.(type) {
+	case map[string]any:
+		return removeMap(obj.(map[string]any), ptrs[0], ptrs[1:])
+	case []any:
+		return removeArray(obj.([]any), ptrs[0], ptrs[1:])
+	default:
+		return obj, fmt.Errorf("cannot remove from non-map or non-array object with a json ptr")
 	}
 }
 
-func removeMap(obj any, ptr string, ptrs []string) (any, error) {
-	var m map[string]any
-	switch obj.(type) {
-	case map[string]any:
-		m = obj.(map[string]any)
-	case nil:
-		return obj, nil
-	default:
-		return obj, fmt.Errorf("cannot remove from non-map object with a non-number json ptr")
-	}
-
+func removeMap(obj map[string]any, ptr string, ptrs []string) (any, error) {
 	if len(ptrs) == 0 {
-		delete(m, ptr)
-		return m, nil
+		if _, ok := obj[ptr]; !ok {
+			return obj, fmt.Errorf("cannot remove from map: key not found")
+		}
+		delete(obj, ptr)
+		return obj, nil
 	}
 
-	newVal, err := remove(m[ptr], ptrs)
+	newVal, err := remove(obj[ptr], ptrs)
 	if err != nil {
 		return obj, err
 	}
-
-	m[ptr] = newVal
-	return m, nil
+	obj[ptr] = newVal
+	return obj, nil
 }
 
-func removeArray(obj any, idx int, ptrs []string) (any, error) {
-	var arr []any
-	switch obj.(type) {
-	case []any:
-		arr = obj.([]any)
-	case nil:
-		return obj, nil
-	default:
-		return obj, fmt.Errorf("cannot remove from non-array object with a number json ptr")
-	}
-
-	if len(arr) <= idx {
-		return obj, fmt.Errorf("cannot remove from array: index out of bounds")
+func removeArray(arr []any, ptr string, ptrs []string) (any, error) {
+	var idx int
+	var err error
+	if idx, err = strconv.Atoi(ptr); err != nil {
+		return arr, fmt.Errorf("failed to remove from array: %w", err)
+	} else if idx < 0 || idx >= len(arr) {
+		return arr, fmt.Errorf("failed to remove from array: index out of bounds: %d", idx)
 	}
 
 	if len(ptrs) == 0 {
@@ -63,9 +52,8 @@ func removeArray(obj any, idx int, ptrs []string) (any, error) {
 
 	newVal, err := remove(arr[idx], ptrs)
 	if err != nil {
-		return obj, err
+		return arr, err
 	}
-
 	arr[idx] = newVal
 	return arr, nil
 }

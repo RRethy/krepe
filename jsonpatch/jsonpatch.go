@@ -62,6 +62,11 @@ func (jp *JsonPatch) Apply(obj any) (any, error) {
 		}
 		return obj, nil
 	case replaceOp:
+		// obj, err = replace(obj, jp.path, jp.value)
+		// if err != nil {
+		// return obj, fmt.Errorf("failed applying 'replace': %s", err)
+		// }
+		// return obj, nil
 		panic("unimplemented")
 	case moveOp:
 		panic("unimplemented")
