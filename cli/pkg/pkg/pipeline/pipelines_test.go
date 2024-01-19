@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/Shopify/krepe/cli/pkg/pkg/function"
-	"github.com/goccy/go-yaml"
+	"github.com/Shopify/krepe/cli/pkg/yaml"
 	"github.com/stretchr/testify/assert"
 	"github.com/wk8/go-ordered-map/v2"
 )

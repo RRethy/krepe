@@ -7,7 +7,7 @@ import (
 
 	"github.com/Shopify/krepe/cli/pkg/pkg/imports"
 	"github.com/Shopify/krepe/cli/pkg/pkg/pipeline"
-	"github.com/goccy/go-yaml"
+	"github.com/Shopify/krepe/cli/pkg/yaml"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -34,7 +34,6 @@ func NewKrepeFromPath(krepePath string) (*Krepe, error) {
 	return k, nil
 }
 
-// TODO(RRethy): better indentation
 func (k *Krepe) Write(dir string) error {
 	path := filepath.Join(dir, "krepe.yaml")
 

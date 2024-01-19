@@ -5,7 +5,7 @@ import (
 
 	"github.com/Shopify/krepe/cli/pkg/pkg/function"
 	"github.com/Shopify/krepe/cli/pkg/pkg/resource"
-	"github.com/goccy/go-yaml"
+	"github.com/Shopify/krepe/cli/pkg/yaml"
 )
 
 var (
