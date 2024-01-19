@@ -63,11 +63,8 @@ func TestReplace(t *testing.T) {
 				"key1": "value1",
 				"key2": "value2",
 			},
-			patch: &Replace{path: []string{"key3"}, value: "value3"},
-			want: map[string]any{
-				"key1": "value1",
-				"key2": "value2",
-			},
+			patch:   &Replace{path: []string{"key3"}, value: "value3"},
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -75,10 +72,8 @@ func TestReplace(t *testing.T) {
 			obj: map[string]any{
 				"key1": []any{"value1", "value2", "value3"},
 			},
-			patch: &Replace{path: []string{"key1", "3"}, value: "value4"},
-			want: map[string]any{
-				"key1": []any{"value1", "value2", "value3"},
-			},
+			patch:   &Replace{path: []string{"key1", "3"}, value: "value4"},
+			want:    nil,
 			wantErr: true,
 		},
 	})

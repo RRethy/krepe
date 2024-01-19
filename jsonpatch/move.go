@@ -33,7 +33,7 @@ func (m *Move) Apply(obj any) (any, error) {
 func move(obj any, from []string, path []string) (any, error) {
 	obj, removed, err := remove(obj, from)
 	if err != nil {
-		return obj, err
+		return nil, err
 	}
 
 	return add(obj, path, removed)

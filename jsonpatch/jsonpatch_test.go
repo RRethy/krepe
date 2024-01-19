@@ -1,8 +1,10 @@
 package jsonpatch
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"golang.design/x/reflect"
 )
 
 type patchTest struct {
@@ -15,13 +17,16 @@ type patchTest struct {
 
 func (pt *patchTest) run(t *testing.T) {
 	t.Run(pt.name, func(t *testing.T) {
-		pt.patch.Apply(pt.obj)
-		// assert.Equal(t, pt.want, got)
-		// if pt.wantErr {
-		// 	assert.Error(t, err)
-		// } else {
-		// 	assert.NoError(t, err)
-		// }
+		objCopy := reflect.DeepCopy(pt.obj)
+		got, err := pt.patch.Apply(pt.obj)
+		if pt.wantErr {
+			assert.Error(t, err)
+			assert.Equal(t, objCopy, pt.obj)
+			assert.Nil(t, got)
+		} else {
+			assert.NoError(t, err)
+			assert.Equal(t, pt.want, got)
+		}
 	})
 }
 

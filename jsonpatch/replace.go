@@ -37,13 +37,13 @@ func replace(obj any, path []string, value any) (any, error) {
 	case []any:
 		return replaceInArray(obj.([]any), path[0], path[1:], value)
 	default:
-		return obj, fmt.Errorf("cannot replace to non-map or non-array object with a json path")
+		return nil, fmt.Errorf("cannot replace to non-map or non-array object with a json path")
 	}
 }
 
 func replaceInMap(obj map[string]any, ptr string, path []string, value any) (map[string]any, error) {
 	if _, ok := obj[ptr]; !ok {
-		return obj, fmt.Errorf("failed to replace to map: key not found: %s", ptr)
+		return nil, fmt.Errorf("failed to replace to map: key not found: %s", ptr)
 	}
 
 	if len(path) == 0 {
@@ -53,7 +53,7 @@ func replaceInMap(obj map[string]any, ptr string, path []string, value any) (map
 
 	newVal, err := replace(obj[ptr], path, value)
 	if err != nil {
-		return obj, err
+		return nil, err
 	}
 
 	obj[ptr] = newVal
@@ -64,9 +64,9 @@ func replaceInArray(arr []any, ptr string, path []string, value any) (any, error
 	var idx int
 	var err error
 	if idx, err = strconv.Atoi(ptr); err != nil {
-		return arr, err
+		return nil, err
 	} else if idx < 0 || idx >= len(arr) {
-		return arr, fmt.Errorf("index out of bounds: %d", idx)
+		return nil, fmt.Errorf("index out of bounds: %d", idx)
 	}
 
 	if len(path) == 0 {
@@ -76,7 +76,7 @@ func replaceInArray(arr []any, ptr string, path []string, value any) (any, error
 
 	newVal, err := replace(arr[idx], path, value)
 	if err != nil {
-		return arr, err
+		return nil, err
 	}
 
 	arr[idx] = newVal

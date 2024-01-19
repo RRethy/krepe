@@ -77,10 +77,8 @@ func TestAdd(t *testing.T) {
 			obj: map[string]any{
 				"foo": "bar",
 			},
-			patch: &Add{path: []string{"baz", "baz2"}, value: "qux"},
-			want: map[string]any{
-				"foo": "bar",
-			},
+			patch:   &Add{path: []string{"baz", "baz2"}, value: "qux"},
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -138,12 +136,8 @@ func TestAdd(t *testing.T) {
 					"bar",
 				},
 			},
-			patch: &Add{path: []string{"foo", "2"}, value: "qux"},
-			want: map[string]any{
-				"foo": []any{
-					"bar",
-				},
-			},
+			patch:   &Add{path: []string{"foo", "2"}, value: "qux"},
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -183,10 +177,8 @@ func TestAdd(t *testing.T) {
 			obj: map[string]any{
 				"foo": 3,
 			},
-			patch: &Add{path: []string{"foo", "bar"}, value: "baz"},
-			want: map[string]any{
-				"foo": 3,
-			},
+			patch:   &Add{path: []string{"foo", "bar"}, value: "baz"},
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -196,12 +188,8 @@ func TestAdd(t *testing.T) {
 					"bar",
 				},
 			},
-			patch: &Add{path: []string{"foo", "bar"}, value: "baz"},
-			want: map[string]any{
-				"foo": []any{
-					"bar",
-				},
-			},
+			patch:   &Add{path: []string{"foo", "bar"}, value: "baz"},
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -227,12 +215,8 @@ func TestAdd(t *testing.T) {
 					"bar": "baz",
 				},
 			},
-			patch: &Add{path: []string{"foo", "baz", "qux"}, value: "qux"},
-			want: map[string]any{
-				"foo": map[string]any{
-					"bar": "baz",
-				},
-			},
+			patch:   &Add{path: []string{"foo", "baz", "qux"}, value: "qux"},
+			want:    nil,
 			wantErr: true,
 		},
 	})

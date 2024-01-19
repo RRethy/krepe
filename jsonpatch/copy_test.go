@@ -99,13 +99,10 @@ func TestCopy(t *testing.T) {
 			name: "copy from non-existent path in map",
 			obj: map[string]any{
 				"key1": "value1",
-				"key2": "vobjalue2",
-			},
-			patch: &Copy{from: []string{"key3"}, path: []string{"key4"}},
-			want: map[string]any{
-				"key1": "value1",
 				"key2": "value2",
 			},
+			patch:   &Copy{from: []string{"key3"}, path: []string{"key4"}},
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -113,10 +110,8 @@ func TestCopy(t *testing.T) {
 			obj: map[string]any{
 				"key1": []any{"value1", "value2", "value3"},
 			},
-			patch: &Copy{from: []string{"key1", "3"}, path: []string{"key2"}},
-			want: map[string]any{
-				"key1": []any{"value1", "value2", "value3"},
-			},
+			patch:   &Copy{from: []string{"key1", "3"}, path: []string{"key2"}},
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -125,11 +120,8 @@ func TestCopy(t *testing.T) {
 				"key1": "value1",
 				"key2": "value2",
 			},
-			patch: &Copy{from: []string{"key1"}, path: []string{"key3", "key4"}},
-			want: map[string]any{
-				"key1": "value1",
-				"key2": "value2",
-			},
+			patch:   &Copy{from: []string{"key1"}, path: []string{"key3", "key4"}},
+			want:    nil,
 			wantErr: true,
 		},
 	})

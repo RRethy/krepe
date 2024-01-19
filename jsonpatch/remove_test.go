@@ -61,11 +61,8 @@ func TestRemove(t *testing.T) {
 				"key1": "value1",
 				"key2": "value2",
 			},
-			patch: &Remove{path: []string{"key3"}},
-			want: map[string]any{
-				"key1": "value1",
-				"key2": "value2",
-			},
+			patch:   &Remove{path: []string{"key3"}},
+			want:    nil,
 			wantErr: true,
 		},
 		{
@@ -73,10 +70,8 @@ func TestRemove(t *testing.T) {
 			obj: map[string]any{
 				"key1": []any{"value1", "value2", "value3"},
 			},
-			patch: &Remove{path: []string{"key1", "3"}},
-			want: map[string]any{
-				"key1": []any{"value1", "value2", "value3"},
-			},
+			patch:   &Remove{path: []string{"key1", "3"}},
+			want:    nil,
 			wantErr: true,
 		},
 	})

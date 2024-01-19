@@ -35,7 +35,7 @@ func (c *Copy) Apply(obj any) (any, error) {
 func copy(obj any, from, path []string) (any, error) {
 	fromObj, err := get(obj, from)
 	if err != nil {
-		return obj, err
+		return nil, err
 	}
 
 	return add(obj, path, reflect.DeepCopy(fromObj))

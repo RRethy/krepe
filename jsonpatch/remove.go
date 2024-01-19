@@ -27,7 +27,7 @@ func (r *Remove) Apply(obj any) (any, error) {
 
 func remove(obj any, path []string) (any, any, error) {
 	if len(path) == 0 {
-		return nil, obj, nil
+		return nil, nil, nil
 	}
 
 	switch obj.(type) {
@@ -36,14 +36,14 @@ func remove(obj any, path []string) (any, any, error) {
 	case []any:
 		return removeInArray(obj.([]any), path[0], path[1:])
 	default:
-		return obj, nil, fmt.Errorf("cannot remove from non-map or non-array object with a json path")
+		return nil, nil, fmt.Errorf("cannot remove from non-map or non-array object with a json path")
 	}
 }
 
 func removeInMap(obj map[string]any, ptr string, path []string) (any, any, error) {
 	removed, ok := obj[ptr]
 	if !ok {
-		return obj, nil, fmt.Errorf("key not found")
+		return nil, nil, fmt.Errorf("key not found")
 	}
 
 	if len(path) == 0 {
@@ -53,7 +53,7 @@ func removeInMap(obj map[string]any, ptr string, path []string) (any, any, error
 
 	newVal, removed, err := remove(obj[ptr], path)
 	if err != nil {
-		return obj, removed, err
+		return nil, nil, err
 	}
 
 	obj[ptr] = newVal
@@ -66,7 +66,7 @@ func removeInArray(arr []any, ptr string, path []string) (any, any, error) {
 	if idx, err = strconv.Atoi(ptr); err != nil {
 		return arr, nil, err
 	} else if idx < 0 || idx >= len(arr) {
-		return arr, nil, fmt.Errorf("index out of bounds: %d", idx)
+		return nil, nil, fmt.Errorf("index out of bounds: %d", idx)
 	}
 
 	if len(path) == 0 {
@@ -75,7 +75,7 @@ func removeInArray(arr []any, ptr string, path []string) (any, any, error) {
 
 	newVal, removed, err := remove(arr[idx], path)
 	if err != nil {
-		return arr, removed, err
+		return nil, nil, err
 	}
 
 	arr[idx] = newVal

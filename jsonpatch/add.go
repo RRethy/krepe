@@ -37,7 +37,7 @@ func add(obj any, path []string, value any) (any, error) {
 	case []any:
 		return addInArray(obj.([]any), path[0], path[1:], value)
 	default:
-		return obj, fmt.Errorf("cannot add to non-map or non-array object with a json path")
+		return nil, fmt.Errorf("cannot add to non-map or non-array object with a json path")
 	}
 }
 
@@ -49,7 +49,7 @@ func addInMap(obj map[string]any, ptr string, path []string, value any) (map[str
 
 	newVal, err := add(obj[ptr], path, value)
 	if err != nil {
-		return obj, err
+		return nil, err
 	}
 
 	obj[ptr] = newVal
@@ -62,9 +62,9 @@ func addInArray(arr []any, ptr string, path []string, value any) (any, error) {
 	if ptr == "-" {
 		idx = len(arr)
 	} else if idx, err = strconv.Atoi(ptr); err != nil {
-		return arr, err
+		return nil, err
 	} else if idx < 0 || idx > len(arr) {
-		return arr, fmt.Errorf("index out of bounds: %d", idx)
+		return nil, fmt.Errorf("index out of bounds: %d", idx)
 	}
 
 	if len(path) == 0 {
@@ -72,11 +72,11 @@ func addInArray(arr []any, ptr string, path []string, value any) (any, error) {
 	}
 
 	if idx == len(arr) {
-		return arr, fmt.Errorf("index out of bounds: %d", idx)
+		return nil, fmt.Errorf("index out of bounds: %d", idx)
 	}
 	newVal, err := add(arr[idx], path, value)
 	if err != nil {
-		return arr, err
+		return nil, err
 	}
 
 	arr[idx] = newVal
