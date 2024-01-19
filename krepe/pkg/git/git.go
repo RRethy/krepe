@@ -3,12 +3,21 @@ package git
 import (
 	"os"
 
-	"github.com/RRethy/krepe/krepe/pkg/reporef"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
-func Clone(ref *reporef.RepoRef, dir string) error {
+type Client interface {
+	CloneInto(ref *RepoRef, dir string) error
+}
+
+type Git struct{}
+
+func NewGit() Client {
+	return &Git{}
+}
+
+func (g *Git) CloneInto(ref *RepoRef, dir string) error {
 	cloned := true
 	var err error
 	if _, err = os.Stat(dir); err != nil {

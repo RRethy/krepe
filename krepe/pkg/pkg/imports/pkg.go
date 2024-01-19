@@ -1,7 +1,7 @@
 package imports
 
 import (
-	"github.com/RRethy/krepe/krepe/pkg/reporef"
+	"github.com/RRethy/krepe/krepe/pkg/git"
 	"github.com/RRethy/krepe/krepe/pkg/yaml"
 )
 
@@ -11,7 +11,7 @@ var (
 )
 
 type Pkg struct {
-	ref  *reporef.RepoRef
+	ref  *git.RepoRef
 	name string
 }
 
@@ -20,7 +20,7 @@ type RawPkg struct {
 	Name string `yaml:"name,omitempty"`
 }
 
-func NewPkg(ref *reporef.RepoRef, name string) *Pkg {
+func NewPkg(ref *git.RepoRef, name string) *Pkg {
 	return &Pkg{
 		ref:  ref,
 		name: name,
@@ -33,7 +33,7 @@ func (p *Pkg) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
-	ref, err := reporef.NewRepoRefFromString(raw.Ref)
+	ref, err := git.NewRepoRefFromString(raw.Ref)
 	if err != nil {
 		return err
 	}

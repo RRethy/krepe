@@ -12,7 +12,8 @@ func TestPath(t *testing.T) {
 	path := t.TempDir()
 	xdg.CacheHome = path
 
-	cachePath := Path()
+	cache := NewClient()
+	cachePath := cache.Path()
 	assert.NotEmpty(t, cachePath)
 	assert.DirExists(t, cachePath)
 	assert.Equal(t, filepath.Join(path, dirName), cachePath)

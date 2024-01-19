@@ -1,4 +1,4 @@
-package reporef
+package git
 
 import (
 	"testing"
