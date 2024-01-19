@@ -1,26 +1,18 @@
 package jsonpatch
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestRemove(t *testing.T) {
-	tests := []struct {
-		name    string
-		obj     map[string]any
-		op      string
-		path    string
-		want    any
-		wantErr bool
-	}{
+	runPatchTests(t, []*patchTest{
 		{
 			name: "remove from map",
 			obj: map[string]any{
 				"key1": "value1",
 				"key2": "value2",
 			},
-			path: "/key1",
+			patch: &Remove{path: []string{"key1"}},
 			want: map[string]any{
 				"key2": "value2",
 			},
@@ -31,7 +23,7 @@ func TestRemove(t *testing.T) {
 			obj: map[string]any{
 				"key1": []any{"value1", "value2", "value3"},
 			},
-			path: "/key1/1",
+			patch: &Remove{path: []string{"key1", "1"}},
 			want: map[string]any{
 				"key1": []any{"value1", "value3"},
 			},
@@ -50,7 +42,7 @@ func TestRemove(t *testing.T) {
 					},
 				},
 			},
-			path: "/key1/0/key2",
+			patch: &Remove{path: []string{"key1", "0", "key2"}},
 			want: map[string]any{
 				"key1": []any{
 					map[string]any{
@@ -69,7 +61,7 @@ func TestRemove(t *testing.T) {
 				"key1": "value1",
 				"key2": "value2",
 			},
-			path: "/key3",
+			patch: &Remove{path: []string{"key3"}},
 			want: map[string]any{
 				"key1": "value1",
 				"key2": "value2",
@@ -81,24 +73,11 @@ func TestRemove(t *testing.T) {
 			obj: map[string]any{
 				"key1": []any{"value1", "value2", "value3"},
 			},
-			path: "/key1/3",
+			patch: &Remove{path: []string{"key1", "3"}},
 			want: map[string]any{
 				"key1": []any{"value1", "value2", "value3"},
 			},
 			wantErr: true,
 		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			ptrs, _ := pathToJsonPtrs(tt.path)
-			newObj, err := remove(tt.obj, ptrs)
-			assert.Equal(t, tt.want, newObj)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-		})
-	}
+	})
 }

@@ -11,7 +11,7 @@ type Replace struct {
 }
 
 func NewReplace(path string, value any) (*Replace, error) {
-	pathArr, err := pathToJsonPtrs(path)
+	pathArr, err := pathToArray(path)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing path: %s", err)
 	}
@@ -26,32 +26,32 @@ func (r *Replace) Apply(obj any) (any, error) {
 	return replace(obj, r.path, r.value)
 }
 
-func replace(obj any, ptrs []string, value any) (any, error) {
-	if len(ptrs) == 0 {
+func replace(obj any, path []string, value any) (any, error) {
+	if len(path) == 0 {
 		return value, nil
 	}
 
 	switch obj.(type) {
 	case map[string]any:
-		return replaceMap(obj.(map[string]any), ptrs[0], ptrs[1:], value)
+		return replaceMap(obj.(map[string]any), path[0], path[1:], value)
 	case []any:
-		return replaceArray(obj.([]any), ptrs[0], ptrs[1:], value)
+		return replaceArray(obj.([]any), path[0], path[1:], value)
 	default:
-		return obj, fmt.Errorf("cannot replace to non-map or non-array object with a json ptr")
+		return obj, fmt.Errorf("cannot replace to non-map or non-array object with a json path")
 	}
 }
 
-func replaceMap(obj map[string]any, ptr string, ptrs []string, value any) (map[string]any, error) {
+func replaceMap(obj map[string]any, ptr string, path []string, value any) (map[string]any, error) {
 	if _, ok := obj[ptr]; !ok {
 		return obj, fmt.Errorf("failed to replace to map: key not found: %s", ptr)
 	}
 
-	if len(ptrs) == 0 {
+	if len(path) == 0 {
 		obj[ptr] = value
 		return obj, nil
 	}
 
-	newVal, err := replace(obj[ptr], ptrs, value)
+	newVal, err := replace(obj[ptr], path, value)
 	if err != nil {
 		return obj, err
 	}
@@ -60,7 +60,7 @@ func replaceMap(obj map[string]any, ptr string, ptrs []string, value any) (map[s
 	return obj, nil
 }
 
-func replaceArray(arr []any, ptr string, ptrs []string, value any) (any, error) {
+func replaceArray(arr []any, ptr string, path []string, value any) (any, error) {
 	var idx int
 	var err error
 	if idx, err = strconv.Atoi(ptr); err != nil {
@@ -69,12 +69,12 @@ func replaceArray(arr []any, ptr string, ptrs []string, value any) (any, error) 
 		return arr, fmt.Errorf("index out of bounds: %d", idx)
 	}
 
-	if len(ptrs) == 0 {
+	if len(path) == 0 {
 		arr[idx] = value
 		return arr, nil
 	}
 
-	newVal, err := replace(arr[idx], ptrs, value)
+	newVal, err := replace(arr[idx], path, value)
 	if err != nil {
 		return arr, err
 	}

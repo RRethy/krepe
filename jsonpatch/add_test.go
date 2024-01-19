@@ -1,20 +1,11 @@
 package jsonpatch
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestAdd(t *testing.T) {
-	tests := []struct {
-		name    string
-		obj     map[string]any
-		op      string
-		path    string
-		value   any
-		want    any
-		wantErr bool
-	}{
+	runPatchTests(t, []*patchTest{
 		{
 			name: "add with empty path",
 			obj: map[string]any{
@@ -23,21 +14,19 @@ func TestAdd(t *testing.T) {
 					"baz2": "qux",
 				},
 			},
-			path:    "",
-			value:   "quux",
+			patch:   &Add{path: []string{}, value: "quux"},
 			want:    "quux",
 			wantErr: false,
 		},
 		{
-			name: "add with empty json ptr",
+			name: "add with empty json path",
 			obj: map[string]any{
 				"foo": "bar",
 				"baz": map[string]any{
 					"baz2": "qux",
 				},
 			},
-			path:  "/baz/",
-			value: "quux",
+			patch: &Add{path: []string{"baz", ""}, value: "quux"},
 			want: map[string]any{
 				"foo": "bar",
 				"baz": map[string]any{
@@ -52,8 +41,7 @@ func TestAdd(t *testing.T) {
 			obj: map[string]any{
 				"foo": "bar",
 			},
-			path:  "/baz",
-			value: "qux",
+			patch: &Add{path: []string{"baz"}, value: "qux"},
 			want: map[string]any{
 				"foo": "bar",
 				"baz": "qux",
@@ -71,8 +59,7 @@ func TestAdd(t *testing.T) {
 					},
 				},
 			},
-			path:  "/baz/baz3/baz5",
-			value: "corge",
+			patch: &Add{path: []string{"baz", "baz3", "baz5"}, value: "corge"},
 			want: map[string]any{
 				"foo": "bar",
 				"baz": map[string]any{
@@ -86,12 +73,11 @@ func TestAdd(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "add to map with non existent ptr",
+			name: "add to map with non existent path",
 			obj: map[string]any{
 				"foo": "bar",
 			},
-			path:  "/baz/baz2",
-			value: "qux",
+			patch: &Add{path: []string{"baz", "baz2"}, value: "qux"},
 			want: map[string]any{
 				"foo": "bar",
 			},
@@ -104,8 +90,7 @@ func TestAdd(t *testing.T) {
 					"bar",
 				},
 			},
-			path:  "/foo/1",
-			value: "qux",
+			patch: &Add{path: []string{"foo", "1"}, value: "qux"},
 			want: map[string]any{
 				"foo": []any{
 					"bar",
@@ -121,8 +106,7 @@ func TestAdd(t *testing.T) {
 					"bar",
 				},
 			},
-			path:  "/foo/-",
-			value: "qux",
+			patch: &Add{path: []string{"foo", "-"}, value: "qux"},
 			want: map[string]any{
 				"foo": []any{
 					"bar",
@@ -138,8 +122,7 @@ func TestAdd(t *testing.T) {
 					"bar",
 				},
 			},
-			path:  "/foo/0",
-			value: "qux",
+			patch: &Add{path: []string{"foo", "0"}, value: "qux"},
 			want: map[string]any{
 				"foo": []any{
 					"qux",
@@ -155,8 +138,7 @@ func TestAdd(t *testing.T) {
 					"bar",
 				},
 			},
-			path:  "/foo/2",
-			value: "qux",
+			patch: &Add{path: []string{"foo", "2"}, value: "qux"},
 			want: map[string]any{
 				"foo": []any{
 					"bar",
@@ -179,8 +161,7 @@ func TestAdd(t *testing.T) {
 					"baz",
 				},
 			},
-			path:  "/foo/1/quux/1",
-			value: "qux",
+			patch: &Add{path: []string{"foo", "1", "quux", "1"}, value: "qux"},
 			want: map[string]any{
 				"foo": []any{
 					"bar",
@@ -202,8 +183,7 @@ func TestAdd(t *testing.T) {
 			obj: map[string]any{
 				"foo": 3,
 			},
-			path:  "/foo/bar",
-			value: "baz",
+			patch: &Add{path: []string{"foo", "bar"}, value: "baz"},
 			want: map[string]any{
 				"foo": 3,
 			},
@@ -216,8 +196,7 @@ func TestAdd(t *testing.T) {
 					"bar",
 				},
 			},
-			path:  "/foo/bar",
-			value: "baz",
+			patch: &Add{path: []string{"foo", "bar"}, value: "baz"},
 			want: map[string]any{
 				"foo": []any{
 					"bar",
@@ -232,8 +211,7 @@ func TestAdd(t *testing.T) {
 					"bar": "baz",
 				},
 			},
-			path:  "/foo/1",
-			value: "baz",
+			patch: &Add{path: []string{"foo", "1"}, value: "baz"},
 			want: map[string]any{
 				"foo": map[string]any{
 					"bar": "baz",
@@ -249,8 +227,7 @@ func TestAdd(t *testing.T) {
 					"bar": "baz",
 				},
 			},
-			path:  "/bar/baz",
-			value: "qux",
+			patch: &Add{path: []string{"foo", "baz", "qux"}, value: "qux"},
 			want: map[string]any{
 				"foo": map[string]any{
 					"bar": "baz",
@@ -258,18 +235,5 @@ func TestAdd(t *testing.T) {
 			},
 			wantErr: true,
 		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			ptrs, _ := pathToJsonPtrs(tt.path)
-			newObj, err := add(tt.obj, ptrs, tt.value)
-			assert.Equal(t, tt.want, newObj)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-		})
-	}
+	})
 }

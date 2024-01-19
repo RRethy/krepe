@@ -11,7 +11,7 @@ type Add struct {
 }
 
 func NewAdd(path string, value any) (*Add, error) {
-	pathArr, err := pathToJsonPtrs(path)
+	pathArr, err := pathToArray(path)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing path: %s", err)
 	}
@@ -26,28 +26,28 @@ func (a *Add) Apply(obj any) (any, error) {
 	return add(obj, a.path, a.value)
 }
 
-func add(obj any, ptrs []string, value any) (any, error) {
-	if len(ptrs) == 0 {
+func add(obj any, path []string, value any) (any, error) {
+	if len(path) == 0 {
 		return value, nil
 	}
 
 	switch obj.(type) {
 	case map[string]any:
-		return addMap(obj.(map[string]any), ptrs[0], ptrs[1:], value)
+		return addMap(obj.(map[string]any), path[0], path[1:], value)
 	case []any:
-		return addArray(obj.([]any), ptrs[0], ptrs[1:], value)
+		return addArray(obj.([]any), path[0], path[1:], value)
 	default:
-		return obj, fmt.Errorf("cannot add to non-map or non-array object with a json ptr")
+		return obj, fmt.Errorf("cannot add to non-map or non-array object with a json path")
 	}
 }
 
-func addMap(obj map[string]any, ptr string, ptrs []string, value any) (map[string]any, error) {
-	if len(ptrs) == 0 {
+func addMap(obj map[string]any, ptr string, path []string, value any) (map[string]any, error) {
+	if len(path) == 0 {
 		obj[ptr] = value
 		return obj, nil
 	}
 
-	newVal, err := add(obj[ptr], ptrs, value)
+	newVal, err := add(obj[ptr], path, value)
 	if err != nil {
 		return obj, err
 	}
@@ -56,7 +56,7 @@ func addMap(obj map[string]any, ptr string, ptrs []string, value any) (map[strin
 	return obj, nil
 }
 
-func addArray(arr []any, ptr string, ptrs []string, value any) (any, error) {
+func addArray(arr []any, ptr string, path []string, value any) (any, error) {
 	var idx int
 	var err error
 	if ptr == "-" {
@@ -67,14 +67,14 @@ func addArray(arr []any, ptr string, ptrs []string, value any) (any, error) {
 		return arr, fmt.Errorf("index out of bounds: %d", idx)
 	}
 
-	if len(ptrs) == 0 {
+	if len(path) == 0 {
 		return append(arr[:idx], append([]any{value}, arr[idx:]...)...), nil
 	}
 
 	if idx == len(arr) {
 		return arr, fmt.Errorf("index out of bounds: %d", idx)
 	}
-	newVal, err := add(arr[idx], ptrs, value)
+	newVal, err := add(arr[idx], path, value)
 	if err != nil {
 		return arr, err
 	}

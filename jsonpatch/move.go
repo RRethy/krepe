@@ -10,19 +10,19 @@ type Move struct {
 }
 
 func NewMove(from, path string) (*Move, error) {
-	fromPtrs, err := pathToJsonPtrs(from)
+	fromPath, err := pathToArray(from)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing from: %s", err)
 	}
 
-	pathPtrs, err := pathToJsonPtrs(path)
+	toPath, err := pathToArray(path)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing path: %s", err)
 	}
 
 	return &Move{
-		from: fromPtrs,
-		path: pathPtrs,
+		from: fromPath,
+		path: toPath,
 	}, nil
 }
 
@@ -30,6 +30,6 @@ func (m *Move) Apply(obj any) (any, error) {
 	return move(obj, m.from, m.path)
 }
 
-func move(obj any, from []string, ptrs []string) (any, error) {
+func move(obj any, from []string, path []string) (any, error) {
 	panic("not implemented")
 }

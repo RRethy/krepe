@@ -1,28 +1,18 @@
 package jsonpatch
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
 )
 
 func TestReplace(t *testing.T) {
-	tests := []struct {
-		name    string
-		obj     map[string]any
-		op      string
-		path    string
-		value   any
-		want    any
-		wantErr bool
-	}{
+	runPatchTests(t, []*patchTest{
 		{
 			name: "replace from map",
 			obj: map[string]any{
 				"key1": "value1",
 				"key2": "value2",
 			},
-			path:  "/key1",
-			value: "value3",
+			patch: &Replace{path: []string{"key1"}, value: "value3"},
 			want: map[string]any{
 				"key1": "value3",
 				"key2": "value2",
@@ -34,8 +24,7 @@ func TestReplace(t *testing.T) {
 			obj: map[string]any{
 				"key1": []any{"value1", "value2", "value3"},
 			},
-			path:  "/key1/1",
-			value: "value4",
+			patch: &Replace{path: []string{"key1", "1"}, value: "value4"},
 			want: map[string]any{
 				"key1": []any{"value1", "value4", "value3"},
 			},
@@ -54,8 +43,7 @@ func TestReplace(t *testing.T) {
 					},
 				},
 			},
-			path:  "/key1/0/key2",
-			value: "value5",
+			patch: &Replace{path: []string{"key1", "0", "key2"}, value: "value5"},
 			want: map[string]any{
 				"key1": []any{
 					map[string]any{
@@ -75,8 +63,7 @@ func TestReplace(t *testing.T) {
 				"key1": "value1",
 				"key2": "value2",
 			},
-			path:  "/key3",
-			value: "value3",
+			patch: &Replace{path: []string{"key3"}, value: "value3"},
 			want: map[string]any{
 				"key1": "value1",
 				"key2": "value2",
@@ -88,25 +75,11 @@ func TestReplace(t *testing.T) {
 			obj: map[string]any{
 				"key1": []any{"value1", "value2", "value3"},
 			},
-			path:  "/key1/3",
-			value: "value4",
+			patch: &Replace{path: []string{"key1", "3"}, value: "value4"},
 			want: map[string]any{
 				"key1": []any{"value1", "value2", "value3"},
 			},
 			wantErr: true,
 		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			ptrs, _ := pathToJsonPtrs(tt.path)
-			newObj, err := replace(tt.obj, ptrs, tt.value)
-			assert.Equal(t, tt.want, newObj)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-		})
-	}
+	})
 }

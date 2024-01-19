@@ -5,32 +5,32 @@ import (
 	"strings"
 )
 
-func pathToJsonPtrs(path string) ([]string, error) {
+func pathToArray(path string) ([]string, error) {
 	if path == "" {
 		return nil, nil
 	}
 
-	var ptrs []string
-	var curptr []rune
+	var arr []string
+	var cur []rune
 	for _, c := range path {
 		if c == '/' {
-			ptrs = append(ptrs, string(curptr))
-			curptr = nil
+			arr = append(arr, string(cur))
+			cur = nil
 		} else {
-			curptr = append(curptr, c)
+			cur = append(cur, c)
 		}
 	}
-	ptrs = append(ptrs, string(curptr))
+	arr = append(arr, string(cur))
 
-	if ptrs[0] != "" {
+	if arr[0] != "" {
 		return nil, fmt.Errorf("path must start with /")
 	}
 
-	for i, ptr := range ptrs {
-		ptr = strings.ReplaceAll(ptr, "~1", "/")
-		ptr = strings.ReplaceAll(ptr, "~0", "~")
-		ptrs[i] = ptr
+	for i, part := range arr {
+		part = strings.ReplaceAll(part, "~1", "/")
+		part = strings.ReplaceAll(part, "~0", "~")
+		arr[i] = part
 	}
 
-	return ptrs[1:], nil
+	return arr[1:], nil
 }

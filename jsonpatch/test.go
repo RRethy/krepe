@@ -10,7 +10,7 @@ type Test struct {
 }
 
 func NewTest(path string, value any) (*Test, error) {
-	pathArr, err := pathToJsonPtrs(path)
+	pathArr, err := pathToArray(path)
 	if err != nil {
 		return nil, fmt.Errorf("error parsing path: %s", err)
 	}

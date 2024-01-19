@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPatchToJsonPtrs(t *testing.T) {
+func TestPathToArray(t *testing.T) {
 	tests := []struct {
 		name    string
 		path    string
@@ -71,7 +71,7 @@ func TestPatchToJsonPtrs(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := pathToJsonPtrs(tt.path)
+			got, err := pathToArray(tt.path)
 			assert.Equal(t, tt.want, got)
 			if tt.wantErr {
 				assert.Error(t, err)

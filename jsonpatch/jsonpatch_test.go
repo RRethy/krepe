@@ -5,6 +5,32 @@ import (
 	"testing"
 )
 
+type patchTest struct {
+	name    string
+	obj     map[string]any
+	patch   JsonPatch
+	want    any
+	wantErr bool
+}
+
+func (pt *patchTest) run(t *testing.T) {
+	t.Run(pt.name, func(t *testing.T) {
+		got, err := pt.patch.Apply(pt.obj)
+		assert.Equal(t, pt.want, got)
+		if pt.wantErr {
+			assert.Error(t, err)
+		} else {
+			assert.NoError(t, err)
+		}
+	})
+}
+
+func runPatchTests(t *testing.T, tests []*patchTest) {
+	for _, tt := range tests {
+		tt.run(t)
+	}
+}
+
 func TestNewJsonPatch(t *testing.T) {
 	tests := []struct {
 		name    string
