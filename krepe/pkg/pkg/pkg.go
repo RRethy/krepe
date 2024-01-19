@@ -7,8 +7,6 @@ import (
 
 	"github.com/RRethy/krepe/krepe/pkg/pkg/imports"
 	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
-	"github.com/go-git/go-git/v5"
-	"github.com/go-git/go-git/v5/plumbing"
 )
 
 type Pkg struct {
@@ -80,49 +78,13 @@ func (p *Pkg) RunPipelineByName(name string) error {
 	}
 }
 
-func (p *Pkg) InstallPackage(url string, name string) error {
-	pkgImport, err := imports.NewPkg(url, name)
-	if err != nil {
-		return fmt.Errorf("creating pkg import `%s` from url `%s`: %w", name, url, err)
+func (p *Pkg) AddPackage(pkg *Pkg, pkgImport *imports.Pkg) error {
+	if pkgImport.Name() != pkg.name {
+		return fmt.Errorf("package name `%s` does not match import name `%s`", pkg.name, pkgImport.Name())
 	}
 
-	if p.PkgExists(pkgImport.Name()) {
-		return fmt.Errorf("pkg `%s` already exists, consider giving it another name", pkgImport.Name())
-	}
-
-	// TODO: This is all temporary for a MVP
-	tmpDir := "/tmp"
-	pkgPath := filepath.Join(tmpDir, pkgImport.Name())
-
-	if _, err := os.Stat(pkgPath); err == nil {
-		if err := os.RemoveAll(pkgPath); err != nil {
-			return fmt.Errorf("removing existing pkg `%s`: %w", pkgPath, err)
-		}
-	}
-
-	repo, err := git.PlainClone(pkgPath, false, &git.CloneOptions{
-		URL:      pkgImport.URL(),
-		Progress: os.Stdout,
-	})
-	if err != nil {
-		return fmt.Errorf("cloning pkg from url `%s` to `%s`: %w", pkgImport.URL(), pkgPath, err)
-	}
-
-	wt, err := repo.Worktree()
-	if err != nil {
-		return err
-	}
-
-	err = wt.Checkout(&git.CheckoutOptions{
-		Branch: plumbing.ReferenceName("refs/tags/" + pkgImport.Version()),
-	})
-	if err != nil {
-		return fmt.Errorf("checking out tag `%s` in pkg `%s`: %w", pkgImport.Version(), pkgPath, err)
-	}
-
-	pkg, err := NewPkgFromPathWithName(pkgPath, pkgImport.Name())
-	if err != nil {
-		return fmt.Errorf("creating pkg from path `%s`: %w", pkgPath, err)
+	if p.PkgExists(pkg.name) {
+		return fmt.Errorf("package `%s` already exists", pkg.name)
 	}
 
 	p.packages = append(p.packages, pkg)

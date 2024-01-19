@@ -12,7 +12,7 @@ type RepoRef struct {
 	Tag  string
 }
 
-func ParseRepoRef(repoRef string) (*RepoRef, error) {
+func NewRepoRefFromString(repoRef string) (*RepoRef, error) {
 	parts := strings.Split(repoRef, "@")
 	if len(parts) != 2 {
 		return nil, errors.New("repoRef must be in the format <url>@<tag>")
@@ -23,7 +23,12 @@ func ParseRepoRef(repoRef string) (*RepoRef, error) {
 	if len(parts) < 3 {
 		return nil, errors.New("url must be in the format <host>/<owner>/<repo>")
 	}
+
 	name := parts[len(parts)-1]
+	if name == "" {
+		return nil, errors.New("url must be in the format <host>/<owner>/<repo> and <repo> can't be empty")
+	}
+
 	url = strings.Join(parts[:3], "/")
 	path := strings.Join(parts[3:], "/")
 
@@ -33,4 +38,13 @@ func ParseRepoRef(repoRef string) (*RepoRef, error) {
 		Name: name,
 		Tag:  tag,
 	}, nil
+}
+
+func (r *RepoRef) String() string {
+	builder := []string{r.URL}
+	if r.Path != "" {
+		builder = append(builder, r.Path)
+	}
+	builder = []string{strings.Join(builder, "/"), r.Tag}
+	return strings.Join(builder, "@")
 }

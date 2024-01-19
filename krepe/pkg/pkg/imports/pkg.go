@@ -1,9 +1,7 @@
 package imports
 
 import (
-	"errors"
-	"strings"
-
+	"github.com/RRethy/krepe/krepe/pkg/reporef"
 	"github.com/RRethy/krepe/krepe/pkg/yaml"
 )
 
@@ -13,37 +11,20 @@ var (
 )
 
 type Pkg struct {
-	url     string
-	version string
-	name    string
+	ref  *reporef.RepoRef
+	name string
 }
 
 type RawPkg struct {
-	Tag  string `yaml:"tag,omitempty"`
+	Ref  string `yaml:"ref,omitempty"`
 	Name string `yaml:"name,omitempty"`
 }
 
-func NewPkg(tag string, name string) (*Pkg, error) {
-	parts := strings.Split(tag, "@")
-	if len(parts) != 2 {
-		return nil, errors.New("tag must be in the format <url>@<version>")
-	}
-
-	url, version := parts[0], parts[1]
-
-	if name == "" {
-		urlParts := strings.Split(url, "/")
-		name = urlParts[len(urlParts)-1]
-		if name == "" {
-			return nil, errors.New("could not parse name from url")
-		}
-	}
-
+func NewPkg(ref *reporef.RepoRef, name string) *Pkg {
 	return &Pkg{
-		url:     url,
-		version: version,
-		name:    name,
-	}, nil
+		ref:  ref,
+		name: name,
+	}
 }
 
 func (p *Pkg) UnmarshalYAML(unmarshal func(interface{}) error) error {
@@ -52,7 +33,12 @@ func (p *Pkg) UnmarshalYAML(unmarshal func(interface{}) error) error {
 		return err
 	}
 
-	newPkg, err := NewPkg(raw.Tag, raw.Name)
+	ref, err := reporef.NewRepoRefFromString(raw.Ref)
+	if err != nil {
+		return err
+	}
+
+	newPkg := NewPkg(ref, raw.Name)
 	if err != nil {
 		return err
 	}
@@ -63,19 +49,15 @@ func (p *Pkg) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 func (p *Pkg) MarshalYAML() (interface{}, error) {
 	return RawPkg{
-		Tag:  p.url + "@" + p.version,
+		Ref:  p.ref.String(),
 		Name: p.name,
 	}, nil
 }
 
-func (p *Pkg) URL() string {
-	return p.url
-}
-
-func (p *Pkg) Version() string {
-	return p.version
-}
-
 func (p *Pkg) Name() string {
+	if p.name == "" {
+		return p.ref.Name
+	}
+
 	return p.name
 }

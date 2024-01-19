@@ -8,17 +8,10 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 )
 
-type Git struct {
-}
-
-func NewGit() *Git {
-	return &Git{}
-}
-
-func (g *Git) Clone(ref reporef.RepoRef, path string) error {
+func Clone(ref *reporef.RepoRef, dir string) error {
 	cloned := true
 	var err error
-	if _, err = os.Stat(path); err != nil {
+	if _, err = os.Stat(dir); err != nil {
 		if !os.IsNotExist(err) {
 			return err
 		}
@@ -27,7 +20,7 @@ func (g *Git) Clone(ref reporef.RepoRef, path string) error {
 
 	var repo *git.Repository
 	if !cloned {
-		repo, err = git.PlainClone(path, false, &git.CloneOptions{
+		repo, err = git.PlainClone(dir, false, &git.CloneOptions{
 			URL:      ref.URL,
 			Progress: os.Stdout,
 		})
