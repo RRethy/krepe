@@ -110,6 +110,30 @@ func TestDelta(t *testing.T) {
 			remove: map[string]any{"b": 2, "d": map[string]any{"e": 4, "f": []any{1, 2, 3, 4, 5, 6}}, "g": 7},
 			want:   map[string]any{"a": 1, "c": 3, "d": map[string]any{"f": []any{1, 2, 3}}},
 		},
+		{
+			name: "mismatched map type",
+			source: map[string]any{
+				"a": 1,
+				"b": 2,
+			},
+			remove: 5,
+			want: map[string]any{
+				"a": 1,
+				"b": 2,
+			},
+		},
+		{
+			name: "mismatched slice type",
+			source: []any{
+				1,
+				2,
+			},
+			remove: "foo",
+			want: []any{
+				1,
+				2,
+			},
+		},
 	}
 
 	for _, tt := range tests {

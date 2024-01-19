@@ -65,3 +65,43 @@ func getAssociativeKey(slice []any) string {
 
 	return ""
 }
+
+func hasAssociativeKey(slice []any, key string) bool {
+	values := make(map[string]struct{}, len(slice))
+
+	for _, elem := range slice {
+		elemMap, ok := elem.(map[string]any)
+		if !ok {
+			return false
+		}
+
+		val, ok := elemMap[key]
+		if !ok {
+			return false
+		}
+
+		valStr, ok := val.(string)
+		if !ok {
+			return false
+		}
+
+		values[valStr] = struct{}{}
+	}
+
+	return len(values) == len(slice)
+}
+
+func getCommonAssociativeKey(keys1, keys2 []string) string {
+	keys2Set := make(map[string]struct{}, len(keys2))
+	for _, key := range keys2 {
+		keys2Set[key] = struct{}{}
+	}
+
+	for _, key := range keys1 {
+		if _, ok := keys2Set[key]; ok {
+			return key
+		}
+	}
+
+	return ""
+}

@@ -1,7 +1,6 @@
 package krmmerge
 
 import (
-	"fmt"
 	"reflect"
 )
 
@@ -12,9 +11,17 @@ func delta(source, remove any) any {
 
 	switch source.(type) {
 	case map[string]any:
-		return deltaMap(source.(map[string]any), remove.(map[string]any))
+		removeMap, ok := remove.(map[string]any)
+		if !ok {
+			return source
+		}
+		return deltaMap(source.(map[string]any), removeMap)
 	case []any:
-		return deltaSlice(source.([]any), remove.([]any))
+		removeArr, ok := remove.([]any)
+		if !ok {
+			return source
+		}
+		return deltaSlice(source.([]any), removeArr)
 	default:
 		return deltaScalar(source, remove)
 	}
@@ -71,8 +78,7 @@ func deltaSliceNonAssociative(source, remove []any) []any {
 // result in non associative behavior.
 func deltaSliceAssociative(source, remove []any) []any {
 	key := getAssociativeKey(source)
-	fmt.Println(">", key)
-	if key == "" {
+	if key == "" || !hasAssociativeKey(remove, key) {
 		return deltaSliceNonAssociative(source, remove)
 	}
 

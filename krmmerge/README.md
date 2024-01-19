@@ -32,3 +32,8 @@ If the field is present in either upstream or local and the value is null, remov
 If the field is present only in local, leave the local value unchanged.
 If the field is not present in local, add the delta between origin and upstream as the value in local.
 If the field is present in both upstream and local, recursively merge the values between local, upstream and origin.
+
+# TODO
+
+null values
+input should not be modified, but memory may be shared
