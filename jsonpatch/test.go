@@ -13,7 +13,7 @@ type Test struct {
 func NewTest(path string, value any) (*Test, error) {
 	pathArr, err := pathToArray(path)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing path: %s", err)
+		return nil, fmt.Errorf("parsing path: %s", err)
 	}
 
 	return &Test{
@@ -25,11 +25,11 @@ func NewTest(path string, value any) (*Test, error) {
 func (t *Test) Apply(obj any) (any, error) {
 	got, err := get(obj, t.path)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("getting value at path `%s`: %s", t.path, err)
 	}
 
 	if !reflect.DeepEqual(got, t.value) {
-		return nil, fmt.Errorf("test failed: expected %v, got %v", t.value, got)
+		return nil, fmt.Errorf("asserting value `%s` at path `%s`: got `%s`", t.value, t.path, got)
 	}
 
 	return obj, nil

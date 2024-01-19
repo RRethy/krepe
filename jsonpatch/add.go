@@ -13,7 +13,7 @@ type Add struct {
 func NewAdd(path string, value any) (*Add, error) {
 	pathArr, err := pathToArray(path)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing path: %s", err)
+		return nil, fmt.Errorf("parsing path: %s", err)
 	}
 
 	return &Add{
@@ -23,7 +23,12 @@ func NewAdd(path string, value any) (*Add, error) {
 }
 
 func (a *Add) Apply(obj any) (any, error) {
-	return add(obj, a.path, a.value)
+	obj, err := add(obj, a.path, a.value)
+	if err != nil {
+		return nil, fmt.Errorf("adding value `%s` to path `%s`: %s", a.value, a.path, err)
+	}
+
+	return obj, nil
 }
 
 func add(obj any, path []string, value any) (any, error) {
@@ -37,7 +42,7 @@ func add(obj any, path []string, value any) (any, error) {
 	case []any:
 		return addInArray(obj.([]any), path[0], path[1:], value)
 	default:
-		return nil, fmt.Errorf("cannot add to non-map or non-array object with a json path")
+		return nil, fmt.Errorf("incompatible type for value %s: %T", obj, obj)
 	}
 }
 

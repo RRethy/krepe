@@ -15,11 +15,11 @@ type Copy struct {
 func NewCopy(from, path string) (*Copy, error) {
 	fromArr, err := pathToArray(from)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing from: %s", err)
+		return nil, fmt.Errorf("parsing from: %s", err)
 	}
 	pathArr, err := pathToArray(path)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing path: %s", err)
+		return nil, fmt.Errorf("parsing path: %s", err)
 	}
 
 	return &Copy{
@@ -29,7 +29,12 @@ func NewCopy(from, path string) (*Copy, error) {
 }
 
 func (c *Copy) Apply(obj any) (any, error) {
-	return copy(obj, c.from, c.path)
+	obj, err := copy(obj, c.from, c.path)
+	if err != nil {
+		return nil, fmt.Errorf("copying from `%s` to `%s`: %s", c.from, c.path, err)
+	}
+
+	return obj, nil
 }
 
 func copy(obj any, from, path []string) (any, error) {
@@ -52,7 +57,7 @@ func get(obj any, path []string) (any, error) {
 	case []any:
 		return getInArray(obj.([]any), path[0], path[1:])
 	default:
-		return nil, fmt.Errorf("cannot get from non-map or non-array object with a json path")
+		return nil, fmt.Errorf("incompatible type for value %s: %T", obj, obj)
 	}
 }
 

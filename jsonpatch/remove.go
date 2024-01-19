@@ -12,7 +12,7 @@ type Remove struct {
 func NewRemove(path string) (*Remove, error) {
 	pathArr, err := pathToArray(path)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing path: %s", err)
+		return nil, fmt.Errorf("parsing path: %s", err)
 	}
 
 	return &Remove{
@@ -22,6 +22,10 @@ func NewRemove(path string) (*Remove, error) {
 
 func (r *Remove) Apply(obj any) (any, error) {
 	obj, _, err := remove(obj, r.path)
+	if err != nil {
+		return nil, fmt.Errorf("removing value at `%s`: %s", r.path, err)
+	}
+
 	return obj, err
 }
 
@@ -36,7 +40,7 @@ func remove(obj any, path []string) (any, any, error) {
 	case []any:
 		return removeInArray(obj.([]any), path[0], path[1:])
 	default:
-		return nil, nil, fmt.Errorf("cannot remove from non-map or non-array object with a json path")
+		return nil, nil, fmt.Errorf("incompatible type for value %s: %T", obj, obj)
 	}
 }
 

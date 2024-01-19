@@ -12,12 +12,12 @@ type Move struct {
 func NewMove(from, path string) (*Move, error) {
 	fromPath, err := pathToArray(from)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing from: %s", err)
+		return nil, fmt.Errorf("parsing from: %s", err)
 	}
 
 	toPath, err := pathToArray(path)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing path: %s", err)
+		return nil, fmt.Errorf("parsing path: %s", err)
 	}
 
 	return &Move{
@@ -27,7 +27,12 @@ func NewMove(from, path string) (*Move, error) {
 }
 
 func (m *Move) Apply(obj any) (any, error) {
-	return move(obj, m.from, m.path)
+	obj, err := move(obj, m.from, m.path)
+	if err != nil {
+		return nil, fmt.Errorf("moving value from `%s` to `%s`: %s", m.from, m.path, err)
+	}
+
+	return obj, nil
 }
 
 func move(obj any, from []string, path []string) (any, error) {

@@ -13,7 +13,7 @@ type Replace struct {
 func NewReplace(path string, value any) (*Replace, error) {
 	pathArr, err := pathToArray(path)
 	if err != nil {
-		return nil, fmt.Errorf("error parsing path: %s", err)
+		return nil, fmt.Errorf("parsing path: %s", err)
 	}
 
 	return &Replace{
@@ -23,7 +23,12 @@ func NewReplace(path string, value any) (*Replace, error) {
 }
 
 func (r *Replace) Apply(obj any) (any, error) {
-	return replace(obj, r.path, r.value)
+	obj, err := replace(obj, r.path, r.value)
+	if err != nil {
+		return nil, fmt.Errorf("replacing value at path `%s` with `%s`: %s", r.path, r.value, err)
+	}
+
+	return obj, nil
 }
 
 func replace(obj any, path []string, value any) (any, error) {
@@ -37,13 +42,13 @@ func replace(obj any, path []string, value any) (any, error) {
 	case []any:
 		return replaceInArray(obj.([]any), path[0], path[1:], value)
 	default:
-		return nil, fmt.Errorf("cannot replace to non-map or non-array object with a json path")
+		return nil, fmt.Errorf("incompatible type for value %s: %T", obj, obj)
 	}
 }
 
 func replaceInMap(obj map[string]any, ptr string, path []string, value any) (map[string]any, error) {
 	if _, ok := obj[ptr]; !ok {
-		return nil, fmt.Errorf("failed to replace to map: key not found: %s", ptr)
+		return nil, fmt.Errorf("key not found: %s", ptr)
 	}
 
 	if len(path) == 0 {
