@@ -32,7 +32,6 @@ func NewExec(options ...Option) *Exec {
 	return exec
 }
 
-// TODO: test
 func (e *Exec) Run(args ...string) ([]byte, error) {
 	cmd := exec.Command(e.cmd, args...)
 	cmd.Dir = e.dir
