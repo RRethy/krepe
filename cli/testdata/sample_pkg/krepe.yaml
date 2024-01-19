@@ -1,0 +1,7 @@
+apiVersion: krepe.io/v1
+kind: Krepe
+imports:
+  files:
+    - deployment.yaml
+    - service.yaml
+    - ingress.yaml
