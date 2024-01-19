@@ -79,6 +79,9 @@ func TestPkgRunPipelineByName(t *testing.T) {
 	}
 }
 
+func TestInstallPackage(t *testing.T) {
+}
+
 func TestPkgWrite(t *testing.T) {
 	tmpDir := t.TempDir()
 	pkg, _ := NewPkgFromPath(samplePkgPath)

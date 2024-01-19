@@ -86,6 +86,10 @@ func (p *Pkg) InstallPackage(url string, name string) error {
 		return fmt.Errorf("creating pkg import `%s` from url `%s`: %w", name, url, err)
 	}
 
+	if p.PkgExists(pkgImport.Name()) {
+		return fmt.Errorf("pkg `%s` already exists, consider giving it another name", pkgImport.Name())
+	}
+
 	// TODO: This is all temporary for a MVP
 	tmpDir := "/tmp"
 	pkgPath := filepath.Join(tmpDir, pkgImport.Name())
@@ -154,4 +158,14 @@ func (p *Pkg) Write(dir string) error {
 	}
 
 	return nil
+}
+
+func (p *Pkg) PkgExists(other string) bool {
+	for _, pkg := range p.packages {
+		if pkg.name == other {
+			return true
+		}
+	}
+
+	return false
 }
