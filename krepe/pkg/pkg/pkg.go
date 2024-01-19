@@ -74,6 +74,10 @@ func (p *Pkg) RunPipelineByName(name string) error {
 	}
 }
 
+func (p *Pkg) InstallPackage(url string, name string) error {
+	return nil
+}
+
 func (p *Pkg) Write(dir string) error {
 	pkgPath := filepath.Join(dir, p.name)
 
