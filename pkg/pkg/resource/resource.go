@@ -5,17 +5,14 @@ import (
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 type Resource struct {
-	name string
-	raw  []byte
+	unstructured.Unstructured
 
-	metav1.TypeMeta   `yaml:",inline"`
-	metav1.ObjectMeta `yaml:"metadata,omitempty"`
-
-	Data map[string]any `yaml:",inline,omitempty"`
+	fname string
+	raw   []byte
 }
 
 func NewResourceFromPath(path string) (*Resource, error) {
@@ -25,13 +22,18 @@ func NewResourceFromPath(path string) (*Resource, error) {
 	}
 
 	r := &Resource{
-		name: filepath.Base(path),
-		raw:  raw,
-	}
-	err = yaml.Unmarshal(raw, r)
-	if err != nil {
-		return nil, err
+		fname: filepath.Base(path),
+		raw:   raw,
 	}
 
+	m := make(map[string]any)
+	if err := yaml.Unmarshal([]byte(r.raw), &m); err != nil {
+		panic(err)
+	}
+	r.Object = m
 	return r, nil
+}
+
+func (r *Resource) Fname() string {
+	return r.fname
 }

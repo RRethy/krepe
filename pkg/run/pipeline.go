@@ -14,5 +14,6 @@ func newPipeline(pkg *pkg.Pkg, name string) *pipeline {
 }
 
 func (p *pipeline) run() error {
-	return p.pkg.RunPipeline(p.name)
+	return nil
+	// return p.pkg.RunPipeline(p.name)
 }
