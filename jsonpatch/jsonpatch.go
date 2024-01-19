@@ -5,32 +5,40 @@ import (
 	"strings"
 )
 
-func JSONPatch(obj map[string]any, op, path string, value any) (map[string]any, error) {
-	_, err := pathToJsonPtrs(path)
+func JSONPatch(obj any, op, path string, value any) (any, error) {
+	ptrs, err := pathToJsonPtrs(path)
 	if err != nil {
 		return nil, err // TODO: wrap error
 	}
 
 	switch op {
 	case "add":
-		// newObj, err := add(obj, ptrs, value)
-		// if err != nil {
-		// return nil, err // TODO: wrap error
-		// }
-		// return newObj, nil
+		return add(obj, ptrs, value)
+
 	}
 
 	return obj, nil
 }
 
 func pathToJsonPtrs(path string) ([]string, error) {
-	if path[0] != '/' {
-		return nil, fmt.Errorf("path must start with /")
+	if path == "" {
+		return nil, nil
 	}
 
-	ptrs := strings.Split(path, "/")
-	if len(ptrs) == 0 {
-		return nil, fmt.Errorf("empty path is unsupported")
+	var ptrs []string
+	var curptr []rune
+	for _, c := range path {
+		if c == '/' {
+			ptrs = append(ptrs, string(curptr))
+			curptr = nil
+		} else {
+			curptr = append(curptr, c)
+		}
+	}
+	ptrs = append(ptrs, string(curptr))
+
+	if ptrs[0] != "" {
+		return nil, fmt.Errorf("path must start with /")
 	}
 
 	for i, ptr := range ptrs {

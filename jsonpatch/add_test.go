@@ -5,22 +5,53 @@ import (
 	"testing"
 )
 
-func TestJSONPatch(t *testing.T) {
+func TestAdd(t *testing.T) {
 	tests := []struct {
 		name    string
 		obj     map[string]any
 		op      string
 		path    string
 		value   any
-		want    map[string]any
+		want    any
 		wantErr bool
 	}{
+		{
+			name: "add with empty path",
+			obj: map[string]any{
+				"foo": "bar",
+				"baz": map[string]any{
+					"baz2": "qux",
+				},
+			},
+			path:    "",
+			value:   "quux",
+			want:    "quux",
+			wantErr: false,
+		},
+		{
+			name: "add with empty json ptr",
+			obj: map[string]any{
+				"foo": "bar",
+				"baz": map[string]any{
+					"baz2": "qux",
+				},
+			},
+			path:  "/baz/",
+			value: "quux",
+			want: map[string]any{
+				"foo": "bar",
+				"baz": map[string]any{
+					"baz2": "qux",
+					"":     "quux",
+				},
+			},
+			wantErr: false,
+		},
 		{
 			name: "add to map",
 			obj: map[string]any{
 				"foo": "bar",
 			},
-			op:    "add",
 			path:  "/baz",
 			value: "qux",
 			want: map[string]any{
@@ -40,7 +71,6 @@ func TestJSONPatch(t *testing.T) {
 					},
 				},
 			},
-			op:    "add",
 			path:  "/baz/baz3/baz5",
 			value: "corge",
 			want: map[string]any{
@@ -60,7 +90,6 @@ func TestJSONPatch(t *testing.T) {
 			obj: map[string]any{
 				"foo": "bar",
 			},
-			op:    "add",
 			path:  "/baz/baz2",
 			value: "qux",
 			want: map[string]any{
@@ -76,7 +105,6 @@ func TestJSONPatch(t *testing.T) {
 			obj: map[string]any{
 				"foo": "bar",
 			},
-			op:    "add",
 			path:  "/baz/baz2/baz3/baz4/baz5",
 			value: "qux",
 			want: map[string]any{
@@ -100,7 +128,6 @@ func TestJSONPatch(t *testing.T) {
 					"bar",
 				},
 			},
-			op:    "add",
 			path:  "/foo/1",
 			value: "qux",
 			want: map[string]any{
@@ -118,7 +145,6 @@ func TestJSONPatch(t *testing.T) {
 					"bar",
 				},
 			},
-			op:    "add",
 			path:  "/foo/-",
 			value: "qux",
 			want: map[string]any{
@@ -136,7 +162,6 @@ func TestJSONPatch(t *testing.T) {
 					"bar",
 				},
 			},
-			op:    "add",
 			path:  "/foo/0",
 			value: "qux",
 			want: map[string]any{
@@ -153,7 +178,6 @@ func TestJSONPatch(t *testing.T) {
 					"bar",
 				},
 			},
-			op:    "add",
 			path:  "/foo/2",
 			value: "qux",
 			want: map[string]any{
@@ -172,7 +196,6 @@ func TestJSONPatch(t *testing.T) {
 					"bar",
 				},
 			},
-			op:    "add",
 			path:  "/foo/3",
 			value: "qux",
 			want: map[string]any{
@@ -200,7 +223,6 @@ func TestJSONPatch(t *testing.T) {
 					"baz",
 				},
 			},
-			op:    "add",
 			path:  "/foo/1/quux/1",
 			value: "qux",
 			want: map[string]any{
@@ -223,7 +245,6 @@ func TestJSONPatch(t *testing.T) {
 			obj: map[string]any{
 				"foo": 3,
 			},
-			op:    "add",
 			path:  "/foo/bar",
 			value: "baz",
 			want: map[string]any{
@@ -238,7 +259,6 @@ func TestJSONPatch(t *testing.T) {
 					"bar",
 				},
 			},
-			op:    "add",
 			path:  "/foo/bar",
 			value: "baz",
 			want: map[string]any{
@@ -255,7 +275,6 @@ func TestJSONPatch(t *testing.T) {
 					"bar",
 				},
 			},
-			op:    "add",
 			path:  "/foo/bar",
 			value: "baz",
 			want: map[string]any{
@@ -272,7 +291,6 @@ func TestJSONPatch(t *testing.T) {
 					"bar": "baz",
 				},
 			},
-			op:    "add",
 			path:  "/foo/1",
 			value: "baz",
 			want: map[string]any{
