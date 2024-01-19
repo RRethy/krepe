@@ -5,7 +5,7 @@ import (
 
 	"github.com/Shopify/krepe/cli/pkg/pkg/imports"
 	"github.com/Shopify/krepe/cli/pkg/pkg/pipeline"
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

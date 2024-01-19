@@ -1,0 +1,7 @@
+name: krepe
+
+type: go
+
+up:
+  - go:
+      version: 1.21.1
