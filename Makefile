@@ -7,22 +7,14 @@ GOTEST=go test
 GOMOD=go mod
 
 .PHONY: build
-build:
-	$(GOBUILD) -C krepe -o $(BINARY_NAME) -v
-	$(GOBUILD) -C jsonpatch
+build: build-krepe build-jsonpatch build-krmmerge
 
-.PHONY: build-krepe
-build-krepe:
-	$(GOBUILD) -C krepe -o $(BINARY_NAME) -v
-
-.PHONY: build-jsonpatch
-build-jsonpatch:
-	$(GOBUILD) -C jsonpatch
+.PHONY: build-%
+build-%:
+	$(GOBUILD) -C $*
 
 .PHONY: test
-test:
-	$(GOTEST) -C krepe ./...
-	$(GOTEST) -C jsonpatch ./...
+test: test-krepe test-jsonpatch test-krmmerge
 
 .PHONY: test-%
 test-%:
