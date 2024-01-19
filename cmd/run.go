@@ -3,8 +3,13 @@ package cmd
 import (
 	"fmt"
 
+	"github.com/Shopify/krepe/pkg/run"
 	"github.com/spf13/cobra"
 )
+
+var pipeline string
+var function string
+var pkg string
 
 // runCmd represents the run command
 var runCmd = &cobra.Command{
@@ -17,7 +22,11 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("run called")
+		err := run.Run(pkg, pipeline, function)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("run succeeded")
 	},
 }
 
@@ -30,7 +39,7 @@ func init() {
 	// and all subcommands, e.g.:
 	// runCmd.PersistentFlags().String("foo", "", "A help for foo")
 
-	runCmd.Flags().StringP("pipeline", "p", "default", "TODO")
-	// runCmd.Flags().StringP("function", "f", "", "TODO")
-	runCmd.Flags().String("pkg", ".", "TODO")
+	runCmd.Flags().StringVarP(&pipeline, "pipeline", "p", "default", "TODO")
+	runCmd.Flags().StringVarP(&function, "function", "f", "", "TODO")
+	runCmd.Flags().StringVar(&pkg, "pkg", ".", "TODO")
 }
