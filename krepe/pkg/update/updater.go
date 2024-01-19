@@ -4,7 +4,6 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/git"
 	"github.com/RRethy/krepe/krepe/pkg/merger"
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
-	"github.com/RRethy/krepe/krepe/pkg/pkg/imports"
 )
 
 type Updater struct {
@@ -58,7 +57,7 @@ func (updater *Updater) Update(p *pkg.Pkg, url, name string) error {
 		return err
 	}
 
-	upstreamPkgImport := imports.NewPkg(upstreamRef, name)
+	upstreamPkgImport := pkg.NewPackageImport(upstreamRef, name)
 	pkgName := upstreamPkgImport.Name()
 
 	originPkgImport, ok := p.GetPkgImport(pkgName)

@@ -6,7 +6,6 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/exec"
 	"github.com/RRethy/krepe/krepe/pkg/git"
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
-	"github.com/RRethy/krepe/krepe/pkg/pkg/imports"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -27,7 +26,7 @@ func TestInstallerInstall(t *testing.T) {
 		url      string
 		name     string
 		cmd      string
-		wantPkg  *imports.Pkg
+		wantPkg  *pkg.PackageImport
 		wantErr  bool
 	}{
 		{
@@ -36,7 +35,7 @@ func TestInstallerInstall(t *testing.T) {
 			url:      "github.com/RRethy/sample_pkg@v0.0.1",
 			name:     "sample_pkg",
 			cmd:      "true",
-			wantPkg:  imports.NewPkg(installedRepoRef, "sample_pkg"),
+			wantPkg:  pkg.NewPackageImport(installedRepoRef, "sample_pkg"),
 			wantErr:  false,
 		},
 		{
@@ -69,7 +68,7 @@ func TestInstallerInstall(t *testing.T) {
 			url:      "github.com/RRethy/sample_pkg@v0.0.1",
 			name:     "",
 			cmd:      "true",
-			wantPkg:  imports.NewPkg(installedRepoRef, ""),
+			wantPkg:  pkg.NewPackageImport(installedRepoRef, ""),
 			wantErr:  true,
 		},
 	}

@@ -3,7 +3,6 @@ package install
 import (
 	"github.com/RRethy/krepe/krepe/pkg/git"
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
-	"github.com/RRethy/krepe/krepe/pkg/pkg/imports"
 )
 
 type Installer struct {
@@ -49,7 +48,7 @@ func (installer *Installer) Install(p *pkg.Pkg, url, name string) error {
 		return err
 	}
 
-	pkgImport := imports.NewPkg(ref, name)
+	pkgImport := pkg.NewPackageImport(ref, name)
 	err = p.AddPackage(newPkg, pkgImport)
 	if err != nil {
 		return err

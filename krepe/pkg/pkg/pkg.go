@@ -4,16 +4,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-
-	"github.com/RRethy/krepe/krepe/pkg/pkg/imports"
-	"github.com/RRethy/krepe/krepe/pkg/pkg/pipeline"
-	"github.com/RRethy/krepe/krepe/pkg/pkg/resource"
 )
 
 type Pkg struct {
 	Name      string
 	Krepe     *Krepe
-	resources []*resource.Resource
+	resources []*Resource
 	packages  []*Pkg
 }
 
@@ -35,9 +31,9 @@ func NewPkgFromPathWithName(pkgPath, name string) (*Pkg, error) {
 		return nil, fmt.Errorf("failed to parse krepe.yaml in pkg path `%s`: %w", pkgPath, err)
 	}
 
-	var resources []*resource.Resource
+	var resources []*Resource
 	for _, fileImport := range krepe.Imports.Files {
-		resource, err := resource.NewResourceFromPath(filepath.Join(pkgPath, fileImport))
+		resource, err := NewResourceFromPath(filepath.Join(pkgPath, fileImport))
 		if err != nil {
 			return nil, fmt.Errorf("failed to create resource `%s` in pkg `%s`: %w", fileImport, pkgPath, err)
 		}
@@ -73,7 +69,7 @@ func (p *Pkg) RunPipelineByName(name string) error {
 	}
 }
 
-func (p *Pkg) RunPipeline(pipeline pipeline.Pipeline) error {
+func (p *Pkg) RunPipeline(pipeline Pipeline) error {
 	for _, resource := range p.resources {
 		err := pipeline.Run(resource)
 		if err != nil {
@@ -96,7 +92,7 @@ func (p *Pkg) RunPipeline(pipeline pipeline.Pipeline) error {
 	return nil
 }
 
-func (p *Pkg) AddPackage(pkg *Pkg, pkgImport *imports.Pkg) error {
+func (p *Pkg) AddPackage(pkg *Pkg, pkgImport *PackageImport) error {
 	pkg.Name = pkgImport.Name()
 
 	if p.ContainsPkg(pkgImport) {
@@ -108,7 +104,7 @@ func (p *Pkg) AddPackage(pkg *Pkg, pkgImport *imports.Pkg) error {
 	return nil
 }
 
-func (p *Pkg) UpdatePackage(newPkg *Pkg, pkgImport *imports.Pkg) error {
+func (p *Pkg) UpdatePackage(newPkg *Pkg, pkgImport *PackageImport) error {
 	newPkg.Name = pkgImport.Name()
 
 	for i, pkg := range p.packages {
@@ -157,7 +153,7 @@ func (p *Pkg) Write(dir string) error {
 	return nil
 }
 
-func (p *Pkg) ContainsPkg(other *imports.Pkg) bool {
+func (p *Pkg) ContainsPkg(other *PackageImport) bool {
 	for _, pkgImport := range p.Krepe.Imports.Packages {
 		if pkgImport.Name() == other.Name() {
 			return true
@@ -167,7 +163,7 @@ func (p *Pkg) ContainsPkg(other *imports.Pkg) bool {
 	return false
 }
 
-func (p *Pkg) GetPkgImport(name string) (pkgImport *imports.Pkg, ok bool) {
+func (p *Pkg) GetPkgImport(name string) (pkgImport *PackageImport, ok bool) {
 	for _, pkgImport := range p.Krepe.Imports.Packages {
 		if pkgImport.Name() == name {
 			return pkgImport, true

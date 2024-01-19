@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/RRethy/krepe/krepe/pkg/pkg/imports"
-	"github.com/RRethy/krepe/krepe/pkg/pkg/pipeline"
 	"github.com/RRethy/krepe/krepe/pkg/yaml"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -15,8 +13,8 @@ type Krepe struct {
 	metav1.TypeMeta   `yaml:",inline"`
 	metav1.ObjectMeta `yaml:"metadata,omitempty"`
 
-	Imports   *imports.Imports    `yaml:"imports,omitempty"`
-	Pipelines *pipeline.Pipelines `yaml:"pipelines,omitempty"`
+	Imports   *Imports   `yaml:"imports,omitempty"`
+	Pipelines *Pipelines `yaml:"pipelines,omitempty"`
 }
 
 func NewKrepeFromPath(krepePath string) (*Krepe, error) {
@@ -34,7 +32,7 @@ func NewKrepeFromPath(krepePath string) (*Krepe, error) {
 	return k, nil
 }
 
-func (k *Krepe) AddPkgImport(p *imports.Pkg) {
+func (k *Krepe) AddPkgImport(p *PackageImport) {
 	k.Imports.AddPackage(p)
 }
 

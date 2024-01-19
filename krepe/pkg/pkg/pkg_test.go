@@ -5,8 +5,6 @@ import (
 	"testing"
 
 	"github.com/RRethy/krepe/krepe/pkg/git"
-	"github.com/RRethy/krepe/krepe/pkg/pkg/imports"
-	"github.com/RRethy/krepe/krepe/pkg/pkg/pipeline"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -95,7 +93,7 @@ func TestPkgRunPipeline(t *testing.T) {
 		name     string
 		pkg      *Pkg
 		validate func(*Pkg)
-		pipeline pipeline.Pipeline
+		pipeline Pipeline
 		wantErr  bool
 	}{
 		{
@@ -163,7 +161,7 @@ func TestPkgAddPackage(t *testing.T) {
 			assert.NoError(t, err)
 			repoRef, err := git.NewPkgRefFromString("github.com/RRethy/" + test.newPkgName + "@v0.0.1")
 			assert.NoError(t, err)
-			pkgImport := imports.NewPkg(repoRef, "")
+			pkgImport := NewPackageImport(repoRef, "")
 
 			err = pkg.AddPackage(newPkg, pkgImport)
 			if test.wantErr {
@@ -201,7 +199,7 @@ func TestPkgContainsPkg(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			repoRef, err := git.NewPkgRefFromString(test.other)
 			assert.NoError(t, err)
-			pkgImport := imports.NewPkg(repoRef, "")
+			pkgImport := NewPackageImport(repoRef, "")
 			assert.Equal(t, test.want, pkg.ContainsPkg(pkgImport))
 		})
 	}
