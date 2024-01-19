@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"github.com/Shopify/krepe/pkg/pkg/pipeline"
+	"github.com/Shopify/krepe/pkg/pkg/resource"
 )
 
 type Pkg struct {
 	name      string
 	krepe     *Krepe
-	resources []*resource
+	resources []*resource.Resource
 	packages  []*Pkg
 }
 
@@ -32,9 +35,9 @@ func NewPkgFromPath(pkgPath string) (*Pkg, error) {
 		return nil, fmt.Errorf("failed to create krepe in pkg path `%s`: %w", pkgPath, err)
 	}
 
-	var resources []*resource
+	var resources []*resource.Resource
 	for _, fileImport := range krepe.Imports.Files {
-		resource, err := newResourceFromPath(filepath.Join(pkgPath, fileImport))
+		resource, err := resource.NewResourceFromPath(filepath.Join(pkgPath, fileImport))
 		if err != nil {
 			return nil, fmt.Errorf("failed to create resource `%s` in pkg `%s`: %w", fileImport, pkgPath, err)
 		}
@@ -58,6 +61,20 @@ func NewPkgFromPath(pkgPath string) (*Pkg, error) {
 	}, nil
 }
 
-func (p *Pkg) RunPipeline(name string) error {
+func (p *Pkg) RunPipelineByName(name string) error {
+	if pipeline, ok := p.krepe.Pipelines[name]; ok {
+		for _, resource := range p.resources {
+			err := pipeline.Run(resource)
+			if err != nil {
+				return fmt.Errorf("failed to run pipeline `%s` on resource `%s`: %w", name, resource.Name, err)
+			}
+		}
+		return nil
+	} else {
+		return fmt.Errorf("failed to get pipeline `%s`", name)
+	}
+}
+
+func (p *Pkg) RunPipeline(pipeline pipeline.Pipeline) error {
 	return nil
 }

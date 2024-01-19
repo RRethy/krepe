@@ -1,4 +1,4 @@
-package pkg
+package resource
 
 import (
 	"os"
@@ -7,20 +7,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type resource struct {
+type Resource struct {
 	metav1.TypeMeta   `yaml:",inline"`
 	metav1.ObjectMeta `yaml:"metadata,omitempty"`
 
-	data map[string]any `yaml:",inline,omitempty"`
+	Data map[string]any `yaml:",inline,omitempty"`
 }
 
-func newResourceFromPath(path string) (*resource, error) {
+func NewResourceFromPath(path string) (*Resource, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	r := &resource{}
+	r := &Resource{}
 	err = yaml.Unmarshal(data, r)
 	if err != nil {
 		return nil, err

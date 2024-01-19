@@ -9,5 +9,10 @@ func Run(pkg, pipeline, function string) error {
 	if err != nil {
 		return fmt.Errorf("failed to create runnable: %w", err)
 	}
-	return r.run()
+
+	err = r.run()
+	if err != nil {
+		return fmt.Errorf("failed to run in pkg `%s`: %w", pkg, err)
+	}
+	return nil
 }
