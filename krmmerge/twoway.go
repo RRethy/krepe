@@ -1,19 +1,19 @@
 package krmmerge
 
 func twoWayMerge(local, upstream any) any {
-	switch local.(type) {
+	switch localTyped := local.(type) {
 	case map[string]any:
 		upstreamMap, ok := upstream.(map[string]any)
 		if !ok {
 			return local
 		}
-		return twoWayMergeMap(local.(map[string]any), upstreamMap)
+		return twoWayMergeMap(localTyped, upstreamMap)
 	case []any:
 		upstreamArr, ok := upstream.([]any)
 		if !ok {
 			return local
 		}
-		return twoWayMergeSlice(local.([]any), upstreamArr)
+		return twoWayMergeSlice(localTyped, upstreamArr)
 	default:
 		return twoWayMergeScalar(local, upstream)
 	}

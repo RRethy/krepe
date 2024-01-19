@@ -9,19 +9,19 @@ func delta(source, remove any) any {
 		return source
 	}
 
-	switch source.(type) {
+	switch sourceTyped := source.(type) {
 	case map[string]any:
 		removeMap, ok := remove.(map[string]any)
 		if !ok {
 			return source
 		}
-		return deltaMap(source.(map[string]any), removeMap)
+		return deltaMap(sourceTyped, removeMap)
 	case []any:
 		removeArr, ok := remove.([]any)
 		if !ok {
 			return source
 		}
-		return deltaSlice(source.([]any), removeArr)
+		return deltaSlice(sourceTyped, removeArr)
 	default:
 		return deltaScalar(source, remove)
 	}
