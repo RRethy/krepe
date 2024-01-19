@@ -2,6 +2,7 @@ package jsonpatch
 
 import (
 	"fmt"
+	"reflect"
 )
 
 type Test struct {
@@ -21,6 +22,15 @@ func NewTest(path string, value any) (*Test, error) {
 	}, nil
 }
 
-func (c *Test) Apply(obj any) (any, error) {
-	return nil, nil
+func (t *Test) Apply(obj any) (any, error) {
+	got, err := get(obj, t.path)
+	if err != nil {
+		return nil, err
+	}
+
+	if !reflect.DeepEqual(got, t.value) {
+		return nil, fmt.Errorf("test failed: expected %v, got %v", t.value, got)
+	}
+
+	return obj, nil
 }
