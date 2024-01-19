@@ -26,9 +26,7 @@ clean:
 	rm -f $(BINARY_PATH)
 
 .PHONY: tidy
-tidy:
-	$(GOMOD) -C krepe tidy
-	$(GOMOD) -C jsonpatch tidy
+tidy: tidy-krepe tidy-jsonpatch tidy-krmmerge
 
 .PHONY: tidy-%
 tidy-%:

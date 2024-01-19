@@ -43,6 +43,14 @@ func deltaMap(source, remove map[string]any) map[string]any {
 }
 
 func deltaSlice(source, remove []any) []any {
+	if isAssociativeSlice(source) && isAssociativeSlice(remove) {
+		return deltaSliceAssociative(source, remove)
+	} else {
+		return deltaSliceNonAssociative(source, remove)
+	}
+}
+
+func deltaSliceNonAssociative(source, remove []any) []any {
 	if len(source) != len(remove) {
 		return source
 	}
@@ -53,5 +61,25 @@ func deltaSlice(source, remove []any) []any {
 		}
 	}
 
+	return nil
+}
+
+func deltaSliceAssociative(source, remove []any) []any {
+	key := getAssociativeKey(append(source, remove...))
+	if key == "" {
+		return deltaSliceNonAssociative(source, remove)
+	}
+
+	removeByKey := make(map[string]any)
+	for _, v := range remove {
+		v, ok := v.(map[string]any)
+		if !ok {
+			return deltaSliceNonAssociative(source, remove)
+		}
+
+		removeByKey[v[key].(string)] = v
+	}
+
+	var result []any
 	return nil
 }
