@@ -2,21 +2,13 @@ kind: Krepe
 apiVersion: krepe.io/v1
 imports:
   files:
-  - deployment.yaml
-  - service.yaml
-  - ingress.yaml
+    - deployment.yaml
+    - service.yaml
+    - ingress.yaml
 pipelines:
-  - name: mypipeline
-    steps:
+  mypipeline:
     - function: set-labels
       configMap:
         foo: bar
-  - name: badpipeline
-    steps:
-pipelines:
-  mypipeline:
-  - function: set-labels
-    configMap:
-      foo: bar
   badpipeline:
-  - function: run-fail
+    - function: run-fail

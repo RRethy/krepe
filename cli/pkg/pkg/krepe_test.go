@@ -84,7 +84,7 @@ func TestNewKrepeFromPath(t *testing.T) {
 	}
 }
 
-func XTestKrepeWrite(t *testing.T) {
+func TestKrepeWrite(t *testing.T) {
 	krepe, _ := NewKrepeFromPath(krepeFile)
 	wantYaml, _ := os.ReadFile(krepeFile)
 
