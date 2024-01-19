@@ -14,6 +14,8 @@ var functions = map[string]Function{
 	"validate-schema": &ValidateSchema{},
 	"tag-image":       &TagImage{},
 	"jsonpatch":       &JsonPatch{},
+	"run-fail":        &RunFail{},
+	"config-fail":     &ConfigFail{},
 }
 
 type Function interface {

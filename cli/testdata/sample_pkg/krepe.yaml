@@ -11,8 +11,4 @@ pipelines:
       configMap:
         foo: bar
   badpipeline:
-    - function: jsonpatch
-      configMap:
-        op: add
-        path: /foo/bar/baz
-        value: 1
+    - function: run-fail

@@ -57,7 +57,6 @@ func TestPkgRunPipelineByName(t *testing.T) {
 			wantErr:  true,
 		},
 		{
-			// TODO(RRethy): add fail function
 			name:     "fails with bad pipeline",
 			pkg:      pkg,
 			validate: func(pkg *Pkg) {},
