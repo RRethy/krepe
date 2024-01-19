@@ -3,9 +3,16 @@ module github.com/Shopify/krepe/krepe
 go 1.21
 
 require (
+	github.com/Shopify/krepe/jsonpatch v0.0.0-00010101000000-000000000000
+	github.com/goccy/go-yaml v1.11.0
 	github.com/spf13/cobra v1.7.0
+	github.com/stretchr/testify v1.8.4
+	github.com/wk8/go-ordered-map/v2 v2.1.8
+	gopkg.in/yaml.v3 v3.0.1
 	k8s.io/apimachinery v0.28.1
 )
+
+replace github.com/Shopify/krepe/jsonpatch => ../jsonpatch
 
 require (
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
@@ -13,7 +20,6 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.15.0 // indirect
 	github.com/go-logr/logr v1.2.4 // indirect
-	github.com/goccy/go-yaml v1.11.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -25,17 +31,13 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	github.com/stretchr/objx v0.5.1 // indirect
-	github.com/stretchr/testify v1.8.4 // indirect
-	github.com/wk8/go-ordered-map v1.0.0 // indirect
-	github.com/wk8/go-ordered-map/v2 v2.1.8 // indirect
+	golang.design/x/reflect v0.0.0-20220504060917-02c43be63f3b // indirect
 	golang.org/x/net v0.13.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.11.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/klog/v2 v2.100.1 // indirect
 	k8s.io/utils v0.0.0-20230406110748-d93618cff8a2 // indirect
 	sigs.k8s.io/json v0.0.0-20221116044647-bc3834ca7abd // indirect
