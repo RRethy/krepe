@@ -10,7 +10,7 @@ import (
 
 type Pkg struct {
 	name      string
-	krepe     *Krepe
+	Krepe     *Krepe
 	resources []*resource.Resource
 	packages  []*Pkg
 }
@@ -54,14 +54,14 @@ func NewPkgFromPath(pkgPath string) (*Pkg, error) {
 
 	return &Pkg{
 		name:      name,
-		krepe:     krepe,
+		Krepe:     krepe,
 		resources: resources,
 		packages:  packages,
 	}, nil
 }
 
 func (p *Pkg) RunPipelineByName(name string) error {
-	if pipeline, ok := p.krepe.Pipelines.Get(name); ok {
+	if pipeline, ok := p.Krepe.Pipelines.Get(name); ok {
 		for _, resource := range p.resources {
 			err := pipeline.Run(resource)
 			if err != nil {
@@ -82,7 +82,7 @@ func (p *Pkg) Write(dir string) error {
 		return fmt.Errorf("failed to create pkg directory `%s`: %w", pkgPath, err)
 	}
 
-	err = p.krepe.Write(pkgPath)
+	err = p.Krepe.Write(pkgPath)
 	if err != nil {
 		return fmt.Errorf("failed to write krepe.yaml in pkg directory `%s`: %w", pkgPath, err)
 	}

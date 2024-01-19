@@ -13,6 +13,6 @@ func newFunction(pkg *pkg.Pkg, name string) *function {
 	return &function{pkg: pkg, name: name}
 }
 
-func (f *function) run() error {
+func (f *function) run(dir string) error {
 	return nil
 }

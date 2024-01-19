@@ -32,8 +32,9 @@ func TestNewKrepeFromPath(t *testing.T) {
 			},
 			wantImportPackages: nil,
 			wantPipelines: map[string][]string{
-				"mypipeline":  {"set-labels"},
-				"badpipeline": {"run-fail"},
+				"mypipeline":     {"set-labels"},
+				"badpipeline":    {"run-fail"},
+				"no-op-pipeline": {"succeed"},
 			},
 			wantErr: false,
 		},

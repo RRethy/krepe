@@ -12,3 +12,5 @@ pipelines:
         foo: bar
   badpipeline:
     - function: run-fail
+  no-op-pipeline:
+    - function: succeed

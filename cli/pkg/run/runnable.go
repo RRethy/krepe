@@ -7,7 +7,7 @@ import (
 )
 
 type runnable interface {
-	run() error
+	run(dir string) error
 }
 
 func newRunnable(pkgPath, pipeline, function string) (runnable, error) {
