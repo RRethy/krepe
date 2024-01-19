@@ -4,11 +4,14 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/RRethy/krepe/krepe/pkg/git"
+	"github.com/RRethy/krepe/krepe/pkg/pkg/imports"
 	"github.com/stretchr/testify/assert"
 )
 
 const (
-	samplePkgPath = "../../testdata/packages/sample_pkg"
+	samplePkgPath                 = "../../testdata/packages/sample_pkg"
+	samplePkgWithPkgInstalledPath = "../../testdata/packages/sample_pkg_with_pkg_installed"
 )
 
 func TestNewPkgFromPath(t *testing.T) {
@@ -79,7 +82,38 @@ func TestPkgRunPipelineByName(t *testing.T) {
 	}
 }
 
-func TestInstallPackage(t *testing.T) {
+func TestPkgAddPackage(t *testing.T) {
+}
+
+func TestPkgContainsPkg(t *testing.T) {
+	pkg, err := NewPkgFromPath(samplePkgWithPkgInstalledPath)
+	assert.NoError(t, err)
+
+	tests := []struct {
+		name  string
+		other string
+		want  bool
+	}{
+		{
+			name:  "contains pkg",
+			other: "github.com/RRethy/sample_pkg@v0.0.1",
+			want:  true,
+		},
+		{
+			name:  "does not contain pkg",
+			other: "github.com/RRethy/non_existent_pkg@v0.0.1",
+			want:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			repoRef, err := git.NewRepoRefFromString(tt.other)
+			assert.NoError(t, err)
+			pkgImport := imports.NewPkg(repoRef, "")
+			assert.Equal(t, tt.want, pkg.ContainsPkg(pkgImport))
+		})
+	}
 }
 
 func TestPkgWrite(t *testing.T) {

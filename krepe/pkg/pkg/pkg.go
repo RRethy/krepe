@@ -124,12 +124,6 @@ func (p *Pkg) Write(dir string) error {
 }
 
 func (p *Pkg) ContainsPkg(other *imports.Pkg) bool {
-	for _, pkg := range p.packages {
-		if pkg.name == other.Name() {
-			return true
-		}
-	}
-
 	for _, pkgImport := range p.Krepe.Imports.Packages {
 		if pkgImport.Name() == other.Name() {
 			return true
