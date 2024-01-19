@@ -3,8 +3,8 @@ package threewaymerge
 import (
 	"testing"
 
+	"github.com/RRethy/krepe/deepishcopy"
 	"github.com/stretchr/testify/assert"
-	"golang.design/x/reflect"
 )
 
 type threeWayMergeTest[T mergeable] struct {
@@ -20,9 +20,9 @@ func runThreeWayMergeTests[T mergeable](t *testing.T, threeWayMergeFunc func(T, 
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			originCopy := reflect.DeepCopy(test.origin)
-			localCopy := reflect.DeepCopy(test.local)
-			upstreamCopy := reflect.DeepCopy(test.upstream)
+			originCopy := deepishcopy.Copy(test.origin)
+			localCopy := deepishcopy.Copy(test.local)
+			upstreamCopy := deepishcopy.Copy(test.upstream)
 			got := threeWayMergeFunc(test.origin, test.local, test.upstream)
 			assert.Equal(t, test.want, got)
 			assert.Equal(t, originCopy, test.origin, "origin should not be mutated")

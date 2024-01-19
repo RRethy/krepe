@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"golang.design/x/reflect"
+	"github.com/RRethy/krepe/deepishcopy"
 )
 
 // Copy is a JSON patch operation that copies a value from one location to another.
@@ -46,7 +46,7 @@ func copy(obj any, from, path []string) (any, error) {
 		return nil, err
 	}
 
-	return add(obj, path, reflect.DeepCopy(fromObj))
+	return add(obj, path, deepishcopy.Copy(fromObj))
 }
 
 func get(obj any, path []string) (any, error) {

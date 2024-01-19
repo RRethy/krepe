@@ -17,7 +17,10 @@ replace github.com/RRethy/krepe/jsonpatch => ../jsonpatch
 
 replace github.com/RRethy/krepe/krmmerge => ../krmmerge
 
+replace github.com/RRethy/krepe/deepishcopy => ../deepishcopy
+
 require (
+	github.com/RRethy/krepe/deepishcopy v0.0.0-00010101000000-000000000000 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -36,7 +39,6 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.design/x/reflect v0.0.0-20220504060917-02c43be63f3b // indirect
 	golang.org/x/net v0.15.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 	golang.org/x/text v0.13.0 // indirect

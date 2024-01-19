@@ -3,8 +3,8 @@ package threewaymerge
 import (
 	"testing"
 
+	"github.com/RRethy/krepe/deepishcopy"
 	"github.com/stretchr/testify/assert"
-	"golang.design/x/reflect"
 )
 
 type deltaTest[T mergeable] struct {
@@ -19,8 +19,8 @@ func runDeltaTests[T mergeable](t *testing.T, deltaFunc func(T, T) T, tests []de
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			sourceCopy := reflect.DeepCopy(test.source)
-			removeCopy := reflect.DeepCopy(test.remove)
+			sourceCopy := deepishcopy.Copy(test.source)
+			removeCopy := deepishcopy.Copy(test.remove)
 			got := deltaFunc(test.source, test.remove)
 			assert.Equal(t, test.want, got)
 			assert.Equal(t, sourceCopy, test.source, "source should not be mutated")

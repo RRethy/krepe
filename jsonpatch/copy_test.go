@@ -124,5 +124,22 @@ func TestCopy(t *testing.T) {
 			want:    nil,
 			wantErr: true,
 		},
+		{
+			name: "copy from map with nested nil value",
+			obj: map[string]any{
+				"key1": map[string]any{
+					"key2": nil,
+				},
+			},
+			patch: &Copy{from: []string{"key1"}, path: []string{"key3"}},
+			want: map[string]any{
+				"key1": map[string]any{
+					"key2": nil,
+				},
+				"key3": map[string]any{
+					"key2": nil,
+				},
+			},
+		},
 	})
 }

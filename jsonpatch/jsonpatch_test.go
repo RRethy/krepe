@@ -3,8 +3,8 @@ package jsonpatch
 import (
 	"testing"
 
+	"github.com/RRethy/krepe/deepishcopy"
 	"github.com/stretchr/testify/assert"
-	"golang.design/x/reflect"
 )
 
 type patchTest struct {
@@ -17,7 +17,7 @@ type patchTest struct {
 
 func (pt *patchTest) run(t *testing.T) {
 	t.Run(pt.name, func(t *testing.T) {
-		objCopy := reflect.DeepCopy(pt.obj)
+		objCopy := deepishcopy.Copy(pt.obj)
 		got, err := pt.patch.Apply(pt.obj)
 		if pt.wantErr {
 			assert.Error(t, err)
