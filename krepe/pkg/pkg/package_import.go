@@ -54,6 +54,8 @@ func (p *PackageImport) MarshalYAML() (interface{}, error) {
 	}, nil
 }
 
+// Name returns the name of the package import. It is inferred from the package reference,
+// unless it is explicitly set.
 func (p *PackageImport) Name() string {
 	if p.name == "" {
 		return p.Ref.Repo

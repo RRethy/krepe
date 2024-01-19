@@ -75,3 +75,46 @@ name: foo
 	assert.NoError(t, err)
 	assert.Equal(t, want, string(got))
 }
+
+func TestPackageImportName(t *testing.T) {
+	tests := []struct {
+		name string
+		pkg  *PackageImport
+		want string
+	}{
+		{
+			name: "name set",
+			pkg: &PackageImport{
+				Ref: &git.PkgRef{
+					Owner: "RRethy",
+					Repo:  "krepe",
+					Path:  nil,
+					Tag:   "v0.0.1",
+					Name:  "krepe",
+				},
+				name: "foo",
+			},
+			want: "foo",
+		},
+		{
+			name: "name not set",
+			pkg: &PackageImport{
+				Ref: &git.PkgRef{
+					Owner: "RRethy",
+					Repo:  "krepe",
+					Path:  nil,
+					Tag:   "v0.0.1",
+					Name:  "krepe",
+				},
+				name: "",
+			},
+			want: "krepe",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.want, test.pkg.Name())
+		})
+	}
+}
