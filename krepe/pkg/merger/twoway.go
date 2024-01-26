@@ -1,4 +1,19 @@
-package threewaymerge
+package merger
+
+import (
+	"fmt"
+
+	"github.com/RRethy/krepe/krepe/pkg/pkg"
+)
+
+func TwoWayMerge[T Mergeable](local, upstream T) (T, error) {
+	merged := twoWayMerge(any(local), any(upstream))
+	mergedTyped, ok := merged.(T)
+	if !ok {
+		return local, fmt.Errorf("TODO: internal error casting merged value of type %T to expected type %T", merged, local)
+	}
+	return mergedTyped, nil
+}
 
 // twoWayMerge returns the result of performing a 2-way merge on local and upstream.
 // If local and upstream are not the same type then local is returned.
@@ -132,4 +147,12 @@ func twoWayMergeSliceNonAssociative(local, upstream []any) []any {
 // twoWayMergeScalar returns the upstream value.
 func twoWayMergeScalar(local, upstream any) any {
 	return upstream
+}
+
+func twoWayMergePkg(local, upstream *pkg.Pkg) *pkg.Pkg {
+	return nil
+}
+
+func twoWayMergeKrepe(local, upstream *pkg.Krepe) *pkg.Krepe {
+	return nil
 }

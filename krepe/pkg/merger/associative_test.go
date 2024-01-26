@@ -1,4 +1,4 @@
-package threewaymerge
+package merger
 
 import (
 	"testing"

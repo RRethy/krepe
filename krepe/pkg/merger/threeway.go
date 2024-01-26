@@ -1,8 +1,22 @@
-package threewaymerge
+package merger
 
 import (
+	"fmt"
 	"reflect"
+
+	"github.com/RRethy/krepe/krepe/pkg/pkg"
 )
+
+// Merge returns the result of performing a 3-way merge on the origin, local, and upstream maps.
+// This method does not mutate origin, local, and upstream, but the result might share data structures.
+func ThreeWayMerge[T Mergeable](origin, local, upstream T) (T, error) {
+	merged := threeWayMerge(any(origin), any(local), any(upstream))
+	mergedTyped, ok := merged.(T)
+	if !ok {
+		return local, fmt.Errorf("TODO: internal error casting merged value of type %T to expected type %T", merged, local)
+	}
+	return mergedTyped, nil
+}
 
 // threeWayMerge returns the result of performing a 3-way merge on origin, local, and upstream.
 // If any of origin, local, and upstream are not the same type then local is returned.
@@ -13,12 +27,23 @@ import (
 //   - If origin, local, and upstream are scalars then threeWayMergeScalar algorithm is used.
 //
 // origin, local, and upstream are not modified but the result may share memory with origin, local, and upstream.
-func threeWayMergeAny(origin, local, upstream any) any {
+func threeWayMerge(origin, local, upstream any) any {
 	if upstream == nil {
 		if origin == nil {
 			return local
 		}
 		return nil
+	}
+
+	if local == nil {
+		if origin == nil {
+			return upstream
+		}
+		return nil
+	}
+
+	if origin == nil {
+		return twoWayMerge(local, upstream)
 	}
 
 	switch localTyped := local.(type) {
@@ -46,6 +71,30 @@ func threeWayMergeAny(origin, local, upstream any) any {
 		}
 
 		return threeWayMergeSlice(originArr, localTyped, upstreamArr)
+	case *pkg.Pkg:
+		upstreamPkg, ok := upstream.(*pkg.Pkg)
+		if !ok {
+			return local
+		}
+
+		originPkg, ok := origin.(*pkg.Pkg)
+		if !ok {
+			return twoWayMergePkg(localTyped, upstreamPkg)
+		}
+
+		return threeWayMergePkg(originPkg, localTyped, upstreamPkg)
+	case *pkg.Krepe:
+		upstreamKrepe, ok := upstream.(*pkg.Krepe)
+		if !ok {
+			return local
+		}
+
+		originKrepe, ok := origin.(*pkg.Krepe)
+		if !ok {
+			return twoWayMergeKrepe(localTyped, upstreamKrepe)
+		}
+
+		return threeWayMergeKrepe(originKrepe, localTyped, upstreamKrepe)
 	default:
 		if reflect.TypeOf(local) != reflect.TypeOf(upstream) {
 			return local
@@ -89,7 +138,7 @@ func threeWayMergeMap(origin, local, upstream map[string]any) map[string]any {
 		} else if !originOk && localOk && upstreamOk {
 			res[key] = twoWayMerge(localVal, upstreamVal)
 		} else if originOk && localOk && upstreamOk {
-			res[key] = threeWayMergeAny(originVal, localVal, upstreamVal)
+			res[key] = threeWayMerge(originVal, localVal, upstreamVal)
 		}
 	}
 
@@ -179,7 +228,7 @@ func threeWayMergeSliceAssociative(origin, local, upstream []any) []any {
 
 		if keepTuple, ok := keysToMerge[keyVal]; ok {
 			delete(keysToMerge, keyVal)
-			result = append(result, threeWayMergeAny(keepTuple.origin, elem, keepTuple.upstream))
+			result = append(result, threeWayMerge(keepTuple.origin, elem, keepTuple.upstream))
 		} else if addElem, ok := keysToAdd[keyVal]; ok {
 			delete(keysToAdd, keyVal)
 			result = append(result, twoWayMerge(elem, addElem))
@@ -211,4 +260,15 @@ func threeWayMergeScalar(origin, local, upstream any) any {
 	}
 
 	return upstream
+}
+
+func threeWayMergePkg(origin, local, upstream *pkg.Pkg) *pkg.Pkg {
+	// name := threeWayMergeScalar(origin.Name, local.Name, upstream.Name)
+	// krepe := threeWayMerge(origin.Krepe, local.Krepe, upstream.Krepe)
+
+	return nil
+}
+
+func threeWayMergeKrepe(origin, local, upstream *pkg.Krepe) *pkg.Krepe {
+	return nil
 }

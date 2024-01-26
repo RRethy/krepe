@@ -1,4 +1,4 @@
-package threewaymerge
+package merger
 
 import (
 	"testing"
@@ -7,14 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type twoWayMergeTest[T mergeable] struct {
+type twoWayMergeTest[T Mergeable] struct {
 	name     string
 	local    T
 	upstream T
 	want     any
 }
 
-func runTwoWayMergeTests[T mergeable](t *testing.T, mergeFunc func(T, T) T, tests []twoWayMergeTest[T]) {
+func runTwoWayMergeTests[T Mergeable](t *testing.T, mergeFunc func(T, T) T, tests []twoWayMergeTest[T]) {
 	t.Helper()
 
 	for _, test := range tests {

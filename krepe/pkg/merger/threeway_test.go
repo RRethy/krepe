@@ -1,4 +1,4 @@
-package threewaymerge
+package merger
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type threeWayMergeTest[T mergeable] struct {
+type threeWayMergeTest[T Mergeable] struct {
 	name     string
 	origin   T
 	local    T
@@ -15,7 +15,7 @@ type threeWayMergeTest[T mergeable] struct {
 	want     any
 }
 
-func runThreeWayMergeTests[T mergeable](t *testing.T, threeWayMergeFunc func(T, T, T) T, tests []threeWayMergeTest[T]) {
+func runThreeWayMergeTests[T Mergeable](t *testing.T, threeWayMergeFunc func(T, T, T) T, tests []threeWayMergeTest[T]) {
 	t.Helper()
 
 	for _, test := range tests {
@@ -33,7 +33,7 @@ func runThreeWayMergeTests[T mergeable](t *testing.T, threeWayMergeFunc func(T, 
 }
 
 func TestThreeWayMergeAny(t *testing.T) {
-	runThreeWayMergeTests(t, threeWayMergeAny, []threeWayMergeTest[any]{
+	runThreeWayMergeTests(t, threeWayMerge, []threeWayMergeTest[any]{
 		{
 			name:     "all maps",
 			origin:   map[string]any{"a": 1, "b": 2},

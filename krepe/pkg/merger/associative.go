@@ -1,4 +1,4 @@
-package threewaymerge
+package merger
 
 var (
 	// TODO(RRethy): this is a bit of a hack, but it works for now, we should try

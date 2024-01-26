@@ -7,8 +7,7 @@ import (
 )
 
 type Updater struct {
-	git    *git.Git
-	merger merger.Merger[*pkg.Pkg]
+	git *git.Git
 }
 
 type Option func(*Updater)
@@ -16,12 +15,6 @@ type Option func(*Updater)
 func WithGit(git *git.Git) Option {
 	return func(updater *Updater) {
 		updater.git = git
-	}
-}
-
-func WithMerger(merger merger.Merger[*pkg.Pkg]) Option {
-	return func(updater *Updater) {
-		updater.merger = merger
 	}
 }
 
@@ -33,7 +26,6 @@ func NewUpdater(options ...Option) (*Updater, error) {
 
 	i := &Updater{
 		git,
-		&merger.PkgMerger{},
 	}
 	for _, option := range options {
 		option(i)
@@ -75,7 +67,12 @@ func (updater *Updater) Update(p *pkg.Pkg, url, name string) error {
 	}
 
 	localPkg, _ := p.GetPkg(pkgName)
-	newPkg := updater.merger.ThreeWayMerge(originPkg, localPkg, upstreamPkg)
+	newPkg, err := merger.ThreeWayMerge(originPkg, localPkg, upstreamPkg)
+	if err != nil {
+		return err
+	}
+
+	// TODO: ensure name is set correctly
 	err = p.UpdatePackage(newPkg, upstreamPkgImport)
 	if err != nil {
 		return err

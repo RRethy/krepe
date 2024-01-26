@@ -4,5 +4,4 @@ use (
 	./deepishcopy
 	./jsonpatch
 	./krepe
-	./threewaymerge
 )

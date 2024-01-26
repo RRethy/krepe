@@ -1,4 +1,4 @@
-package threewaymerge
+package merger
 
 import (
 	"testing"
@@ -7,14 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type deltaTest[T mergeable] struct {
+type deltaTest[T Mergeable] struct {
 	name   string
 	source T
 	remove T
 	want   any
 }
 
-func runDeltaTests[T mergeable](t *testing.T, deltaFunc func(T, T) T, tests []deltaTest[T]) {
+func runDeltaTests[T Mergeable](t *testing.T, deltaFunc func(T, T) T, tests []deltaTest[T]) {
 	t.Helper()
 
 	for _, test := range tests {
