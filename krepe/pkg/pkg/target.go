@@ -3,23 +3,9 @@ package pkg
 import (
 	"fmt"
 
-	"github.com/RRethy/krepe/krepe/pkg/yaml"
+	"github.com/RRethy/krepe/krepe/pkg/types"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
-
-var (
-	_ yaml.InterfaceUnmarshaler = &Target{}
-	_ yaml.InterfaceMarshaler   = &Target{}
-)
-
-type RawTarget struct {
-	APIVersion string `yaml:"apiVersion,omitempty"`
-	Group      string `yaml:"group,omitempty"`
-	Version    string `yaml:"version,omitempty"`
-	Kind       string `yaml:"kind,omitempty"`
-	Name       string `yaml:"name,omitempty"`
-	Namespace  string `yaml:"namespace,omitempty"`
-}
 
 type Target struct {
 	APIVersion string
@@ -30,52 +16,50 @@ type Target struct {
 	Namespace  string
 }
 
-func (t *Target) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	raw := RawTarget{}
-	if err := unmarshal(&raw); err != nil {
-		return err
-	}
-
-	if raw.APIVersion != "" && (raw.Group != "" || raw.Version != "") {
-		return fmt.Errorf("cannot specify both apiVersion and group/version")
-	}
-
-	if raw.APIVersion != "" {
-		gv, err := schema.ParseGroupVersion(raw.APIVersion)
-		if err != nil {
-			return fmt.Errorf("parsing apiVersion: %w", err)
-		}
-		raw.Group = gv.Group
-		raw.Version = gv.Version
-	}
-
-	t.APIVersion = raw.APIVersion
-	t.Group = raw.Group
-	t.Version = raw.Version
-	t.Kind = raw.Kind
-	t.Name = raw.Name
-	t.Namespace = raw.Namespace
-	return nil
-}
-
-func (t *Target) MarshalYAML() (interface{}, error) {
-	raw := &RawTarget{
-		Kind:      t.Kind,
-		Name:      t.Name,
-		Namespace: t.Namespace,
+func NewTarget(t types.Target) (Target, error) {
+	if t.APIVersion != "" && (t.Group != "" || t.Version != "") {
+		return Target{}, fmt.Errorf("cannot specify both apiVersion and group/version")
 	}
 
 	if t.APIVersion != "" {
-		raw.APIVersion = t.APIVersion
-	} else {
-		raw.Group = t.Group
-		raw.Version = t.Version
+		gv, err := schema.ParseGroupVersion(t.APIVersion)
+		if err != nil {
+			return Target{}, fmt.Errorf("parsing apiVersion: %w", err)
+		}
+		t.Group = gv.Group
+		t.Version = gv.Version
 	}
 
-	return raw, nil
+	return Target{
+		APIVersion: t.APIVersion,
+		Group:      t.Group,
+		Version:    t.Version,
+		Kind:       t.Kind,
+		Name:       t.Name,
+		Namespace:  t.Namespace,
+	}, nil
 }
 
-func (t *Target) Matches(res *Resource) bool {
+func (t Target) ToTypesTarget() types.Target {
+	if t.APIVersion != "" {
+		return types.Target{
+			APIVersion: t.APIVersion,
+			Kind:       t.Kind,
+			Name:       t.Name,
+			Namespace:  t.Namespace,
+		}
+	} else {
+		return types.Target{
+			Group:     t.Group,
+			Version:   t.Version,
+			Kind:      t.Kind,
+			Name:      t.Name,
+			Namespace: t.Namespace,
+		}
+	}
+}
+
+func (t Target) Matches(res *Resource) bool {
 	if t.APIVersion != "" && t.APIVersion != res.GetAPIVersion() {
 		return false
 	}

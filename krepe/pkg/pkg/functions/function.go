@@ -26,6 +26,7 @@ type Function interface {
 	Run(res *unstructured.Unstructured) error
 }
 
+// TODO: test to ensure WithConfigMap always returns a copy
 func NewFunction(name string, configMap map[string]any) (Function, error) {
 	f, ok := functions[name]
 	if !ok {

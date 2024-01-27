@@ -1,232 +1,65 @@
 package pkg
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/RRethy/krepe/krepe/pkg/pkg/functions"
-	"github.com/RRethy/krepe/krepe/pkg/yaml"
+	"github.com/RRethy/krepe/krepe/pkg/types"
 	"github.com/stretchr/testify/assert"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-func TestStepUnmarshallYAML(t *testing.T) {
-	setLabelsFn, _ := functions.NewFunction("set-labels", map[string]any{
-		"foo": "bar",
+func TestNewStep(t *testing.T) {
+	t.Run("valid step", func(t *testing.T) {
+		step, err := NewStep(types.Step{Function: "set-labels", Target: types.Target{Kind: "Deployment"}, ConfigMap: map[string]any{"foo": "bar"}})
+		assert.NoError(t, err)
+		assert.Equal(t, "set-labels", step.Name)
+		assert.Equal(t, reflect.TypeOf(&functions.SetLabels{}), reflect.TypeOf(step.Fn))
+		assert.Equal(t, Target{Kind: "Deployment"}, step.Target)
+		assert.Equal(t, map[string]any{"foo": "bar"}, step.ConfigMap)
 	})
 
-	tests := []struct {
-		name       string
-		yaml       string
-		wantName   string
-		wantFn     functions.Function
-		wantTarget *Target
-		wantErr    bool
-	}{
-		{
-			name: "succeeds with valid step",
-			yaml: `
-function: set-labels
-target:
-  kind: Deployment
-  name: foo
-configMap:
-  foo: bar
-`,
-			wantName: "set-labels",
-			wantFn:   setLabelsFn,
-			wantTarget: &Target{
-				Kind: "Deployment",
-				Name: "foo",
-			},
-			wantErr: false,
-		},
-		{
-			name: "succeeds with empty target",
-			yaml: `
-function: set-labels
-configMap:
-  foo: bar
-`,
-			wantName:   "set-labels",
-			wantFn:     setLabelsFn,
-			wantTarget: nil,
-			wantErr:    false,
-		},
-		{
-			name:       "fails with invalid step yaml",
-			yaml:       `foo: bar`,
-			wantName:   "",
-			wantFn:     nil,
-			wantTarget: nil,
-			wantErr:    true,
-		},
-		{
-			name: "fails with invalid function",
-			yaml: `
-function: unknown-fn
-configMap:
-  foo: bar
-			`,
-			wantName:   "",
-			wantFn:     nil,
-			wantTarget: nil,
-			wantErr:    true,
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			s := &Step{}
-			err := yaml.Unmarshal([]byte(test.yaml), s)
-			if test.wantErr {
-				assert.Error(t, err)
-				assert.Nil(t, s.fn)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, test.wantName, s.name)
-				assert.Equal(t, test.wantFn, s.fn)
-			}
-		})
-	}
-}
-
-func TestStepMarshalYAML(t *testing.T) {
-	setLabelsFn, _ := functions.NewFunction("set-labels", map[string]any{
-		"foo": "bar",
+	t.Run("invalid step with non-existent function", func(t *testing.T) {
+		step, err := NewStep(types.Step{Function: "zzz", Target: types.Target{Kind: "Deployment"}, ConfigMap: map[string]any{"foo": "bar"}})
+		assert.NoError(t, err)
+		assert.Nil(t, step)
 	})
-	step := &Step{
-		name: "set-labels",
-		fn:   setLabelsFn,
-		configMap: map[string]any{
-			"foo": "bar",
-		},
-	}
 
-	got, err := yaml.Marshal(step)
-	assert.NoError(t, err)
-	assert.Equal(t, `function: set-labels
-configMap:
-  foo: bar
-`, string(got))
+	t.Run("invalid step with invalid target", func(t *testing.T) {
+		step, err := NewStep(types.Step{Function: "set-labels", Target: types.Target{APIVersion: "apps/v1", Group: "apps"}, ConfigMap: map[string]any{"foo": "bar"}})
+		assert.NoError(t, err)
+		assert.Nil(t, step)
+	})
 }
 
 func TestStepRun(t *testing.T) {
-	setLabelsFn, _ := functions.NewFunction("set-labels", map[string]any{
-		"foo": "bar",
+	resource, err := NewResourceFromBytes("deployment.yaml", []byte("apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  labels:\n    foo: bar\n"))
+	assert.NoError(t, err)
+
+	t.Run("valid function passes without error", func(t *testing.T) {
+		step, err := NewStep(types.Step{Function: "set-labels", Target: types.Target{Kind: "Deployment"}, ConfigMap: map[string]any{"foo": "bar2"}})
+		assert.NoError(t, err)
+
+		err = step.Run(resource)
+		assert.NoError(t, err)
+		assert.Equal(t, "bar2", resource.GetLabels()["foo"])
 	})
-	badjsonPatchFn, _ := functions.NewFunction("jsonpatch", map[string]any{
-		"op":    "add",
-		"path":  "/foo/bar",
-		"value": "baz",
+
+	t.Run("no-op if step doesn't target resource", func(t *testing.T) {
+		step, err := NewStep(types.Step{Function: "set-labels", Target: types.Target{Kind: "Service"}, ConfigMap: map[string]any{"foo": "bar2"}})
+		assert.NoError(t, err)
+
+		err = step.Run(resource)
+		assert.NoError(t, err)
+		assert.Equal(t, "bar", resource.GetLabels()["foo"])
 	})
-	inputResource, _ := NewResourceFromBytes("foo.yaml", []byte(``))
 
-	tests := []struct {
-		name          string
-		step          *Step
-		inputResource *Resource
-		want          map[string]any
-		wantErr       bool
-	}{
-		{
-			name: "succeeds with valid step",
-			step: &Step{
-				name: "set-labels",
-				fn:   setLabelsFn,
-			},
-			inputResource: inputResource,
-			want: map[string]any{
-				"metadata": map[string]any{
-					"labels": map[string]any{
-						"foo": "bar",
-					},
-				},
-			},
-			wantErr: false,
-		},
-		{
-			name: "fails with run error step",
-			step: &Step{
-				name: "jsonpatch",
-				fn:   badjsonPatchFn,
-			},
-			inputResource: inputResource,
-			want:          nil,
-			wantErr:       true,
-		},
-	}
+	t.Run("function fails", func(t *testing.T) {
+		step, err := NewStep(types.Step{Function: "run-fail", Target: types.Target{Kind: "Deployment"}, ConfigMap: map[string]any{"foo": "bar"}})
+		assert.NoError(t, err)
 
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			err := test.step.Run(test.inputResource)
-			if test.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, test.want, test.inputResource.Object)
-			}
-		})
-	}
-}
-
-func TestStepMatches(t *testing.T) {
-	tests := []struct {
-		name   string
-		step   *Step
-		resObj map[string]any
-		want   bool
-	}{
-		{
-			name: "succeeds with matching target",
-			step: &Step{
-				target: &Target{
-					Kind: "Pod",
-				},
-			},
-			resObj: map[string]any{
-				"apiVersion": "v1",
-				"kind":       "Pod",
-				"metadata": map[string]any{
-					"name":      "test-pod",
-					"namespace": "default",
-				},
-			},
-			want: true,
-		},
-		{
-			name: "fails with non-matching target",
-			step: &Step{
-				target: &Target{
-					Kind: "Pod",
-				},
-			},
-			resObj: map[string]any{
-				"apiVersion": "v1",
-				"kind":       "Deployment",
-			},
-			want: false,
-		},
-		{
-			name: "succeeds with empty target",
-			step: &Step{
-				target: nil,
-			},
-			resObj: map[string]any{
-				"apiVersion": "v1",
-				"kind":       "Deployment",
-			},
-			want: true,
-		},
-	}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			got := test.step.Matches(&Resource{
-				Unstructured: unstructured.Unstructured{
-					Object: test.resObj,
-				},
-			})
-			assert.Equal(t, test.want, got)
-		})
-	}
+		err = step.Run(resource)
+		assert.Error(t, err)
+		assert.Equal(t, []byte("apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  labels:\n    foo: bar\n"), resource.Raw)
+	})
 }

@@ -149,10 +149,6 @@ func twoWayMergeScalar(local, upstream any) any {
 	return upstream
 }
 
-func twoWayMergePkg(local, upstream *pkg.Pkg) *pkg.Pkg {
-	return nil
-}
-
-func twoWayMergeKrepe(local, upstream *pkg.Krepe) *pkg.Krepe {
+func twoWayMergePkg(local, upstream *pkg.Package) *pkg.Package {
 	return nil
 }

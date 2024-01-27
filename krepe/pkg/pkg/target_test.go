@@ -3,105 +3,44 @@ package pkg
 import (
 	"testing"
 
-	"github.com/RRethy/krepe/krepe/pkg/yaml"
+	"github.com/RRethy/krepe/krepe/pkg/types"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-func TestTargetUnmarshalYAML(t *testing.T) {
+func TestNewTarget(t *testing.T) {
 	tests := []struct {
 		name    string
-		yaml    string
-		want    *Target
+		target  types.Target
 		wantErr bool
+		want    Target
 	}{
 		{
-			name: "succeeds with valid target",
-			yaml: `
-kind: Deployment
-name: foo
-`,
-			want: &Target{
-				Kind: "Deployment",
-				Name: "foo",
-			},
+			name:    "valid target",
+			target:  types.Target{Group: "core", Version: "v1", Kind: "Pod"},
 			wantErr: false,
+			want:    Target{Group: "core", Version: "v1", Kind: "Pod"},
 		},
 		{
-			name: "success with valid apiVersion",
-			yaml: `
-apiVersion: apps/v1
-kind: Deployment
-`,
-			want: &Target{
-				APIVersion: "apps/v1",
-				Group:      "apps",
-				Version:    "v1",
-				Kind:       "Deployment",
-			},
-			wantErr: false,
-		},
-		{
-			name: "fails with invalid apiVersion",
-			yaml: `
-apiVersion: foo/bar/baz
-kind: Deployment
-`,
-			want:    nil,
+			name:    "apiVersion and group",
+			target:  types.Target{APIVersion: "apps/v1", Group: "core"},
 			wantErr: true,
 		},
 		{
-			name: "fails with apiVersion and group",
-			yaml: `
-apiVersion: apps/v1
-group: apps
-kind: Deployment
-`,
-			want:    nil,
-			wantErr: true,
-		},
-		{
-			name: "fails with apiVersion and version",
-			yaml: `
-apiVersion: apps/v1
-version: v1
-kind: Deployment
-`,
-			want:    nil,
+			name:    "invalid apiVersion",
+			target:  types.Target{APIVersion: "zzzzzz"},
 			wantErr: true,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := &Target{}
-			err := yaml.Unmarshal([]byte(test.yaml), got)
+			_, err := NewTarget(test.target)
 			if test.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, test.want, got)
-			}
-		})
-	}
-}
-
-func TestTargetMarshalYAML(t *testing.T) {
-	tests := []struct {
-		name    string
-		target  *Target
-		wantYml string
-		wantErr bool
-	}{}
-
-	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			got, err := yaml.Marshal(test.target)
-			if test.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, test.wantYml, string(got))
+				assert.Equal(t, test.want, test.want)
 			}
 		})
 	}

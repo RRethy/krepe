@@ -71,30 +71,18 @@ func threeWayMerge(origin, local, upstream any) any {
 		}
 
 		return threeWayMergeSlice(originArr, localTyped, upstreamArr)
-	case *pkg.Pkg:
-		upstreamPkg, ok := upstream.(*pkg.Pkg)
+	case *pkg.Package:
+		upstreamPkg, ok := upstream.(*pkg.Package)
 		if !ok {
 			return local
 		}
 
-		originPkg, ok := origin.(*pkg.Pkg)
+		originPkg, ok := origin.(*pkg.Package)
 		if !ok {
 			return twoWayMergePkg(localTyped, upstreamPkg)
 		}
 
 		return threeWayMergePkg(originPkg, localTyped, upstreamPkg)
-	case *pkg.Krepe:
-		upstreamKrepe, ok := upstream.(*pkg.Krepe)
-		if !ok {
-			return local
-		}
-
-		originKrepe, ok := origin.(*pkg.Krepe)
-		if !ok {
-			return twoWayMergeKrepe(localTyped, upstreamKrepe)
-		}
-
-		return threeWayMergeKrepe(originKrepe, localTyped, upstreamKrepe)
 	default:
 		if reflect.TypeOf(local) != reflect.TypeOf(upstream) {
 			return local
@@ -262,13 +250,9 @@ func threeWayMergeScalar(origin, local, upstream any) any {
 	return upstream
 }
 
-func threeWayMergePkg(origin, local, upstream *pkg.Pkg) *pkg.Pkg {
+func threeWayMergePkg(origin, local, upstream *pkg.Package) *pkg.Package {
 	// name := threeWayMergeScalar(origin.Name, local.Name, upstream.Name)
 	// krepe := threeWayMerge(origin.Krepe, local.Krepe, upstream.Krepe)
 
-	return nil
-}
-
-func threeWayMergeKrepe(origin, local, upstream *pkg.Krepe) *pkg.Krepe {
 	return nil
 }
