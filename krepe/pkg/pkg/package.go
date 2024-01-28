@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/RRethy/krepe/krepe/pkg/git"
 	"github.com/RRethy/krepe/krepe/pkg/types"
 	"github.com/RRethy/krepe/krepe/pkg/yaml"
-	"github.com/wk8/go-ordered-map/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -18,7 +18,7 @@ type Package struct {
 
 	PackageImports []PackageImport
 	FileImports    []FileImport
-	Pipelines      *orderedmap.OrderedMap[string, Pipeline]
+	Pipelines      []Pipeline
 }
 
 func NewPackageFromPath(pkgPath string) (*Package, error) {
@@ -28,6 +28,10 @@ func NewPackageFromPath(pkgPath string) (*Package, error) {
 func NewPackageFromPathWithName(packagePath, name string) (*Package, error) {
 	if packagePath == "/" {
 		return nil, fmt.Errorf("pkg path cannot be `/`")
+	}
+
+	if name == "" || strings.Contains(name, "/") {
+		return nil, fmt.Errorf("pkg name cannot be empty")
 	}
 
 	fileInfo, err := os.Stat(packagePath)
@@ -83,14 +87,14 @@ func NewPackageFromPathWithName(packagePath, name string) (*Package, error) {
 		})
 	}
 
-	pipelines := orderedmap.New[string, Pipeline]()
-	for pair := krepe.Pipelines.Oldest(); pair != nil; pair = pair.Next() {
-		pipeline, err := NewPipeline(pair.Value)
+	var pipelines []Pipeline
+	for _, typesPipeline := range krepe.Pipelines {
+		pipeline, err := NewPipeline(typesPipeline)
 		if err != nil {
-			return nil, fmt.Errorf("create pipeline `%s` in pkg `%s`: %w", pair.Key, packagePath, err)
+			return nil, fmt.Errorf("create pipeline `%s` in pkg `%s`: %w", typesPipeline.Name, packagePath, err)
 		}
 
-		pipelines.Set(pair.Key, pipeline)
+		pipelines = append(pipelines, pipeline)
 	}
 
 	return &Package{
@@ -103,10 +107,12 @@ func NewPackageFromPathWithName(packagePath, name string) (*Package, error) {
 }
 
 func (p *Package) RunPipelineByName(name string) error {
-	if pipeline, ok := p.Pipelines.Get(name); ok {
-		return p.RunPipeline(pipeline)
-
+	for _, pipeline := range p.Pipelines {
+		if pipeline.Name == name {
+			return p.RunPipeline(pipeline)
+		}
 	}
+
 	return fmt.Errorf("failed to get pipeline `%s`", name)
 }
 
@@ -127,37 +133,3 @@ func (p *Package) RunPipeline(pipeline Pipeline) error {
 
 	return nil
 }
-
-func (p *Package) Write(dir string) error {
-	return nil
-}
-
-// func (p *Pkg) Write(dir string) error {
-// 	pkgPath := filepath.Join(dir, p.Name)
-//
-// 	err := os.MkdirAll(pkgPath, 0755)
-// 	if err != nil {
-// 		return fmt.Errorf("failed to create pkg directory `%s`: %w", pkgPath, err)
-// 	}
-//
-// 	err = p.Krepe.Write(pkgPath)
-// 	if err != nil {
-// 		return fmt.Errorf("failed to write krepe.yaml in pkg directory `%s`: %w", pkgPath, err)
-// 	}
-//
-// 	for _, resource := range p.resources {
-// 		err = resource.Write(pkgPath)
-// 		if err != nil {
-// 			return fmt.Errorf("failed to write resource `%s` in pkg directory `%s`: %w", resource.Fname(), pkgPath, err)
-// 		}
-// 	}
-//
-// 	for _, pkg := range p.packages {
-// 		err = pkg.Write(pkgPath)
-// 		if err != nil {
-// 			return fmt.Errorf("failed to write pkg `%s` in pkg directory `%s`: %w", pkg.Name, pkgPath, err)
-// 		}
-// 	}
-//
-// 	return nil
-// }

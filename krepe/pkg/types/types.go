@@ -1,14 +1,7 @@
 package types
 
 import (
-	"github.com/RRethy/krepe/krepe/pkg/yaml"
-	"github.com/wk8/go-ordered-map/v2"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-)
-
-var (
-	_ yaml.BytesUnmarshaler = &Pipelines{}
-	_ yaml.BytesMarshaler   = &Pipelines{}
 )
 
 type Krepe struct {
@@ -16,7 +9,7 @@ type Krepe struct {
 	metav1.ObjectMeta `yaml:"metadata,omitempty"`
 
 	Imports   Imports    `yaml:"imports,omitempty"`
-	Pipelines *Pipelines `yaml:"pipelines,omitempty"`
+	Pipelines []Pipeline `yaml:"pipelines,omitempty"`
 }
 
 type Imports struct {
@@ -29,21 +22,13 @@ type PackageImport struct {
 	Name string `yaml:"name,omitempty"`
 }
 
-type Pipelines struct {
-	orderedmap.OrderedMap[string, []Step] `yaml:",inline"`
-}
-
-func (p *Pipelines) UnmarshalYAML(data []byte) error {
-	*p = Pipelines{orderedmap.OrderedMap[string, []Step]{}}
-	return yaml.UnmarshalCompatibilityShim(data, p)
-}
-
-func (p *Pipelines) MarshalYAML() ([]byte, error) {
-	return yaml.MarshalCompatibilityShim(&p.OrderedMap)
+type Pipeline struct {
+	Name  string `yaml:"name"`
+	Steps []Step `yaml:"steps,omitempty"`
 }
 
 type Step struct {
-	Function  string         `yaml:"function,omitempty"`
+	Function  string         `yaml:"function"`
 	Target    Target         `yaml:"target,omitempty"`
 	ConfigMap map[string]any `yaml:"configMap,omitempty"`
 }

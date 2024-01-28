@@ -5,16 +5,18 @@ import (
 )
 
 type Pipeline struct {
+	Name  string
 	Steps []*Step
 }
 
-func NewPipeline(steps []types.Step) (Pipeline, error) {
+func NewPipeline(typesPipeline types.Pipeline) (Pipeline, error) {
 	var err error
 	pipeline := Pipeline{
-		Steps: make([]*Step, len(steps)),
+		Name:  typesPipeline.Name,
+		Steps: make([]*Step, len(typesPipeline.Steps)),
 	}
 
-	for i, step := range steps {
+	for i, step := range typesPipeline.Steps {
 		pipeline.Steps[i], err = NewStep(step)
 		if err != nil {
 			return Pipeline{}, err
@@ -26,11 +28,9 @@ func NewPipeline(steps []types.Step) (Pipeline, error) {
 
 func (p Pipeline) Run(res *Resource) error {
 	for _, step := range p.Steps {
-		if step.Matches(res) {
-			err := step.Run(res)
-			if err != nil {
-				return err
-			}
+		err := step.Run(res)
+		if err != nil {
+			return err
 		}
 	}
 	return nil

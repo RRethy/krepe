@@ -1,0 +1,6 @@
+kind: Krepe
+apiVersion: krepe.io/v1
+pipelines:
+  - name: non-existent-function
+    steps:
+      - function: foobar

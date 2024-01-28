@@ -1,0 +1,39 @@
+kind: Krepe
+apiVersion: krepe.io/v1
+imports:
+  files:
+    - deployment.yaml
+    - service.yaml
+    - ingress.yaml
+  packages:
+    - ref: github.com/RRethy/sample_pkg@v0.0.1
+pipelines:
+  - name: mypipeline
+    steps:
+      - function: set-labels
+        configMap:
+          foo: bar
+  - name: badpipeline
+    steps:
+      - function: run-fail
+  - name: no-op-pipeline
+    steps:
+      - function: succeed
+  - name: fail-on-file-import
+    steps:
+      - function: jsonpatch
+        target:
+          kind: Deployment
+        configMap:
+          op: test
+          path: /spec/replicas
+          value: 4
+  - name: fail-on-package-import
+    steps:
+      - function: jsonpatch
+        target:
+          kind: Deployment
+        configMap:
+          op: test
+          path: /spec/replicas
+          value: 3
