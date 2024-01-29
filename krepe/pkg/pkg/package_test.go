@@ -23,6 +23,7 @@ func TestNewPackageFromPathWithName(t *testing.T) {
 		packagePath    string
 		packageName    string
 		wantErr        bool
+		wantName       string
 		packageImports []string
 		fileImports    []string
 		pipelines      []string
@@ -32,6 +33,7 @@ func TestNewPackageFromPathWithName(t *testing.T) {
 			packagePath:    filepath.Join(packagesPath, "sample_pkg_with_pkg_installed_pkg"),
 			packageName:    "sample_pkg_with_pkg_installed",
 			wantErr:        false,
+			wantName:       "sample_pkg_with_pkg_installed",
 			packageImports: []string{"sample_pkg"},
 			fileImports:    []string{"deployment.yaml", "service.yaml", "ingress.yaml"},
 			pipelines:      []string{"mypipeline", "badpipeline", "no-op-pipeline", "fail-on-file-import", "fail-on-package-import"},
@@ -79,16 +81,20 @@ func TestNewPackageFromPathWithName(t *testing.T) {
 			wantErr:     true,
 		},
 		{
-			name:        "empty name",
-			packagePath: filepath.Join(packagesPath, "sample_pkg"),
-			packageName: "",
-			wantErr:     true,
-		},
-		{
 			name:        "bad name",
 			packagePath: filepath.Join(packagesPath, "sample_pkg"),
 			packageName: "/",
 			wantErr:     true,
+		},
+		{
+			name:           "empty name",
+			packagePath:    filepath.Join(packagesPath, "sample_pkg"),
+			packageName:    "",
+			wantErr:        false,
+			wantName:       "sample_pkg",
+			packageImports: nil,
+			fileImports:    []string{"deployment.yaml", "service.yaml", "ingress.yaml"},
+			pipelines:      []string{"mypipeline", "badpipeline", "no-op-pipeline"},
 		},
 	}
 
@@ -99,7 +105,7 @@ func TestNewPackageFromPathWithName(t *testing.T) {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, test.packageName, p.Name)
+				assert.Equal(t, test.wantName, p.Name)
 
 				assert.Equal(t, len(test.packageImports), len(p.PackageImports))
 				assert.Equal(t, len(test.fileImports), len(p.FileImports))

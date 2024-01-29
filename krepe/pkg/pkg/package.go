@@ -30,8 +30,13 @@ func NewPackageFromPathWithName(packagePath, name string) (*Package, error) {
 		return nil, fmt.Errorf("pkg path cannot be `/`")
 	}
 
-	if name == "" || strings.Contains(name, "/") {
-		return nil, fmt.Errorf("pkg name cannot be empty")
+	if strings.Contains(name, "/") {
+		return nil, fmt.Errorf("pkg name cannot have `/`")
+	}
+
+	// TODO: test this
+	if name == "" {
+		name = filepath.Base(packagePath)
 	}
 
 	fileInfo, err := os.Stat(packagePath)
@@ -135,5 +140,24 @@ func (p *Package) RunPipeline(pipeline Pipeline) error {
 		}
 	}
 
+	return nil
+}
+
+func (p *Package) AddPackage(pkg *Package, ref *git.PkgRef, name string) error {
+	if name == "" {
+		name = ref.Name
+	}
+
+	for _, existingPkgImport := range p.PackageImports {
+		if existingPkgImport.Name == name {
+			return fmt.Errorf("pkg `%s` already exists", name)
+		}
+	}
+
+	p.PackageImports = append(p.PackageImports, PackageImport{
+		Ref:     ref,
+		Name:    pkg.Name,
+		Package: pkg,
+	})
 	return nil
 }

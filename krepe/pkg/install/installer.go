@@ -33,26 +33,25 @@ func NewInstaller(options ...Option) (*Installer, error) {
 }
 
 func (installer *Installer) Install(p *pkg.Package, url, name string) error {
-	// ref, err := git.NewPkgRefFromString(url)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// newPkgPath, err := installer.git.Clone(ref)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// newPkg, err := pkg.NewPkgFromPath(newPkgPath)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// pkgImport := pkg.NewPackageImport(ref, name)
-	// err = p.AddPackage(newPkg, pkgImport)
-	// if err != nil {
-	// 	return err
-	// }
+	ref, err := git.NewPkgRefFromString(url)
+	if err != nil {
+		return err
+	}
+
+	newPkgPath, err := installer.git.Clone(ref)
+	if err != nil {
+		return err
+	}
+
+	newPkg, err := pkg.NewPackageFromPath(newPkgPath)
+	if err != nil {
+		return err
+	}
+
+	err = p.AddPackage(newPkg, ref, name)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
