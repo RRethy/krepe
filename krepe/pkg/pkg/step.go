@@ -5,6 +5,7 @@ import (
 
 	"github.com/RRethy/krepe/krepe/pkg/pkg/functions"
 	"github.com/RRethy/krepe/krepe/pkg/types"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 type Step struct {
@@ -33,17 +34,17 @@ func NewStep(step types.Step) (*Step, error) {
 	}, nil
 }
 
-func (s *Step) Run(resource *Resource) error {
+func (s *Step) Run(resource *unstructured.Unstructured) error {
 	if !s.Target.Matches(resource) {
 		return nil
 	}
 
-	err := s.Fn.Run(&resource.Unstructured)
+	err := s.Fn.Run(resource)
 	if err != nil {
 		return fmt.Errorf(
 			"running functions `%s` on resource `%s`: %w",
 			s.Name,
-			resource.Filename,
+			resource.GetName(),
 			err,
 		)
 	}

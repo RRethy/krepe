@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/RRethy/krepe/krepe/pkg/types"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -59,7 +60,7 @@ func (t Target) ToTypesTarget() types.Target {
 	}
 }
 
-func (t Target) Matches(res *Resource) bool {
+func (t Target) Matches(res *unstructured.Unstructured) bool {
 	if t.APIVersion != "" && t.APIVersion != res.GetAPIVersion() {
 		return false
 	}

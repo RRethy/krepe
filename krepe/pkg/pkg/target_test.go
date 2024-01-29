@@ -28,7 +28,7 @@ func TestNewTarget(t *testing.T) {
 		},
 		{
 			name:    "invalid apiVersion",
-			target:  types.Target{APIVersion: "zzzzzz"},
+			target:  types.Target{APIVersion: "a/b/c"},
 			wantErr: true,
 		},
 	}
@@ -212,11 +212,11 @@ func TestTargetMatches(t *testing.T) {
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			got := test.target.Matches(&Resource{
-				Unstructured: unstructured.Unstructured{
+			got := test.target.Matches(
+				&unstructured.Unstructured{
 					Object: test.resObject,
 				},
-			})
+			)
 			assert.Equal(t, test.want, got)
 		})
 	}

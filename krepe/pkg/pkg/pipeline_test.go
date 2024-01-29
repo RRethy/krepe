@@ -23,13 +23,12 @@ func TestNewPipeline(t *testing.T) {
 	})
 
 	t.Run("invalid steps", func(t *testing.T) {
-		pipeline, err := NewPipeline(types.Pipeline{
+		_, err := NewPipeline(types.Pipeline{
 			Name: "test-pipeline",
 			Steps: []types.Step{
 				{Function: "non-existent-function", Target: types.Target{Kind: "Deployment"}, ConfigMap: map[string]any{"foo": "bar"}},
 			},
 		})
 		assert.Error(t, err)
-		assert.Nil(t, pipeline)
 	})
 }

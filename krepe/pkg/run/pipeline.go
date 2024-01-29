@@ -1,7 +1,7 @@
 package run
 
 import (
-	"github.com/RRethy/krepe/krepe/pkg/package"
+	"github.com/RRethy/krepe/krepe/pkg/pkg"
 )
 
 type pipeline struct {
@@ -15,15 +15,15 @@ func newPipeline(pkg *pkg.Package, name string) *pipeline {
 }
 
 func (p *pipeline) run(dir string) error {
-	err := p.pkg.RunPipelineByName(p.name)
-	if err != nil {
-		return err
-	}
-
-	err = p.pkg.Write(dir)
-	if err != nil {
-		return err
-	}
-
+	// err := p.pkg.RunPipelineByName(p.name)
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// err = p.pkg.Write(dir)
+	// if err != nil {
+	// 	return err
+	// }
+	//
 	return nil
 }

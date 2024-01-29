@@ -66,25 +66,27 @@ func NewPackageFromPathWithName(packagePath, name string) (*Package, error) {
 			name = packageImport.Name
 		}
 
+		pkg, err := NewPackageFromPathWithName(filepath.Join(packagePath, name), name)
+		if err != nil {
+			return nil, fmt.Errorf("importing pkg `%s`: %w", name, err)
+		}
+
 		packageImports = append(packageImports, PackageImport{
 			Ref:     pkgRef,
 			Name:    name,
-			Package: nil,
+			Package: pkg,
 		})
 	}
 
 	var fileImports []FileImport
 	for _, fileImport := range krepe.Imports.Files {
 		filename := filepath.Join(packagePath, fileImport)
-		resource, err := NewResourceFromPath(filename)
+		fileImport, err := NewFileImportFromPath(filename)
 		if err != nil {
-			return nil, fmt.Errorf("create resource `%s` in pkg `%s`: %w", fileImport, packagePath, err)
+			return nil, fmt.Errorf("importing file `%s` in pkg `%s`: %w", fileImport.Filename, packagePath, err)
 		}
 
-		fileImports = append(fileImports, FileImport{
-			Filename: filename,
-			Resource: resource,
-		})
+		fileImports = append(fileImports, fileImport)
 	}
 
 	var pipelines []Pipeline
@@ -96,6 +98,8 @@ func NewPackageFromPathWithName(packagePath, name string) (*Package, error) {
 
 		pipelines = append(pipelines, pipeline)
 	}
+
+	krepe.ObjectMeta.Name = name
 
 	return &Package{
 		TypeMeta:       krepe.TypeMeta,

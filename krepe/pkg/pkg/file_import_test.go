@@ -11,30 +11,30 @@ const (
 	deploymentFile = "../../testdata/packages/sample_pkg/deployment.yaml"
 )
 
-func TestNewResourceFromPath(t *testing.T) {
-	r, err := NewResourceFromPath(deploymentFile)
+func TestNewFileImportFromPath(t *testing.T) {
+	r, err := NewFileImportFromPath(deploymentFile)
 	assert.NoError(t, err)
 	assert.NotNil(t, r)
 	assert.Equal(t, "deployment.yaml", r.Filename)
 	raw, err := os.ReadFile(deploymentFile)
 	assert.NoError(t, err)
 	assert.Equal(t, raw, r.Raw)
-	assert.Equal(t, "apps/v1, Kind=Deployment", r.GroupVersionKind().String())
+	assert.Equal(t, "apps/v1, Kind=Deployment", r.Resource.GroupVersionKind().String())
 }
 
-func TestNewResourceFromBytes(t *testing.T) {
+func TestNewFileImportFromBytes(t *testing.T) {
 	raw, err := os.ReadFile(deploymentFile)
 	assert.NoError(t, err)
-	r, err := NewResourceFromBytes("deployment.yaml", raw)
+	r, err := NewFileImportFromBytes("deployment.yaml", raw)
 	assert.NoError(t, err)
 	assert.NotNil(t, r)
 	assert.Equal(t, "deployment.yaml", r.Filename)
 	assert.Equal(t, raw, r.Raw)
-	assert.Equal(t, "apps/v1, Kind=Deployment", r.GroupVersionKind().String())
+	assert.Equal(t, "apps/v1, Kind=Deployment", r.Resource.GroupVersionKind().String())
 }
 
-func TestResourceFname(t *testing.T) {
-	r, err := NewResourceFromPath(deploymentFile)
+func TestFileImportFname(t *testing.T) {
+	r, err := NewFileImportFromPath(deploymentFile)
 	assert.NoError(t, err)
 	assert.Equal(t, "deployment.yaml", r.Filename)
 }

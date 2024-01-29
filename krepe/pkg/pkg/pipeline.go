@@ -2,6 +2,7 @@ package pkg
 
 import (
 	"github.com/RRethy/krepe/krepe/pkg/types"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 type Pipeline struct {
@@ -26,7 +27,7 @@ func NewPipeline(typesPipeline types.Pipeline) (Pipeline, error) {
 	return pipeline, nil
 }
 
-func (p Pipeline) Run(res *Resource) error {
+func (p Pipeline) Run(res *unstructured.Unstructured) error {
 	for _, step := range p.Steps {
 		err := step.Run(res)
 		if err != nil {
