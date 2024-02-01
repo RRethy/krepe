@@ -2,12 +2,15 @@ package update
 
 import (
 	"github.com/RRethy/krepe/krepe/pkg/git"
-	_ "github.com/RRethy/krepe/krepe/pkg/merger"
+	"github.com/RRethy/krepe/krepe/pkg/merger"
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
+	"github.com/RRethy/krepe/krepe/pkg/writer"
 )
 
 type Updater struct {
-	git *git.Git
+	git    *git.Git
+	writer writer.Writer
+	merger merger.Merger
 }
 
 type Option func(*Updater)
@@ -15,6 +18,12 @@ type Option func(*Updater)
 func WithGit(git *git.Git) Option {
 	return func(updater *Updater) {
 		updater.git = git
+	}
+}
+
+func WithWriter(w writer.Writer) Option {
+	return func(updater *Updater) {
+		updater.writer = w
 	}
 }
 
@@ -26,6 +35,8 @@ func NewUpdater(options ...Option) (*Updater, error) {
 
 	i := &Updater{
 		git,
+		writer.Noop{},
+		merger.Noop{},
 	}
 	for _, option := range options {
 		option(i)
@@ -34,50 +45,50 @@ func NewUpdater(options ...Option) (*Updater, error) {
 }
 
 func (updater *Updater) Update(p *pkg.Package, url, name string) error {
+	upstreamPkgRef, err := git.NewPkgRefFromString(url)
+	if err != nil {
+		return err
+	}
+
+	upstreamPkgPath, err := updater.git.Clone(upstreamPkgRef)
+	if err != nil {
+		return err
+	}
+
+	upstreamPkg, err := pkg.NewPackageFromPathWithName(upstreamPkgPath, name)
+	if err != nil {
+		return err
+	}
+
+	pkgImport, err := p.GetPackageImportByName(name)
+	if err != nil {
+		return err
+	}
+
+	localPkgRef := pkgImport.Ref
+	localPkg := pkgImport.Package
+
+	originPkgPath, err := updater.git.Clone(localPkgRef)
+	if err != nil {
+		return err
+	}
+
+	originPkg, err := pkg.NewPackageFromPathWithName(originPkgPath, name)
+	if err != nil {
+		return err
+	}
+
+	newPkg, err := updater.merger.Merge(originPkg, localPkg, upstreamPkg)
+	if err != nil {
+		return err
+	}
+
+	p.UpdatePackage(newPkg, upstreamPkgRef, name)
+
+	err = updater.writer.Write(p)
+	if err != nil {
+		return err
+	}
+
 	return nil
-	// upstreamRef, err := git.NewPkgRefFromString(url)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// upstreamPkgPath, err := updater.git.Clone(upstreamRef)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// upstreamPkg, err := pkg.NewPkgFromPath(upstreamPkgPath)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// upstreamPkgImport := pkg.NewPackageImport(upstreamRef, name)
-	// pkgName := upstreamPkgImport.Name()
-	//
-	// originPkgImport, ok := p.GetPkgImport(pkgName)
-	// var originPkg *pkg.Pkg
-	// if ok {
-	// 	originPkgPath, err := updater.git.Clone(originPkgImport.Ref)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	//
-	// 	originPkg, err = pkg.NewPkgFromPath(originPkgPath)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
-	//
-	// localPkg, _ := p.GetPkg(pkgName)
-	// newPkg, err := merger.ThreeWayMerge(originPkg, localPkg, upstreamPkg)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// // TODO: ensure name is set correctly
-	// err = p.UpdatePackage(newPkg, upstreamPkgImport)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// return nil
 }

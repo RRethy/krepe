@@ -170,3 +170,25 @@ func (p *Package) GetPackageImportByName(name string) (*PackageImport, error) {
 
 	return nil, fmt.Errorf("failed to get package import `%s`", name)
 }
+
+func (p *Package) UpdatePackage(pkg *Package, ref *git.PkgRef, name string) {
+	if name == "" {
+		name = ref.Name
+	}
+	pkg.Name = name
+
+	for i, existingPkgImport := range p.PackageImports {
+		if existingPkgImport.Package.Name == pkg.Name {
+			p.PackageImports[i] = PackageImport{
+				Ref:     ref,
+				Package: pkg,
+			}
+			return
+		}
+	}
+
+	err := p.AddPackage(pkg, ref, name)
+	if err != nil {
+		panic("internal error TODO")
+	}
+}
