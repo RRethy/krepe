@@ -1,22 +1,10 @@
 package merger
 
 import (
-	"fmt"
 	"reflect"
 
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 )
-
-// Merge returns the result of performing a 3-way merge on the origin, local, and upstream maps.
-// This method does not mutate origin, local, and upstream, but the result might share data structures.
-func ThreeWayMerge[T Mergeable](origin, local, upstream T) (T, error) {
-	merged := threeWayMerge(any(origin), any(local), any(upstream))
-	mergedTyped, ok := merged.(T)
-	if !ok {
-		return local, fmt.Errorf("TODO: internal error casting merged value of type %T to expected type %T", merged, local)
-	}
-	return mergedTyped, nil
-}
 
 // threeWayMerge returns the result of performing a 3-way merge on origin, local, and upstream.
 // If any of origin, local, and upstream are not the same type then local is returned.

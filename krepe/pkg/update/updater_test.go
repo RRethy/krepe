@@ -23,7 +23,6 @@ func TestUpdaterUpdate(t *testing.T) {
 		url          string
 		newPkgName   string
 		cmd          string
-		wantMergeErr bool
 		wantWriteErr bool
 		wantErr      bool
 	}{
@@ -84,15 +83,6 @@ func TestUpdaterUpdate(t *testing.T) {
 			wantErr:    true,
 		},
 		{
-			name:         "merge error",
-			pkgPath:      filepath.Join(packagesDirName, "updater_test_pkg_root"),
-			url:          "github.com/RRethy/updater_test_pkg_upstream@v1",
-			newPkgName:   "foobar",
-			cmd:          "true",
-			wantMergeErr: true,
-			wantErr:      true,
-		},
-		{
 			name:         "write fails",
 			pkgPath:      filepath.Join(packagesDirName, "updater_test_pkg_root"),
 			url:          "github.com/RRethy/updater_test_pkg_upstream@v1",
@@ -115,12 +105,8 @@ func TestUpdaterUpdate(t *testing.T) {
 			)
 			assert.Nil(t, err)
 
-			merger := &merger.Mock{
-				Success: !test.wantMergeErr,
-			}
-			writer := &writer.Mock{
-				Success: !test.wantWriteErr,
-			}
+			merger := &merger.Mock{}
+			writer := &writer.Mock{Success: !test.wantWriteErr}
 
 			updater, err := NewUpdater(
 				WithGit(git),

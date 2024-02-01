@@ -84,10 +84,7 @@ func (updater *Updater) Update(p *pkg.Package, url, name string) error {
 		return err
 	}
 
-	newPkg, err := updater.merger.Merge(originPkg, localPkg, upstreamPkg)
-	if err != nil {
-		return err
-	}
+	newPkg := updater.merger.Merge(originPkg, localPkg, upstreamPkg)
 
 	p.UpdatePackage(newPkg, upstreamPkgRef, name)
 

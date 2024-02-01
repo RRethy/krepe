@@ -16,19 +16,14 @@ type Mock struct {
 	Local    *pkg.Package
 	Upstream *pkg.Package
 	Cnt      int
-	Success  bool
 }
 
-func (m *Mock) Merge(origin, local, upstream *pkg.Package) (*pkg.Package, error) {
-	if !m.Success {
-		return nil, assert.AnError
-	}
-
+func (m *Mock) Merge(origin, local, upstream *pkg.Package) *pkg.Package {
 	m.Origin = origin
 	m.Local = local
 	m.Upstream = upstream
 	m.Cnt++
-	return local, nil
+	return local
 }
 
 func (m *Mock) Assert(t *testing.T, origin, local, upstream string, cnt int) {

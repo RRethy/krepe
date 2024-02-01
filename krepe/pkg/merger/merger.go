@@ -10,13 +10,13 @@ var (
 )
 
 type Merger interface {
-	Merge(origin, local, upstream *pkg.Package) (*pkg.Package, error)
+	Merge(origin, local, upstream *pkg.Package) *pkg.Package
 }
 
 type Noop struct{}
 
-func (n Noop) Merge(origin, local, upstream *pkg.Package) (*pkg.Package, error) {
-	return local, nil
+func (n Noop) Merge(origin, local, upstream *pkg.Package) *pkg.Package {
+	return local
 }
 
 type Package struct{}
@@ -25,6 +25,6 @@ func NewMerger() Merger {
 	return Package{}
 }
 
-func (p Package) Merge(origin, local, upstream *pkg.Package) (*pkg.Package, error) {
-	return ThreeWayMerge(origin, local, upstream)
+func (p Package) Merge(origin, local, upstream *pkg.Package) *pkg.Package {
+	return threeWayMergePkg(origin, local, upstream)
 }
