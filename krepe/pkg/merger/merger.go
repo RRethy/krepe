@@ -6,7 +6,7 @@ import (
 
 var (
 	_ Merger = Noop{}
-	_ Merger = PackageMerger{}
+	_ Merger = Package{}
 )
 
 type Merger interface {
@@ -19,12 +19,12 @@ func (n Noop) Merge(origin, local, upstream *pkg.Package) (*pkg.Package, error) 
 	return local, nil
 }
 
-type PackageMerger struct{}
+type Package struct{}
 
 func NewMerger() Merger {
-	return PackageMerger{}
+	return Package{}
 }
 
-func (p PackageMerger) Merge(origin, local, upstream *pkg.Package) (*pkg.Package, error) {
+func (p Package) Merge(origin, local, upstream *pkg.Package) (*pkg.Package, error) {
 	return ThreeWayMerge(origin, local, upstream)
 }

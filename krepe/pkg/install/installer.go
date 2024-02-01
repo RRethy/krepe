@@ -5,6 +5,7 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 )
 
+// TODO: write
 type Installer struct {
 	git *git.Git
 }

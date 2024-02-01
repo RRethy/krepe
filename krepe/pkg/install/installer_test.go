@@ -93,9 +93,9 @@ func TestInstallerInstall(t *testing.T) {
 			pkg, err := pkg.NewPackageFromPathWithName(test.pkgPath, test.newPkgName)
 			assert.Nil(t, err)
 
-			echo := exec.NewExec(exec.WithCmd(test.cmd))
+			cmd := exec.NewExec(exec.WithCmd(test.cmd))
 			git, err := git.NewGit(
-				git.WithExec(echo),
+				git.WithExec(cmd),
 				git.WithDir(packagesDirName),
 			)
 			assert.Nil(t, err)

@@ -10,18 +10,18 @@ type Writer interface {
 	Write(pkg *pkg.Package) error
 }
 
-type PackageWriter struct {
+type Package struct {
 	dir string
 }
 
-func NewPackageWriter(dir string) (PackageWriter, error) {
+func NewPackageWriter(dir string) (Package, error) {
 	if dir == "" {
-		return PackageWriter{}, errors.New("dir cannot be empty")
+		return Package{}, errors.New("dir cannot be empty")
 	}
-	return PackageWriter{dir: dir}, nil
+	return Package{dir: dir}, nil
 }
 
-func (p PackageWriter) Write(pkg *pkg.Package) error {
+func (p Package) Write(pkg *pkg.Package) error {
 	// TODO: write to disk
 	return nil
 }
