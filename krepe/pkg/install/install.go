@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
+	"github.com/RRethy/krepe/krepe/pkg/writer"
 )
 
 func Install(pkgPath, url, name string) error {
@@ -18,7 +19,14 @@ func Install(pkgPath, url, name string) error {
 		return err
 	}
 
-	installer, err := NewInstaller()
+	writer, err := writer.NewPackageWriter(filepath.Dir(absPath))
+	if err != nil {
+		return err
+	}
+
+	installer, err := NewInstaller(
+		WithWriter(writer),
+	)
 	if err != nil {
 		return err
 	}
@@ -28,8 +36,5 @@ func Install(pkgPath, url, name string) error {
 		return err
 	}
 
-	// TODO: write
-	// dir := filepath.Dir(absPath)
-	// return p.Write(dir)
 	return nil
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/exec"
 	"github.com/RRethy/krepe/krepe/pkg/git"
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
+	"github.com/RRethy/krepe/krepe/pkg/writer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,15 +20,16 @@ func TestInstallerInstall(t *testing.T) {
 	assert.Nil(t, err)
 
 	tests := []struct {
-		name        string
-		pkgPath     string
-		url         string
-		newPkgName  string
-		cmd         string
-		wantErr     bool
-		wantPkgRef  *git.PkgRef
-		wantPkgName string
-		wantPackage func(t *testing.T, pkg *pkg.Package) // called with the imported package
+		name         string
+		pkgPath      string
+		url          string
+		newPkgName   string
+		cmd          string
+		wantErr      bool
+		wantWriteErr bool
+		wantPkgRef   *git.PkgRef
+		wantPkgName  string
+		wantPackage  func(t *testing.T, pkg *pkg.Package) // called with the imported package
 	}{
 		{
 			name:        "valid install",
@@ -86,6 +88,15 @@ func TestInstallerInstall(t *testing.T) {
 			cmd:     "true",
 			wantErr: true,
 		},
+		{
+			name:         "write fails",
+			pkgPath:      filepath.Join(packagesDirName, "sample_pkg"),
+			url:          "github.com/RRethy/sample_pkg@v0.0.1",
+			newPkgName:   "foobar",
+			cmd:          "true",
+			wantErr:      true,
+			wantWriteErr: true,
+		},
 	}
 
 	for _, test := range tests {
@@ -100,14 +111,20 @@ func TestInstallerInstall(t *testing.T) {
 			)
 			assert.Nil(t, err)
 
-			installer, err := NewInstaller(WithGit(git))
+			writer := &writer.Mock{
+				Success: !test.wantWriteErr,
+			}
+
+			installer, err := NewInstaller(WithGit(git), WithWriter(writer))
 			assert.Nil(t, err)
 
 			err = installer.Install(pkg, test.url, test.newPkgName)
 			if test.wantErr {
 				assert.Error(t, err)
+				assert.Equal(t, 0, writer.Cnt)
 			} else {
 				assert.NoError(t, err)
+				assert.Equal(t, 1, writer.Cnt)
 				importedPackage, err := pkg.GetPackageImportByName(test.wantPkgName)
 				assert.Nil(t, err)
 				assert.Equal(t, test.wantPkgRef, importedPackage.Ref)

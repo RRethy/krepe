@@ -3,11 +3,12 @@ package install
 import (
 	"github.com/RRethy/krepe/krepe/pkg/git"
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
+	"github.com/RRethy/krepe/krepe/pkg/writer"
 )
 
-// TODO: write
 type Installer struct {
-	git *git.Git
+	git    *git.Git
+	writer writer.Writer
 }
 
 type Option func(*Installer)
@@ -15,6 +16,12 @@ type Option func(*Installer)
 func WithGit(git *git.Git) Option {
 	return func(installer *Installer) {
 		installer.git = git
+	}
+}
+
+func WithWriter(w writer.Writer) Option {
+	return func(installer *Installer) {
+		installer.writer = w
 	}
 }
 
@@ -26,6 +33,7 @@ func NewInstaller(options ...Option) (*Installer, error) {
 
 	i := &Installer{
 		git,
+		writer.Noop{},
 	}
 	for _, option := range options {
 		option(i)
@@ -50,6 +58,11 @@ func (installer *Installer) Install(p *pkg.Package, url, name string) error {
 	}
 
 	err = p.AddPackage(newPkg, ref, name)
+	if err != nil {
+		return err
+	}
+
+	err = installer.writer.Write(p)
 	if err != nil {
 		return err
 	}
