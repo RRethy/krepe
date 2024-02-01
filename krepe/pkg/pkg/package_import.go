@@ -7,6 +7,5 @@ import (
 // TODO: validate package.name == name
 type PackageImport struct {
 	Ref     *git.PkgRef
-	Name    string
 	Package *Package
 }

@@ -66,9 +66,9 @@ func NewPackageFromPathWithName(packagePath, name string) (*Package, error) {
 			return nil, fmt.Errorf("parse package import ref `%s`: %w", packageImport.Ref, err)
 		}
 
-		name := pkgRef.Name
-		if packageImport.Name != "" {
-			name = packageImport.Name
+		name := packageImport.Name
+		if name == "" {
+			name = pkgRef.Name
 		}
 
 		pkg, err := NewPackageFromPathWithName(filepath.Join(packagePath, name), name)
@@ -78,7 +78,6 @@ func NewPackageFromPathWithName(packagePath, name string) (*Package, error) {
 
 		packageImports = append(packageImports, PackageImport{
 			Ref:     pkgRef,
-			Name:    name,
 			Package: pkg,
 		})
 	}
@@ -136,7 +135,7 @@ func (p *Package) RunPipeline(pipeline Pipeline) error {
 	for _, pkgImport := range p.PackageImports {
 		err := pkgImport.Package.RunPipeline(pipeline)
 		if err != nil {
-			return fmt.Errorf("running pipeline on pkg `%s`: %w", pkgImport.Name, err)
+			return fmt.Errorf("running pipeline on pkg `%s`: %w", pkgImport.Package.Name, err)
 		}
 	}
 
@@ -147,17 +146,27 @@ func (p *Package) AddPackage(pkg *Package, ref *git.PkgRef, name string) error {
 	if name == "" {
 		name = ref.Name
 	}
+	pkg.Name = name
 
 	for _, existingPkgImport := range p.PackageImports {
-		if existingPkgImport.Name == name {
-			return fmt.Errorf("pkg `%s` already exists", name)
+		if existingPkgImport.Package.Name == pkg.Name {
+			return fmt.Errorf("pkg `%s` already exists", pkg.Name)
 		}
 	}
 
 	p.PackageImports = append(p.PackageImports, PackageImport{
 		Ref:     ref,
-		Name:    pkg.Name,
 		Package: pkg,
 	})
 	return nil
+}
+
+func (p *Package) GetPackageImportByName(name string) (*PackageImport, error) {
+	for _, pkgImport := range p.PackageImports {
+		if pkgImport.Package.Name == name {
+			return &pkgImport, nil
+		}
+	}
+
+	return nil, fmt.Errorf("failed to get package import `%s`", name)
 }

@@ -38,6 +38,10 @@ func (installer *Installer) Install(p *pkg.Package, url, name string) error {
 		return err
 	}
 
+	if name == "" {
+		name = ref.Name
+	}
+
 	newPkgPath, err := installer.git.Clone(ref)
 	if err != nil {
 		return err
