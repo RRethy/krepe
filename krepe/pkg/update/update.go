@@ -1,34 +1,41 @@
 package update
 
 import (
-	_ "fmt"
-	_ "path/filepath"
+	"fmt"
+	"path/filepath"
 
-	_ "github.com/RRethy/krepe/krepe/pkg/pkg"
+	"github.com/RRethy/krepe/krepe/pkg/merger"
+	"github.com/RRethy/krepe/krepe/pkg/pkg"
+	"github.com/RRethy/krepe/krepe/pkg/writer"
 )
 
 func Update(pkgPath, url, name string) error {
+	absPath, err := filepath.Abs(pkgPath)
+	if err != nil {
+		return fmt.Errorf("getting absolute path: %w", err)
+	}
+
+	p, err := pkg.NewPackageFromPath(pkgPath)
+	if err != nil {
+		return err
+	}
+
+	merger := merger.NewMerger()
+
+	writer, err := writer.NewPackageWriter(filepath.Dir(absPath))
+	if err != nil {
+		return err
+	}
+
+	updater, err := NewUpdater(WithMerger(merger), WithWriter(writer))
+	if err != nil {
+		return err
+	}
+
+	err = updater.Update(p, url, name)
+	if err != nil {
+		return err
+	}
+
 	return nil
-	// absPath, err := filepath.Abs(pkgPath)
-	// if err != nil {
-	// 	return fmt.Errorf("getting absolute path: %w", err)
-	// }
-	//
-	// p, err := pkg.NewPkgFromPath(pkgPath)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// updater, err := NewUpdater()
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// err = updater.Update(p, url, name)
-	// if err != nil {
-	// 	return err
-	// }
-	//
-	// dir := filepath.Dir(absPath)
-	// return p.Write(dir)
 }

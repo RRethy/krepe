@@ -27,6 +27,12 @@ func WithWriter(w writer.Writer) Option {
 	}
 }
 
+func WithMerger(m merger.Merger) Option {
+	return func(updater *Updater) {
+		updater.merger = m
+	}
+}
+
 func NewUpdater(options ...Option) (*Updater, error) {
 	git, err := git.NewGit()
 	if err != nil {
