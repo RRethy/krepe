@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
+	"github.com/RRethy/krepe/krepe/pkg/writer"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -12,20 +13,12 @@ const (
 	packagesDirName = "../../testdata/packages"
 )
 
-type mockWriter struct {
-	writeCalled bool
-}
-
-func (m *mockWriter) Write(pkg *pkg.Package) error {
-	m.writeCalled = true
-	return nil
-}
-
 func TestPipelineRun(t *testing.T) {
 	tests := []struct {
 		name         string
 		pipelineName string
 		wantErr      bool
+		wantWriteErr bool
 		want         func(t *testing.T, pkg *pkg.Package)
 	}{
 		{
@@ -48,22 +41,30 @@ func TestPipelineRun(t *testing.T) {
 			pipelineName: "badpipeline",
 			wantErr:      true,
 		},
+		{
+			name:         "write fails",
+			pipelineName: "mypipeline",
+			wantErr:      true,
+			wantWriteErr: true,
+		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			pkg, err := pkg.NewPackageFromPath(filepath.Join(packagesDirName, "sample_pkg"))
 			assert.NoError(t, err)
-			w := &mockWriter{}
+			w := &writer.Mock{
+				Success: !tt.wantWriteErr,
+			}
 			pipeline := newPipeline(pkg, tt.pipelineName, withWriter(w))
 			err = pipeline.run()
 			if tt.wantErr {
 				assert.Error(t, err)
-				assert.False(t, w.writeCalled)
+				assert.Equal(t, 0, w.Cnt)
 			} else {
 				assert.NoError(t, err)
 				tt.want(t, pkg)
-				assert.True(t, w.writeCalled)
+				assert.Equal(t, 1, w.Cnt)
 			}
 		})
 	}

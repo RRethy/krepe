@@ -5,6 +5,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+var (
+	_ Writer = &Mock{}
+)
+
 type Mock struct {
 	Success bool
 	Cnt     int

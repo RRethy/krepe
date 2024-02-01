@@ -6,6 +6,7 @@ import (
 
 	"github.com/RRethy/krepe/krepe/pkg/exec"
 	"github.com/RRethy/krepe/krepe/pkg/git"
+	"github.com/RRethy/krepe/krepe/pkg/merger"
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 	"github.com/RRethy/krepe/krepe/pkg/writer"
 	"github.com/stretchr/testify/assert"
@@ -14,33 +15,6 @@ import (
 const (
 	packagesDirName = "../../testdata/packages"
 )
-
-type MockMerger struct {
-	origin   *pkg.Package
-	local    *pkg.Package
-	upstream *pkg.Package
-	cnt      int
-	success  bool
-}
-
-func (m *MockMerger) Merge(origin, local, upstream *pkg.Package) (*pkg.Package, error) {
-	if !m.success {
-		return nil, assert.AnError
-	}
-
-	m.origin = origin
-	m.local = local
-	m.upstream = upstream
-	m.cnt++
-	return local, nil
-}
-
-func (m *MockMerger) Assert(t *testing.T, origin, local, upstream string, cnt int) {
-	assert.Equal(t, origin, m.origin.Labels["version"])
-	assert.Equal(t, local, m.local.Labels["version"])
-	assert.Equal(t, upstream, m.upstream.Labels["version"])
-	assert.Equal(t, cnt, m.cnt)
-}
 
 func TestUpdaterUpdate(t *testing.T) {
 	tests := []struct {
@@ -141,8 +115,8 @@ func TestUpdaterUpdate(t *testing.T) {
 			)
 			assert.Nil(t, err)
 
-			merger := &MockMerger{
-				success: !test.wantMergeErr,
+			merger := &merger.Mock{
+				Success: !test.wantMergeErr,
 			}
 			writer := &writer.Mock{
 				Success: !test.wantWriteErr,
