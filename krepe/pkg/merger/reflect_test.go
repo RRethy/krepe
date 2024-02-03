@@ -183,13 +183,207 @@ func TestMapStringAnyToPtrStruct(t *testing.T) {
 }
 
 func TestIsUniformStructSlice(t *testing.T) {
+	type s struct {
+		A string
+		B int
+	}
+
+	tests := []struct {
+		name  string
+		slice []any
+		want  bool
+	}{
+		{
+			name:  "empty slice",
+			slice: []any{},
+			want:  false,
+		},
+		{
+			name:  "slice of same type structs",
+			slice: []any{s{A: "a", B: 1}, s{A: "b", B: 2}},
+			want:  true,
+		},
+		{
+			name:  "slice of different type structs",
+			slice: []any{s{A: "a", B: 1}, struct{ A string }{A: "b"}},
+			want:  false,
+		},
+		{
+			name:  "slice of non-structs",
+			slice: []any{1, 2},
+			want:  false,
+		},
+		{
+			name:  "slice of ptr to same type structs",
+			slice: []any{&s{A: "a", B: 1}, &s{A: "b", B: 2}},
+			want:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, isUniformStructSlice(tt.slice))
+		})
+	}
 }
 
 func TestIsUniformPtrStructSlice(t *testing.T) {
+	type s struct {
+		A string
+		B int
+	}
+
+	tests := []struct {
+		name  string
+		slice []any
+		want  bool
+	}{
+		{
+			name:  "empty slice",
+			slice: []any{},
+			want:  false,
+		},
+		{
+			name:  "slice of same type struct ptr",
+			slice: []any{&s{A: "a", B: 1}, &s{A: "b", B: 2}},
+			want:  true,
+		},
+		{
+			name:  "slice of different type struct ptr",
+			slice: []any{&s{A: "a", B: 1}, &struct{ A string }{A: "b"}},
+			want:  false,
+		},
+		{
+			name:  "slice of non-struct ptrs",
+			slice: []any{new(int), new(int)},
+			want:  false,
+		},
+		{
+			name:  "slice of struct",
+			slice: []any{s{A: "a", B: 1}, s{A: "b", B: 2}},
+			want:  false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, isUniformPtrStructSlice(tt.slice))
+		})
+	}
 }
 
 func TestSliceStructToSliceMap(t *testing.T) {
+	type s2 struct {
+		D string
+		E int
+	}
+	type s struct {
+		A string
+		B int
+		C s2
+	}
+
+	tests := []struct {
+		name  string
+		slice []any
+		want  []map[string]any
+	}{
+		{
+			name:  "empty slice",
+			slice: []any{},
+			want:  []map[string]any{},
+		},
+		{
+			name:  "slice of non-structs",
+			slice: []any{1, 2},
+			want:  []map[string]any{{}, {}},
+		},
+		{
+			name:  "slice of structs",
+			slice: []any{s{A: "a", B: 1}, s{A: "b", B: 2}},
+			want:  []map[string]any{{"A": "a", "B": 1, "C": s2{}}, {"A": "b", "B": 2, "C": s2{}}},
+		},
+		{
+			name:  "slice of mixed structs and non-structs",
+			slice: []any{s{A: "a", B: 1}, 2},
+			want:  []map[string]any{{"A": "a", "B": 1, "C": s2{}}, {}},
+		},
+		{
+			name:  "slice of complex structs",
+			slice: []any{s{A: "a", B: 1, C: s2{D: "d", E: 1}}, s{A: "b", B: 2, C: s2{D: "e", E: 2}}},
+			want: []map[string]any{
+				{"A": "a", "B": 1, "C": s2{D: "d", E: 1}},
+				{"A": "b", "B": 2, "C": s2{D: "e", E: 2}},
+			},
+		},
+		{
+			name:  "slice of ptr to structs",
+			slice: []any{&s{A: "a", B: 1}, &s{A: "b", B: 2}},
+			want:  []map[string]any{{}, {}},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, sliceStructToSliceMap(tt.slice))
+		})
+	}
 }
 
 func TestSlicePtrStructToSliceMap(t *testing.T) {
+	type s2 struct {
+		D string
+		E int
+	}
+	type s struct {
+		A string
+		B int
+		C s2
+	}
+
+	tests := []struct {
+		name  string
+		slice []any
+		want  []map[string]any
+	}{
+		{
+			name:  "empty slice",
+			slice: []any{},
+			want:  []map[string]any{},
+		},
+		{
+			name:  "slice of non-struct ptrs",
+			slice: []any{new(int), new(int)},
+			want:  []map[string]any{{}, {}},
+		},
+		{
+			name:  "slice of struct ptrs",
+			slice: []any{&s{A: "a", B: 1}, &s{A: "b", B: 2}},
+			want:  []map[string]any{{"A": "a", "B": 1, "C": s2{}}, {"A": "b", "B": 2, "C": s2{}}},
+		},
+		{
+			name:  "slice of mixed struct ptrs and non-struct ptrs",
+			slice: []any{&s{A: "a", B: 1}, new(int)},
+			want:  []map[string]any{{"A": "a", "B": 1, "C": s2{}}, {}},
+		},
+		{
+			name:  "slice of complex struct ptrs",
+			slice: []any{&s{A: "a", B: 1, C: s2{D: "d", E: 1}}, &s{A: "b", B: 2, C: s2{D: "e", E: 2}}},
+			want: []map[string]any{
+				{"A": "a", "B": 1, "C": s2{D: "d", E: 1}},
+				{"A": "b", "B": 2, "C": s2{D: "e", E: 2}},
+			},
+		},
+		{
+			name:  "slice of structs",
+			slice: []any{s{A: "a", B: 1}, s{A: "b", B: 2}},
+			want:  []map[string]any{{}, {}},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, slicePtrStructToSliceMap(tt.slice))
+		})
+	}
 }
