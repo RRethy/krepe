@@ -1,7 +1,7 @@
 package merger
 
 import (
-	"reflect"
+	"reflect" // TODO: try to remove this
 )
 
 // threeWayMerge returns the result of performing a 3-way merge on origin, local, and upstream.
@@ -125,6 +125,11 @@ func threeWayMergeMap(origin, local, upstream map[string]any) map[string]any {
 // The algorithm used depends on whether origin, local, and upstream are associative.
 func threeWayMergeSlice(origin, local, upstream []any) []any {
 	// TODO: handle structs for any
+	if isUniformStructSlice(origin) && isUniformStructSlice(local) && isUniformStructSlice(upstream) {
+	}
+
+	if isUniformPtrStructSlice(origin) && isUniformPtrStructSlice(local) && isUniformPtrStructSlice(upstream) {
+	}
 
 	if isAssociativeSlice(origin) && isAssociativeSlice(local) && isAssociativeSlice(upstream) {
 		return threeWayMergeSliceAssociative(origin, local, upstream)

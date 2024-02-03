@@ -123,3 +123,50 @@ func slicePtrStructToSliceMap(slice []any) []map[string]any {
 	}
 	return m
 }
+
+func isUniformStructSlices(slices ...[]any) bool {
+	if len(slices) == 0 || len(slices[0]) == 0 {
+		return false
+	}
+
+	targetType := reflect.TypeOf(slices[0][0])
+
+	for _, slice := range slices {
+		if len(slice) == 0 || !isUniformStructSlice(slice) {
+			return false
+		}
+		itemType := reflect.TypeOf(slice[0])
+		if itemType != targetType || itemType.Name() != targetType.Name() {
+			return false
+		}
+	}
+
+	return true
+}
+
+func isUniformPtrStructSlices(slices ...[]any) bool {
+	if len(slices) == 0 || len(slices[0]) == 0 {
+		return false
+	}
+
+	targetType := reflect.TypeOf(slices[0][0])
+	if targetType.Kind() != reflect.Ptr {
+		return false
+	}
+	targetType = targetType.Elem()
+	if targetType.Kind() != reflect.Struct {
+		return false
+	}
+
+	for _, slice := range slices {
+		if len(slice) == 0 || !isUniformPtrStructSlice(slice) {
+			return false
+		}
+		itemType := reflect.TypeOf(slice[0]).Elem()
+		if itemType != targetType || itemType.Name() != targetType.Name() {
+			return false
+		}
+	}
+
+	return true
+}
