@@ -124,11 +124,12 @@ func threeWayMergeMap(origin, local, upstream map[string]any) map[string]any {
 // threeWayMergeSlice returns the result of performing a 3-way merge on origin, local, and upstream.
 // The algorithm used depends on whether origin, local, and upstream are associative.
 func threeWayMergeSlice(origin, local, upstream []any) []any {
-	// TODO: handle structs for any
-	if isUniformStructSlice(origin) && isUniformStructSlice(local) && isUniformStructSlice(upstream) {
+	if isUniformStructSlices(origin, local, upstream) {
+		return threeWayMergeStructSlice(origin, local, upstream)
 	}
 
-	if isUniformPtrStructSlice(origin) && isUniformPtrStructSlice(local) && isUniformPtrStructSlice(upstream) {
+	if isUniformPtrStructSlices(origin, local, upstream) {
+		return threeWayMergePtrStructSlice(origin, local, upstream)
 	}
 
 	if isAssociativeSlice(origin) && isAssociativeSlice(local) && isAssociativeSlice(upstream) {
@@ -261,4 +262,54 @@ func threeWayMergeStruct(origin, local, upstream any) any {
 
 	merged := threeWayMergeMap(originMap, localMap, upstreamMap)
 	return mapStringAnyToStruct(merged, reflect.TypeOf(local))
+}
+
+func threeWayMergeStructSlice(origin, local, upstream []any) []any {
+	if len(origin) == 0 && len(local) == 0 && len(upstream) == 0 {
+		return nil
+	}
+
+	var targetType reflect.Type
+	if len(origin) > 0 {
+		targetType = reflect.TypeOf(origin[0])
+	} else if len(local) > 0 {
+		targetType = reflect.TypeOf(local[0])
+	} else if len(upstream) > 0 {
+		targetType = reflect.TypeOf(upstream[0])
+	}
+
+	originSliceMap := sliceStructToSliceMap(origin)
+	localSliceMap := sliceStructToSliceMap(local)
+	upstreamSliceMap := sliceStructToSliceMap(upstream)
+
+	mergedSliceMap := threeWayMergeSlice(originSliceMap, localSliceMap, upstreamSliceMap)
+	return sliceMapToSliceStruct(mergedSliceMap, targetType)
+}
+
+func threeWayMergePtrStructSlice(origin, local, upstream []any) []any {
+	if len(origin) == 0 && len(local) == 0 && len(upstream) == 0 {
+		return nil
+	}
+
+	var targetType reflect.Type
+	if len(origin) > 0 {
+		targetType = reflect.TypeOf(origin[0])
+	} else if len(local) > 0 {
+		targetType = reflect.TypeOf(local[0])
+	} else if len(upstream) > 0 {
+		targetType = reflect.TypeOf(upstream[0])
+	}
+
+	if targetType.Kind() != reflect.Ptr {
+		return nil
+	}
+
+	targetType = targetType.Elem()
+
+	originSliceMap := slicePtrStructToSliceMap(origin)
+	localSliceMap := slicePtrStructToSliceMap(local)
+	upstreamSliceMap := slicePtrStructToSliceMap(upstream)
+
+	mergedSliceMap := threeWayMergeSlice(originSliceMap, localSliceMap, upstreamSliceMap)
+	return sliceMapToSlicePtrStruct(mergedSliceMap, targetType)
 }

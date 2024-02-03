@@ -252,40 +252,40 @@ func TestSliceStructToSliceMap(t *testing.T) {
 	tests := []struct {
 		name  string
 		slice []any
-		want  []map[string]any
+		want  []any
 	}{
 		{
 			name:  "empty slice",
 			slice: []any{},
-			want:  []map[string]any{},
+			want:  []any{},
 		},
 		{
 			name:  "slice of non-structs",
 			slice: []any{1, 2},
-			want:  []map[string]any{{}, {}},
+			want:  []any{map[string]any{}, map[string]any{}},
 		},
 		{
 			name:  "slice of structs",
 			slice: []any{testStruct{A: "a", B: 1}, testStruct{A: "b", B: 2}},
-			want:  []map[string]any{{"A": "a", "B": 1, "C": testStruct2{}}, {"A": "b", "B": 2, "C": testStruct2{}}},
+			want:  []any{map[string]any{"A": "a", "B": 1, "C": testStruct2{}}, map[string]any{"A": "b", "B": 2, "C": testStruct2{}}},
 		},
 		{
 			name:  "slice of mixed structs and non-structs",
 			slice: []any{testStruct{A: "a", B: 1}, 2},
-			want:  []map[string]any{{"A": "a", "B": 1, "C": testStruct2{}}, {}},
+			want:  []any{map[string]any{"A": "a", "B": 1, "C": testStruct2{}}, map[string]any{}},
 		},
 		{
 			name:  "slice of complex structs",
 			slice: []any{testStruct{A: "a", B: 1, C: testStruct2{D: "d", E: 1}}, testStruct{A: "b", B: 2, C: testStruct2{D: "e", E: 2}}},
-			want: []map[string]any{
-				{"A": "a", "B": 1, "C": testStruct2{D: "d", E: 1}},
-				{"A": "b", "B": 2, "C": testStruct2{D: "e", E: 2}},
+			want: []any{
+				map[string]any{"A": "a", "B": 1, "C": testStruct2{D: "d", E: 1}},
+				map[string]any{"A": "b", "B": 2, "C": testStruct2{D: "e", E: 2}},
 			},
 		},
 		{
 			name:  "slice of ptr to structs",
 			slice: []any{&testStruct{A: "a", B: 1}, &testStruct{A: "b", B: 2}},
-			want:  []map[string]any{{}, {}},
+			want:  []any{map[string]any{}, map[string]any{}},
 		},
 	}
 
@@ -300,40 +300,40 @@ func TestSlicePtrStructToSliceMap(t *testing.T) {
 	tests := []struct {
 		name  string
 		slice []any
-		want  []map[string]any
+		want  []any
 	}{
 		{
 			name:  "empty slice",
 			slice: []any{},
-			want:  []map[string]any{},
+			want:  []any{},
 		},
 		{
 			name:  "slice of non-struct ptrs",
 			slice: []any{new(int), new(int)},
-			want:  []map[string]any{{}, {}},
+			want:  []any{map[string]any{}, map[string]any{}},
 		},
 		{
 			name:  "slice of struct ptrs",
 			slice: []any{&testStruct{A: "a", B: 1}, &testStruct{A: "b", B: 2}},
-			want:  []map[string]any{{"A": "a", "B": 1, "C": testStruct2{}}, {"A": "b", "B": 2, "C": testStruct2{}}},
+			want:  []any{map[string]any{"A": "a", "B": 1, "C": testStruct2{}}, map[string]any{"A": "b", "B": 2, "C": testStruct2{}}},
 		},
 		{
 			name:  "slice of mixed struct ptrs and non-struct ptrs",
 			slice: []any{&testStruct{A: "a", B: 1}, new(int)},
-			want:  []map[string]any{{"A": "a", "B": 1, "C": testStruct2{}}, {}},
+			want:  []any{map[string]any{"A": "a", "B": 1, "C": testStruct2{}}, map[string]any{}},
 		},
 		{
 			name:  "slice of complex struct ptrs",
 			slice: []any{&testStruct{A: "a", B: 1, C: testStruct2{D: "d", E: 1}}, &testStruct{A: "b", B: 2, C: testStruct2{D: "e", E: 2}}},
-			want: []map[string]any{
-				{"A": "a", "B": 1, "C": testStruct2{D: "d", E: 1}},
-				{"A": "b", "B": 2, "C": testStruct2{D: "e", E: 2}},
+			want: []any{
+				map[string]any{"A": "a", "B": 1, "C": testStruct2{D: "d", E: 1}},
+				map[string]any{"A": "b", "B": 2, "C": testStruct2{D: "e", E: 2}},
 			},
 		},
 		{
 			name:  "slice of structs",
 			slice: []any{testStruct{A: "a", B: 1}, testStruct{A: "b", B: 2}},
-			want:  []map[string]any{{}, {}},
+			want:  []any{map[string]any{}, map[string]any{}},
 		},
 	}
 
@@ -430,6 +430,83 @@ func TestIsUniformPtrStructSlices(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert.Equal(t, tt.want, isUniformPtrStructSlices(tt.slices...))
+		})
+	}
+}
+
+func TestSliceMapToSliceStruct(t *testing.T) {
+	tests := []struct {
+		name       string
+		slice      []any
+		structType reflect.Type
+		want       []any
+	}{
+		{
+			name:  "empty slice",
+			slice: []any{},
+			want:  []any{},
+		},
+		{
+			name:       "slice of empty maps",
+			slice:      []any{map[string]any{}, map[string]any{}},
+			structType: reflect.TypeOf(testStruct{}),
+			want:       []any{testStruct{}, testStruct{}},
+		},
+		{
+			name:       "slice of non-empty maps",
+			slice:      []any{map[string]any{"A": "a", "B": 1, "C": testStruct2{}}, map[string]any{"A": "b", "B": 2, "C": testStruct2{}}},
+			structType: reflect.TypeOf(testStruct{}),
+			want:       []any{testStruct{A: "a", B: 1, C: testStruct2{}}, testStruct{A: "b", B: 2, C: testStruct2{}}},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+		})
+	}
+}
+
+func TestSliceMapToSlicePtrStruct(t *testing.T) {
+	tests := []struct {
+		name       string
+		slice      []any
+		structType reflect.Type
+		want       []any
+	}{
+		{
+			name:       "empty slice",
+			slice:      []any{},
+			structType: reflect.TypeOf(&testStruct{}),
+			want:       []any{},
+		},
+		{
+			name:       "slice of empty maps with ptr struct type",
+			slice:      []any{map[string]any{}, map[string]any{}},
+			structType: reflect.TypeOf(&testStruct{}),
+			want:       []any{&testStruct{}, &testStruct{}},
+		},
+		{
+			name:       "slice of non-empty maps with ptr struct type",
+			slice:      []any{map[string]any{"A": "a", "B": 1, "C": testStruct2{}}, map[string]any{"A": "b", "B": 2, "C": testStruct2{}}},
+			structType: reflect.TypeOf(&testStruct{}),
+			want:       []any{&testStruct{A: "a", B: 1, C: testStruct2{}}, &testStruct{A: "b", B: 2, C: testStruct2{}}},
+		},
+		{
+			name:       "slice of non-empty maps with non-ptr struct type",
+			slice:      []any{map[string]any{"A": "a", "B": 1, "C": testStruct2{}}, map[string]any{"A": "b", "B": 2, "C": testStruct2{}}},
+			structType: reflect.TypeOf(testStruct{}),
+			want:       []any{testStruct{A: "a", B: 1, C: testStruct2{}}, testStruct{A: "b", B: 2, C: testStruct2{}}},
+		},
+		{
+			name:       "slice of empty maps with non-ptr struct type",
+			slice:      []any{map[string]any{}, map[string]any{}},
+			structType: reflect.TypeOf(testStruct{}),
+			want:       []any{testStruct{}, testStruct{}},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
 		})
 	}
 }

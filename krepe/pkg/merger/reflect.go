@@ -108,16 +108,16 @@ func isUniformPtrStructSlice(slice []any) bool {
 	return true
 }
 
-func sliceStructToSliceMap(slice []any) []map[string]any {
-	m := make([]map[string]any, len(slice))
+func sliceStructToSliceMap(slice []any) []any {
+	m := make([]any, len(slice))
 	for i, item := range slice {
 		m[i] = structToMap(item)
 	}
 	return m
 }
 
-func slicePtrStructToSliceMap(slice []any) []map[string]any {
-	m := make([]map[string]any, len(slice))
+func slicePtrStructToSliceMap(slice []any) []any {
+	m := make([]any, len(slice))
 	for i, item := range slice {
 		m[i] = ptrStructToMap(item)
 	}
@@ -169,4 +169,20 @@ func isUniformPtrStructSlices(slices ...[]any) bool {
 	}
 
 	return true
+}
+
+func sliceMapToSliceStruct(slice []any, structType reflect.Type) []any {
+	m := make([]any, len(slice))
+	for i, item := range slice {
+		m[i] = mapStringAnyToStruct(item.(map[string]any), structType)
+	}
+	return m
+}
+
+func sliceMapToSlicePtrStruct(slice []any, structType reflect.Type) []any {
+	m := make([]any, len(slice))
+	for i, item := range slice {
+		m[i] = mapStringAnyToPtrStruct(item.(map[string]any), structType)
+	}
+	return m
 }
