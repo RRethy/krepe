@@ -26,5 +26,5 @@ func NewMerger() Merger {
 }
 
 func (p Package) Merge(origin, local, upstream *pkg.Package) *pkg.Package {
-	return threeWayMergePkg(origin, local, upstream)
+	return threeWayMerge(origin, local, upstream).(*pkg.Package)
 }

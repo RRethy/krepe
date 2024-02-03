@@ -30,7 +30,6 @@ func isAssociativeSlice(slice []any) bool {
 		// it doesn't actually matter what we return here
 		return true
 	}
-
 	for _, v := range slice {
 		switch v.(type) {
 		case map[string]any:
@@ -38,7 +37,6 @@ func isAssociativeSlice(slice []any) bool {
 			return false
 		}
 	}
-
 	return true
 }
 

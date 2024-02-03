@@ -1,6 +1,7 @@
 package merger
 
 import (
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -153,7 +154,7 @@ func TestMapStringAnyToStruct(t *testing.T) {
 		D string
 		E int
 	}{D: "d", E: 1}}
-	assert.Equal(t, want, mapStringAnyToStruct[s](m))
+	assert.Equal(t, want, mapStringAnyToStruct(m, reflect.TypeOf(want)))
 }
 
 func TestMapStringAnyToPtrStruct(t *testing.T) {
@@ -177,5 +178,18 @@ func TestMapStringAnyToPtrStruct(t *testing.T) {
 		D string
 		E int
 	}{D: "d", E: 1}}
-	assert.Equal(t, want, mapStringAnyToPtrStruct[s](m))
+	assert.Equal(t, want, mapStringAnyToPtrStruct(m, reflect.TypeOf(want)))
+	assert.Equal(t, want, mapStringAnyToPtrStruct(m, reflect.TypeOf(*want)))
+}
+
+func TestIsUniformStructSlice(t *testing.T) {
+}
+
+func TestIsUniformPtrStructSlice(t *testing.T) {
+}
+
+func TestSliceStructToSliceMap(t *testing.T) {
+}
+
+func TestSlicePtrStructToSliceMap(t *testing.T) {
 }
