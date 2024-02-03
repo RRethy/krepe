@@ -1,7 +1,7 @@
 package merger
 
 import (
-	"github.com/RRethy/krepe/krepe/pkg/pkg"
+	"reflect"
 )
 
 // twoWayMerge returns the result of performing a 2-way merge on local and upstream.
@@ -15,6 +15,10 @@ import (
 func twoWayMerge(local, upstream any) any {
 	if upstream == nil {
 		return nil
+	}
+
+	if local == nil {
+		return upstream
 	}
 
 	switch localTyped := local.(type) {
@@ -31,6 +35,19 @@ func twoWayMerge(local, upstream any) any {
 		}
 		return twoWayMergeSlice(localTyped, upstreamArr)
 	default:
+		localType := reflect.TypeOf(local)
+		upstreamType := reflect.TypeOf(upstream)
+
+		if localType != upstreamType {
+			return twoWayMergeScalar(local, upstream)
+		}
+
+		if localType.Kind() == reflect.Ptr && localType.Elem().Kind() == reflect.Struct {
+			return twoWayMergePtrStruct(local, upstream)
+		} else if localType.Kind() == reflect.Struct {
+			return twoWayMergeStruct(local, upstream)
+		}
+
 		return twoWayMergeScalar(local, upstream)
 	}
 }
@@ -57,6 +74,14 @@ func twoWayMergeMap(local, upstream map[string]any) map[string]any {
 // twoWayMergeSlice returns the result of performing a 2-way merge on local and upstream.
 // The algorithm used depends on whether local and upstream are associative.
 func twoWayMergeSlice(local, upstream []any) []any {
+	if isUniformStructSlices(local, upstream) {
+		return twoWayMergeStructSlice(local, upstream)
+	}
+
+	if isUniformPtrStructSlices(local, upstream) {
+		return twoWayMergePtrStructSlice(local, upstream)
+	}
+
 	if isAssociativeSlice(local) && isAssociativeSlice(upstream) {
 		return twoWayMergeSliceAssociative(local, upstream)
 	}
@@ -138,6 +163,66 @@ func twoWayMergeScalar(local, upstream any) any {
 	return upstream
 }
 
-func twoWayMergePkg(local, upstream *pkg.Package) *pkg.Package {
-	return nil
+func twoWayMergePtrStruct(local, upstream any) any {
+	localMap := ptrStructToMap(local)
+	upstreamMap := ptrStructToMap(upstream)
+
+	merged := twoWayMergeMap(localMap, upstreamMap)
+	return mapStringAnyToPtrStruct(merged, reflect.TypeOf(local).Elem())
+}
+
+func twoWayMergeStruct(local, upstream any) any {
+	localMap := structToMap(local)
+	upstreamMap := structToMap(upstream)
+
+	merged := twoWayMergeMap(localMap, upstreamMap)
+	return mapStringAnyToStruct(merged, reflect.TypeOf(local))
+}
+
+func twoWayMergeStructSlice(local, upstream []any) []any {
+	if len(local) == 0 && len(upstream) == 0 {
+		return nil
+	}
+
+	var targetType reflect.Type
+	if len(local) > 0 {
+		targetType = reflect.TypeOf(local[0])
+	} else if len(upstream) > 0 {
+		targetType = reflect.TypeOf(upstream[0])
+	}
+
+	if targetType.Kind() != reflect.Struct {
+		return nil
+	}
+
+	localSliceMap := sliceStructToSliceMap(local)
+	upstreamSliceMap := sliceStructToSliceMap(upstream)
+
+	mergedSliceMap := twoWayMergeSlice(localSliceMap, upstreamSliceMap)
+	return sliceMapToSliceStruct(mergedSliceMap, targetType)
+}
+
+func twoWayMergePtrStructSlice(local, upstream []any) []any {
+	if len(local) == 0 && len(upstream) == 0 {
+		return nil
+	}
+
+	var targetType reflect.Type
+	if len(local) > 0 {
+		targetType = reflect.TypeOf(local[0])
+	} else if len(upstream) > 0 {
+		targetType = reflect.TypeOf(upstream[0])
+	}
+
+	if targetType.Kind() != reflect.Ptr {
+		return nil
+	}
+
+	targetType = targetType.Elem()
+
+	localSliceMap := slicePtrStructToSliceMap(local)
+	upstreamSliceMap := slicePtrStructToSliceMap(upstream)
+
+	mergedSliceMap := twoWayMergeSlice(localSliceMap, upstreamSliceMap)
+	return sliceMapToSlicePtrStruct(mergedSliceMap, targetType)
 }

@@ -1,7 +1,7 @@
 package merger
 
 import (
-	"reflect" // TODO: try to remove this
+	"reflect"
 )
 
 // threeWayMerge returns the result of performing a 3-way merge on origin, local, and upstream.
@@ -62,25 +62,17 @@ func threeWayMerge(origin, local, upstream any) any {
 		upstreamType := reflect.TypeOf(upstream)
 		originType := reflect.TypeOf(origin)
 
-		if localType != upstreamType {
-			return local
-		}
-
-		if localType != originType {
-			return twoWayMerge(local, upstream)
-		}
-
-		if localType.Kind() == reflect.Ptr &&
-			localType.Elem().Name() == upstreamType.Elem().Name() &&
-			localType.Elem().Name() == originType.Elem().Name() {
-			return threeWayMergePtrStruct(origin, local, upstream)
-		} else if localType.Kind() == reflect.Struct &&
-			localType.Name() == upstreamType.Name() &&
-			localType.Name() == originType.Name() {
-			return threeWayMergeStruct(origin, local, upstream)
-		} else {
+		if localType != upstreamType || localType != originType {
 			return threeWayMergeScalar(origin, local, upstream)
 		}
+
+		if localType.Kind() == reflect.Ptr && localType.Elem().Kind() == reflect.Struct {
+			return threeWayMergePtrStruct(origin, local, upstream)
+		} else if localType.Kind() == reflect.Struct {
+			return threeWayMergeStruct(origin, local, upstream)
+		}
+
+		return threeWayMergeScalar(origin, local, upstream)
 	}
 }
 
@@ -276,6 +268,10 @@ func threeWayMergeStructSlice(origin, local, upstream []any) []any {
 		targetType = reflect.TypeOf(local[0])
 	} else if len(upstream) > 0 {
 		targetType = reflect.TypeOf(upstream[0])
+	}
+
+	if targetType.Kind() != reflect.Struct {
+		return nil
 	}
 
 	originSliceMap := sliceStructToSliceMap(origin)
