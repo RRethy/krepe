@@ -13,11 +13,20 @@
 //
 // An associative slice is a slice of maps where each map has an associative key that is unique across all maps.
 // The following are possible associative keys:
+//   - type
+//   - name
 //   - mountPath
 //   - devicePath
 //   - ip
-//   - type
 //   - topologyKey
-//   - name
 //   - containerPort
+//   - manager
+//   - Type
+//   - Name
+//   - MountPath
+//   - DevicePath
+//   - IP
+//   - TopologyKey
+//   - ContainerPort
+//   - Manager
 package merger

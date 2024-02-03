@@ -11,6 +11,15 @@ var (
 		"ip",
 		"topologyKey",
 		"containerPort",
+		"manager",
+		"Type",
+		"Name",
+		"MountPath",
+		"DevicePath",
+		"IP",
+		"TopologyKey",
+		"ContainerPort",
+		"Manager",
 	}
 )
 

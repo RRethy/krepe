@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type threeWayMergeTest[T Mergeable] struct {
+type threeWayMergeTest[T any] struct {
 	name     string
 	origin   T
 	local    T
@@ -15,7 +15,7 @@ type threeWayMergeTest[T Mergeable] struct {
 	want     any
 }
 
-func runThreeWayMergeTests[T Mergeable](t *testing.T, threeWayMergeFunc func(T, T, T) T, tests []threeWayMergeTest[T]) {
+func runThreeWayMergeTests[T any](t *testing.T, threeWayMergeFunc func(T, T, T) T, tests []threeWayMergeTest[T]) {
 	t.Helper()
 
 	for _, test := range tests {
@@ -537,7 +537,7 @@ func TestThreeWayMergeSliceNonAssociative(t *testing.T) {
 }
 
 func TestThreeWayMergeScalar(t *testing.T) {
-	runThreeWayMergeTests(t, threeWayMergeScalar, []threeWayMergeTest[any]{
+	runThreeWayMergeTests(t, threeWayMergeScalar[any], []threeWayMergeTest[any]{
 		{
 			name:     "origin and upstream match",
 			origin:   1,

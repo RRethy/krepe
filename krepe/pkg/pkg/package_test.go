@@ -116,7 +116,7 @@ func TestNewPackageFromPathWithName(t *testing.T) {
 					assert.Equal(t, test.packageImports[i], pkgImport.Package.Name)
 				}
 				for i, fileImport := range p.FileImports {
-					assert.Equal(t, test.fileImports[i], fileImport.Filename)
+					assert.Equal(t, test.fileImports[i], fileImport.Name)
 				}
 				for i, pipeline := range p.Pipelines {
 					assert.Equal(t, test.pipelines[i], pipeline.Name)

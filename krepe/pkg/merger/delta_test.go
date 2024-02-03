@@ -7,14 +7,14 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type deltaTest[T Mergeable] struct {
+type deltaTest[T any] struct {
 	name   string
 	source T
 	remove T
 	want   any
 }
 
-func runDeltaTests[T Mergeable](t *testing.T, deltaFunc func(T, T) T, tests []deltaTest[T]) {
+func runDeltaTests[T any](t *testing.T, deltaFunc func(T, T) T, tests []deltaTest[T]) {
 	t.Helper()
 
 	for _, test := range tests {

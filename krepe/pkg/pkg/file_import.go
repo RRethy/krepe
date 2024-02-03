@@ -11,7 +11,7 @@ import (
 
 type FileImport struct {
 	Resource *unstructured.Unstructured
-	Filename string
+	Name     string
 	Raw      []byte
 }
 
@@ -29,8 +29,8 @@ func NewFileImportFromBytes(filename string, bytes []byte) (FileImport, error) {
 		Resource: &unstructured.Unstructured{
 			Object: make(map[string]any),
 		},
-		Filename: filename,
-		Raw:      bytes,
+		Name: filename,
+		Raw:  bytes,
 	}
 
 	if err := yaml.Unmarshal(bytes, &r.Resource.Object); err != nil {

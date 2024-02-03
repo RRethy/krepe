@@ -87,7 +87,7 @@ func NewPackageFromPathWithName(packagePath, name string) (*Package, error) {
 		filename := filepath.Join(packagePath, fileImport)
 		fileImport, err := NewFileImportFromPath(filename)
 		if err != nil {
-			return nil, fmt.Errorf("importing file `%s` in pkg `%s`: %w", fileImport.Filename, packagePath, err)
+			return nil, fmt.Errorf("importing file `%s` in pkg `%s`: %w", fileImport.Name, packagePath, err)
 		}
 
 		fileImports = append(fileImports, fileImport)
@@ -128,7 +128,7 @@ func (p *Package) RunPipeline(pipeline Pipeline) error {
 	for _, fileImport := range p.FileImports {
 		err := pipeline.Run(fileImport.Resource)
 		if err != nil {
-			return fmt.Errorf("running pipeline on resource `%s`: %w", fileImport.Filename, err)
+			return fmt.Errorf("running pipeline on resource `%s`: %w", fileImport.Name, err)
 		}
 	}
 
