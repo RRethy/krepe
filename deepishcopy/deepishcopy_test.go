@@ -6,12 +6,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type testStruct struct {
+	Foo    string
+	Bar    int
+	Nested *testStruct
+}
+
 func TestCopy(t *testing.T) {
 	tests := []struct {
-		name   string
-		src    any
-		want   any
-		modify func(any)
+		name          string
+		src           any
+		want          any
+		modifications func(any)
 	}{
 		{
 			name: "nil",
@@ -102,7 +108,7 @@ func TestCopy(t *testing.T) {
 			name: "slice",
 			src:  []any{1, 2, 3},
 			want: []any{1, 2, 3},
-			modify: func(obj any) {
+			modifications: func(obj any) {
 				obj.([]any)[0] = 4
 			},
 		},
@@ -114,7 +120,7 @@ func TestCopy(t *testing.T) {
 			want: map[string]any{
 				"foo": "bar",
 			},
-			modify: func(obj any) {
+			modifications: func(obj any) {
 				obj.(map[string]any)["foo"] = "baz"
 			},
 		},
@@ -122,7 +128,7 @@ func TestCopy(t *testing.T) {
 			name: "nested slice",
 			src:  []any{1, 2, []any{3, 4}},
 			want: []any{1, 2, []any{3, 4}},
-			modify: func(obj any) {
+			modifications: func(obj any) {
 				obj.([]any)[2].([]any)[0] = 5
 			},
 		},
@@ -138,7 +144,7 @@ func TestCopy(t *testing.T) {
 					"bar": "baz",
 				},
 			},
-			modify: func(obj any) {
+			modifications: func(obj any) {
 				obj.(map[string]any)["foo"].(map[string]any)["bar"] = "qux"
 			},
 		},
@@ -166,8 +172,116 @@ func TestCopy(t *testing.T) {
 					},
 				},
 			},
-			modify: func(obj any) {
+			modifications: func(obj any) {
 				obj.([]any)[1].(map[string]any)["foo"].([]any)[1].(map[string]any)["bar"] = 4
+			},
+		},
+		{
+			name: "nil slice",
+			src:  nil,
+			want: nil,
+		},
+		{
+			name: "nil map",
+			src:  nil,
+			want: nil,
+		},
+		{
+			name: "empty slice",
+			src:  []any{},
+			want: []any{},
+		},
+		{
+			name: "empty map",
+			src:  map[string]any{},
+			want: map[string]any{},
+			modifications: func(obj any) {
+				obj.(map[string]any)["foo"] = "bar"
+			},
+		},
+		{
+			name: "struct ptr",
+			src: &testStruct{
+				Foo: "foo",
+				Bar: 1,
+				Nested: &testStruct{
+					Foo: "nested",
+					Bar: 2,
+					Nested: &testStruct{
+						Foo: "nested2",
+						Bar: 3,
+					},
+				},
+			},
+			want: &testStruct{
+				Foo: "foo",
+				Bar: 1,
+				Nested: &testStruct{
+					Foo: "nested",
+					Bar: 2,
+					Nested: &testStruct{
+						Foo: "nested2",
+						Bar: 3,
+					},
+				},
+			},
+			modifications: func(obj any) {
+				obj.(*testStruct).Nested.Nested.Foo = "qux2"
+			},
+		},
+		{
+			name: "struct",
+			src: testStruct{
+				Foo: "foo",
+				Bar: 1,
+				Nested: &testStruct{
+					Foo: "nested",
+					Bar: 2,
+					Nested: &testStruct{
+						Foo: "nested2",
+						Bar: 3,
+					},
+				},
+			},
+			want: testStruct{
+				Foo: "foo",
+				Bar: 1,
+				Nested: &testStruct{
+					Foo: "nested",
+					Bar: 2,
+					Nested: &testStruct{
+						Foo: "nested2",
+						Bar: 3,
+					},
+				},
+			},
+			modifications: func(obj any) {
+				obj.(testStruct).Nested.Nested.Foo = "qux2"
+			},
+		},
+		{
+			name: "struct ptr with nil field",
+			src: &testStruct{
+				Foo: "foo",
+				Bar: 1,
+			},
+			want: &testStruct{
+				Foo: "foo",
+				Bar: 1,
+			},
+			modifications: func(obj any) {
+				obj.(*testStruct).Foo = "bar"
+			},
+		},
+		{
+			name: "struct with nil field",
+			src: testStruct{
+				Foo: "foo",
+				Bar: 1,
+			},
+			want: testStruct{
+				Foo: "foo",
+				Bar: 1,
 			},
 		},
 	}
@@ -176,9 +290,9 @@ func TestCopy(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := Copy(tt.src)
 			assert.Equal(t, tt.want, got)
-			if tt.modify != nil {
-				tt.modify(got)
-				assert.NotEqual(t, tt.want, got)
+			if tt.modifications != nil {
+				tt.modifications(got)
+				assert.NotEqual(t, tt.src, got)
 			}
 		})
 	}

@@ -8,6 +8,7 @@ package deepishcopy
 
 import (
 	"fmt"
+	"reflect"
 )
 
 // Copy returns a deep copy of src.
@@ -27,11 +28,21 @@ func Copy(src any) any {
 		float32, float64, complex64, complex128, string, nil:
 		return src
 	default:
+		if reflect.TypeOf(src).Kind() == reflect.Ptr {
+			return copyPtr(src)
+		} else if reflect.TypeOf(src).Kind() == reflect.Struct {
+			return copyStruct(src)
+		}
+
 		panic(fmt.Sprintf("deepishcopy: unsupported type %T", src))
 	}
 }
 
 func copyMap(src map[string]any) map[string]any {
+	if src == nil {
+		return nil
+	}
+
 	dst := make(map[string]any, len(src))
 	for k, v := range src {
 		dst[k] = Copy(v)
@@ -40,9 +51,46 @@ func copyMap(src map[string]any) map[string]any {
 }
 
 func copySlice(src []any) []any {
+	if src == nil {
+		return nil
+	}
+
 	dst := make([]any, len(src))
 	for i, v := range src {
 		dst[i] = Copy(v)
 	}
 	return dst
+}
+
+func copyPtr(src any) any {
+	srcVal := reflect.ValueOf(src)
+	if srcVal.IsNil() {
+		return reflect.Zero(reflect.TypeOf(src)).Interface()
+	}
+
+	dst := reflect.New(srcVal.Elem().Type()).Interface()
+	dstElem := reflect.ValueOf(dst).Elem()
+	srcElem := srcVal.Elem()
+
+	if srcElem.CanInterface() && dstElem.CanSet() {
+		dstElem.Set(reflect.ValueOf(Copy(srcElem.Interface())))
+	}
+	return dst
+}
+
+func copyStruct(src any) any {
+	dst := reflect.New(reflect.TypeOf(src)).Elem()
+	srcVal := reflect.ValueOf(src)
+
+	for i := 0; i < srcVal.NumField(); i++ {
+		srcField := srcVal.Field(i)
+		dstField := dst.Field(i)
+
+		if srcField.CanInterface() && dstField.CanSet() {
+			srcFieldInterface := srcField.Interface()
+
+			dstField.Set(reflect.ValueOf(Copy(srcFieldInterface)))
+		}
+	}
+	return dst.Interface()
 }
