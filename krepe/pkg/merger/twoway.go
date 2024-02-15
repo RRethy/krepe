@@ -14,7 +14,7 @@ import (
 // local and upstream are not modified but the result may share memory with local and upstream.
 func twoWayMerge(local, upstream any) any {
 	if upstream == nil {
-		return nil
+		return local
 	}
 
 	if local == nil {
@@ -155,15 +155,25 @@ func twoWayMergeSliceAssociative(local, upstream []any) []any {
 
 // twoWayMergeSliceNonAssociative returns the upstream slice.
 func twoWayMergeSliceNonAssociative(local, upstream []any) []any {
+	if len(upstream) == 0 {
+		return local
+	}
 	return upstream
 }
 
 // twoWayMergeScalar returns the upstream value.
 func twoWayMergeScalar(local, upstream any) any {
+	if upstream == nil {
+		return local
+	}
 	return upstream
 }
 
 func twoWayMergePtrStruct(local, upstream any) any {
+	if local == nil || upstream == nil {
+		return twoWayMergeScalar(local, upstream)
+	}
+
 	localMap := ptrStructToMap(local)
 	upstreamMap := ptrStructToMap(upstream)
 
@@ -176,12 +186,16 @@ func twoWayMergeStruct(local, upstream any) any {
 	upstreamMap := structToMap(upstream)
 
 	merged := twoWayMergeMap(localMap, upstreamMap)
-	return mapStringAnyToStruct(merged, reflect.TypeOf(local))
+	return mapStringAnyToStruct(merged, reflect.TypeOf(upstream))
 }
 
 func twoWayMergeStructSlice(local, upstream []any) []any {
 	if len(local) == 0 && len(upstream) == 0 {
-		return nil
+		return twoWayMergeScalar(local, upstream).([]any)
+	}
+
+	if len(local) > 0 && len(upstream) > 0 && reflect.TypeOf(local[0]) != reflect.TypeOf(upstream[0]) {
+		return twoWayMergeSliceNonAssociative(local, upstream)
 	}
 
 	var targetType reflect.Type
@@ -204,7 +218,11 @@ func twoWayMergeStructSlice(local, upstream []any) []any {
 
 func twoWayMergePtrStructSlice(local, upstream []any) []any {
 	if len(local) == 0 && len(upstream) == 0 {
-		return nil
+		return twoWayMergeScalar(local, upstream).([]any)
+	}
+
+	if len(local) > 0 && len(upstream) > 0 && reflect.TypeOf(local[0]) != reflect.TypeOf(upstream[0]) {
+		return twoWayMergeSliceNonAssociative(local, upstream)
 	}
 
 	var targetType reflect.Type

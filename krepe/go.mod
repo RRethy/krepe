@@ -15,8 +15,6 @@ require (
 
 replace github.com/RRethy/krepe/jsonpatch => ../jsonpatch
 
-replace github.com/RRethy/krepe/krmmerge => ../krmmerge
-
 replace github.com/RRethy/krepe/deepishcopy => ../deepishcopy
 
 require (

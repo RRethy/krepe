@@ -68,13 +68,13 @@ func TestTwoWayMerge(t *testing.T) {
 			name:     "nil upstream",
 			local:    "foo",
 			upstream: nil,
-			want:     nil,
+			want:     "foo",
 		},
 		{
-			name:     "nil upstream it local map",
+			name:     "nil upstream but local map",
 			local:    map[string]any{"foo": "bar"},
 			upstream: nil,
-			want:     nil,
+			want:     map[string]any{"foo": "bar"},
 		},
 	})
 }
@@ -355,6 +355,18 @@ func TestTwoWayMergeSliceNonAssociative(t *testing.T) {
 			upstream: []any{"baz", "qux"},
 			want:     []any{"baz", "qux"},
 		},
+		{
+			name:     "nil upstream",
+			local:    []any{"foo", "bar"},
+			upstream: nil,
+			want:     []any{"foo", "bar"},
+		},
+		{
+			name:     "nil local",
+			local:    nil,
+			upstream: []any{"foo", "bar"},
+			want:     []any{"foo", "bar"},
+		},
 	})
 }
 
@@ -372,5 +384,314 @@ func TestTwoWayMergeScalar(t *testing.T) {
 			upstream: "bar",
 			want:     "bar",
 		},
+		{
+			name:     "nil upstream",
+			local:    "foo",
+			upstream: nil,
+			want:     "foo",
+		},
+		{
+			name:     "nil local",
+			local:    nil,
+			upstream: "foo",
+			want:     "foo",
+		},
 	})
+}
+
+func TestTwoWayMergePtrStruct(t *testing.T) {
+	runTwoWayMergeTests(t, twoWayMergePtrStruct, []twoWayMergeTest[any]{
+		{
+			name: "nil upstream",
+			local: &testStruct{
+				A: "foo",
+				B: 1,
+			},
+			upstream: nil,
+			want: &testStruct{
+				A: "foo",
+				B: 1,
+			},
+		},
+		{
+			name:     "nil upstream and local",
+			local:    nil,
+			upstream: nil,
+			want:     nil,
+		},
+		{
+			name:  "nil local",
+			local: nil,
+			upstream: &testStruct{
+				A: "foo",
+				B: 1,
+			},
+			want: &testStruct{
+				A: "foo",
+				B: 1,
+			},
+		},
+		{
+			name:     "ptr to empty structs",
+			local:    &testStruct{},
+			upstream: &testStruct{},
+			want:     &testStruct{},
+		},
+		{
+			name: "ptr to non-empty structs",
+			local: &testStruct{
+				A: "foo",
+				B: 1,
+			},
+			upstream: &testStruct{
+				A: "bar",
+				B: 2,
+			},
+			want: &testStruct{
+				A: "bar",
+				B: 2,
+			},
+		},
+		{
+			name: "ptr to non-empty structs with nil upstream",
+			local: &testStruct{
+				A: "foo",
+				B: 1,
+				C: testStruct2{
+					D: "baz",
+					E: 3,
+				},
+			},
+			upstream: nil,
+			want: &testStruct{
+				A: "foo",
+				B: 1,
+				C: testStruct2{
+					D: "baz",
+					E: 3,
+				},
+			},
+		},
+		{
+			name:  "ptr to non-empty structs with nil local",
+			local: nil,
+			upstream: &testStruct{
+				A: "foo",
+				B: 1,
+				C: testStruct2{
+					D: "baz",
+					E: 3,
+				},
+			},
+			want: &testStruct{
+				A: "foo",
+				B: 1,
+				C: testStruct2{
+					D: "baz",
+					E: 3,
+				},
+			},
+		},
+		// {
+		// 	name: "ptr to non-structs",
+		// },
+	})
+}
+
+func TestTwoWayMergeStruct(t *testing.T) {
+	tests := []struct {
+		name     string
+		local    any
+		upstream any
+		want     any
+	}{
+		{
+			name:     "empty structs",
+			local:    testStruct{},
+			upstream: testStruct{},
+			want:     testStruct{},
+		},
+		{
+			name: "non-empty structs",
+			local: testStruct{
+				A: "foo",
+				B: 1,
+				C: testStruct2{D: "baz", E: 3},
+				F: &testStruct{
+					A: "qux",
+					B: 4,
+					C: testStruct2{D: "corge", E: 5},
+					F: &testStruct{A: "grault", B: 6},
+				},
+			},
+			upstream: testStruct{
+				A: "bar",
+				B: 2,
+				C: testStruct2{D: "quux", E: 4},
+				F: &testStruct{
+					A: "garply",
+					B: 5,
+					C: testStruct2{D: "waldo", E: 6},
+					F: nil,
+				},
+			},
+			want: testStruct{
+				A: "bar",
+				B: 2,
+				C: testStruct2{D: "quux", E: 4},
+				F: &testStruct{
+					A: "garply",
+					B: 5,
+					C: testStruct2{D: "waldo", E: 6},
+					F: &testStruct{A: "grault", B: 6},
+				},
+			},
+		},
+		{
+			name:     "non-empty local with empty upstream",
+			local:    testStruct{A: "foo", B: 1, C: testStruct2{}},
+			upstream: testStruct{},
+			want:     testStruct{A: "", B: 0, C: testStruct2{}},
+		},
+		{
+			name:     "empty local with non-empty upstream",
+			local:    testStruct{},
+			upstream: testStruct{A: "foo", B: 1, C: testStruct2{D: "baz", E: 3}},
+			want:     testStruct{A: "foo", B: 1, C: testStruct2{D: "baz", E: 3}},
+		},
+		{
+			name:     "different types",
+			local:    testStruct{A: "foo", B: 1},
+			upstream: testStruct2{D: "baz", E: 3},
+			want:     testStruct2{D: "baz", E: 3},
+		},
+		{
+			name:     "equal structs",
+			local:    testStruct{A: "foo", B: 1},
+			upstream: testStruct{A: "foo", B: 1},
+			want:     testStruct{A: "foo", B: 1},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.want, twoWayMergeStruct(test.local, test.upstream))
+		})
+	}
+}
+
+func TestTwoWayMergeStructSlice(t *testing.T) {
+	tests := []struct {
+		name     string
+		local    []any
+		upstream []any
+		want     []any
+	}{
+		{
+			name:     "empty slices",
+			local:    []any{},
+			upstream: []any{},
+			want:     []any{},
+		},
+		{
+			name:     "nil slices",
+			local:    nil,
+			upstream: nil,
+			want:     nil,
+		},
+		{
+			name:     "non-empty slices",
+			local:    []any{testStruct{A: "foo", B: 1}, testStruct{A: "bar", B: 2}},
+			upstream: []any{testStruct{A: "baz", B: 3}, testStruct{A: "qux", B: 4}},
+			want:     []any{testStruct{A: "baz", B: 3}, testStruct{A: "qux", B: 4}},
+		},
+		{
+			name:     "non-empty local with nil upstream",
+			local:    []any{testStruct{A: "foo", B: 1}, testStruct{A: "bar", B: 2}},
+			upstream: nil,
+			want:     []any{testStruct{A: "foo", B: 1}, testStruct{A: "bar", B: 2}},
+		},
+		{
+			name:     "nil local with non-empty upstream",
+			local:    nil,
+			upstream: []any{testStruct{A: "foo", B: 1}, testStruct{A: "bar", B: 2}},
+			want:     []any{testStruct{A: "foo", B: 1}, testStruct{A: "bar", B: 2}},
+		},
+		{
+			name:     "different types",
+			local:    []any{testStruct{A: "foo", B: 1}, testStruct{A: "bar", B: 2}},
+			upstream: []any{testStruct2{D: "baz", E: 3}, testStruct2{D: "qux", E: 4}},
+			want:     []any{testStruct2{D: "baz", E: 3}, testStruct2{D: "qux", E: 4}},
+		},
+		{
+			name:     "with associative keys",
+			local:    []any{testStruct3{Name: "foo", Age: 1}, testStruct3{Name: "bar", Age: 2}, testStruct3{Name: "baz", Age: 3}},
+			upstream: []any{testStruct3{Name: "foo", Age: 5}, testStruct3{Name: "grault", Age: 6}},
+			want:     []any{testStruct3{Name: "foo", Age: 5}, testStruct3{Name: "bar", Age: 2}, testStruct3{Name: "baz", Age: 3}, testStruct3{Name: "grault", Age: 6}},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.want, twoWayMergeStructSlice(test.local, test.upstream))
+		})
+	}
+}
+
+func TestTwoWayMergePtrStructSlice(t *testing.T) {
+	tests := []struct {
+		name     string
+		local    []any
+		upstream []any
+		want     []any
+	}{
+		{
+			name:     "empty slices",
+			local:    []any{},
+			upstream: []any{},
+			want:     []any{},
+		},
+		{
+			name:     "nil slices",
+			local:    nil,
+			upstream: nil,
+			want:     nil,
+		},
+		{
+			name:     "non-empty slices",
+			local:    []any{&testStruct{A: "foo", B: 1}, &testStruct{A: "bar", B: 2}},
+			upstream: []any{&testStruct{A: "baz", B: 3}, &testStruct{A: "qux", B: 4}},
+			want:     []any{&testStruct{A: "baz", B: 3}, &testStruct{A: "qux", B: 4}},
+		},
+		{
+			name:     "non-empty local with nil upstream",
+			local:    []any{&testStruct{A: "foo", B: 1}, &testStruct{A: "bar", B: 2}},
+			upstream: nil,
+			want:     []any{&testStruct{A: "foo", B: 1}, &testStruct{A: "bar", B: 2}},
+		},
+		{
+			name:     "nil local with non-empty upstream",
+			local:    nil,
+			upstream: []any{&testStruct{A: "foo", B: 1}, &testStruct{A: "bar", B: 2}},
+			want:     []any{&testStruct{A: "foo", B: 1}, &testStruct{A: "bar", B: 2}},
+		},
+		{
+			name:     "different types",
+			local:    []any{&testStruct{A: "foo", B: 1}, &testStruct{A: "bar", B: 2}},
+			upstream: []any{&testStruct2{D: "baz", E: 3}, &testStruct2{D: "qux", E: 4}},
+			want:     []any{&testStruct2{D: "baz", E: 3}, &testStruct2{D: "qux", E: 4}},
+		},
+		{
+			name:     "with associative keys",
+			local:    []any{&testStruct3{Name: "foo", Age: 1}, &testStruct3{Name: "bar", Age: 2}, &testStruct3{Name: "baz", Age: 3}},
+			upstream: []any{&testStruct3{Name: "foo", Age: 5}, &testStruct3{Name: "grault", Age: 6}},
+			want:     []any{&testStruct3{Name: "foo", Age: 5}, &testStruct3{Name: "bar", Age: 2}, &testStruct3{Name: "baz", Age: 3}, &testStruct3{Name: "grault", Age: 6}},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.want, twoWayMergePtrStructSlice(test.local, test.upstream))
+		})
+	}
 }

@@ -4,8 +4,11 @@ import (
 	"reflect"
 )
 
+// TODO: we should panic occasionally
+// TODO: handle ptrs being nil
+
 func structToMap(obj any) map[string]any {
-	if reflect.TypeOf(obj).Kind() != reflect.Struct {
+	if obj == nil || reflect.TypeOf(obj).Kind() != reflect.Struct {
 		return make(map[string]any)
 	}
 
@@ -14,24 +17,33 @@ func structToMap(obj any) map[string]any {
 	valueOf := reflect.ValueOf(obj)
 	for i := 0; i < valueOf.NumField(); i++ {
 		field := valueOf.Field(i)
-		m[typeOf.Field(i).Name] = field.Interface()
+		if field.CanInterface() {
+			m[typeOf.Field(i).Name] = field.Interface()
+		}
 	}
 
 	return m
 }
 
 func ptrStructToMap(obj any) map[string]any {
-	if reflect.TypeOf(obj).Kind() != reflect.Ptr ||
+	if obj == nil ||
+		reflect.TypeOf(obj).Kind() != reflect.Ptr ||
 		reflect.TypeOf(obj).Elem().Kind() != reflect.Struct {
 		return make(map[string]any)
 	}
 
 	m := make(map[string]any)
 	typeOf := reflect.TypeOf(obj).Elem()
-	valueOf := reflect.ValueOf(obj).Elem()
+	valueOf := reflect.ValueOf(obj)
+	if valueOf.IsNil() {
+		return m
+	}
+	valueOf = valueOf.Elem()
 	for i := 0; i < valueOf.NumField(); i++ {
 		field := valueOf.Field(i)
-		m[typeOf.Field(i).Name] = field.Interface()
+		if field.CanInterface() {
+			m[typeOf.Field(i).Name] = field.Interface()
+		}
 	}
 
 	return m
@@ -43,13 +55,19 @@ func mapStringAnyToStruct(m map[string]any, structType reflect.Type) any {
 		field := obj.Field(i)
 		name := structType.Field(i).Name
 		if value, ok := m[name]; ok {
-			field.Set(reflect.ValueOf(value))
+			if field.CanSet() && value != nil {
+				field.Set(reflect.ValueOf(value))
+			}
 		}
 	}
 	return obj.Interface()
 }
 
 func mapStringAnyToPtrStruct(m map[string]any, structType reflect.Type) any {
+	if len(m) == 0 {
+		return nil
+	}
+
 	if structType.Kind() == reflect.Pointer {
 		structType = structType.Elem()
 	}
@@ -60,7 +78,9 @@ func mapStringAnyToPtrStruct(m map[string]any, structType reflect.Type) any {
 		field := valueOf.Field(i)
 		name := structType.Field(i).Name
 		if value, ok := m[name]; ok {
-			field.Set(reflect.ValueOf(value))
+			if value != nil {
+				field.Set(reflect.ValueOf(value))
+			}
 		}
 	}
 	return obj.Interface()

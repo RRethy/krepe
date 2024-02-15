@@ -7,6 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+type testStruct3 struct {
+	Name string
+	Age  int
+}
+
 type testStruct2 struct {
 	D string
 	E int
@@ -16,6 +21,7 @@ type testStruct struct {
 	A string
 	B int
 	C testStruct2
+	F *testStruct
 }
 
 func TestStructToMap(t *testing.T) {
@@ -166,6 +172,12 @@ func TestMapStringAnyToPtrStruct(t *testing.T) {
 	want := &testStruct{A: "a", B: 1, C: testStruct2{D: "d", E: 1}}
 	assert.Equal(t, want, mapStringAnyToPtrStruct(m, reflect.TypeOf(want)))
 	assert.Equal(t, want, mapStringAnyToPtrStruct(m, reflect.TypeOf(*want)))
+
+	m = map[string]any(nil)
+	assert.Nil(t, mapStringAnyToPtrStruct(m, reflect.TypeOf(want)))
+
+	m = map[string]any{}
+	assert.Nil(t, mapStringAnyToPtrStruct(m, reflect.TypeOf(want)))
 }
 
 func TestIsUniformStructSlice(t *testing.T) {
@@ -267,19 +279,25 @@ func TestSliceStructToSliceMap(t *testing.T) {
 		{
 			name:  "slice of structs",
 			slice: []any{testStruct{A: "a", B: 1}, testStruct{A: "b", B: 2}},
-			want:  []any{map[string]any{"A": "a", "B": 1, "C": testStruct2{}}, map[string]any{"A": "b", "B": 2, "C": testStruct2{}}},
+			want: []any{
+				map[string]any{"A": "a", "B": 1, "C": testStruct2{}, "F": (*testStruct)(nil)},
+				map[string]any{"A": "b", "B": 2, "C": testStruct2{}, "F": (*testStruct)(nil)},
+			},
 		},
 		{
 			name:  "slice of mixed structs and non-structs",
 			slice: []any{testStruct{A: "a", B: 1}, 2},
-			want:  []any{map[string]any{"A": "a", "B": 1, "C": testStruct2{}}, map[string]any{}},
+			want: []any{
+				map[string]any{"A": "a", "B": 1, "C": testStruct2{}, "F": (*testStruct)(nil)},
+				map[string]any{},
+			},
 		},
 		{
 			name:  "slice of complex structs",
 			slice: []any{testStruct{A: "a", B: 1, C: testStruct2{D: "d", E: 1}}, testStruct{A: "b", B: 2, C: testStruct2{D: "e", E: 2}}},
 			want: []any{
-				map[string]any{"A": "a", "B": 1, "C": testStruct2{D: "d", E: 1}},
-				map[string]any{"A": "b", "B": 2, "C": testStruct2{D: "e", E: 2}},
+				map[string]any{"A": "a", "B": 1, "C": testStruct2{D: "d", E: 1}, "F": (*testStruct)(nil)},
+				map[string]any{"A": "b", "B": 2, "C": testStruct2{D: "e", E: 2}, "F": (*testStruct)(nil)},
 			},
 		},
 		{
@@ -315,19 +333,25 @@ func TestSlicePtrStructToSliceMap(t *testing.T) {
 		{
 			name:  "slice of struct ptrs",
 			slice: []any{&testStruct{A: "a", B: 1}, &testStruct{A: "b", B: 2}},
-			want:  []any{map[string]any{"A": "a", "B": 1, "C": testStruct2{}}, map[string]any{"A": "b", "B": 2, "C": testStruct2{}}},
+			want: []any{
+				map[string]any{"A": "a", "B": 1, "C": testStruct2{}, "F": (*testStruct)(nil)},
+				map[string]any{"A": "b", "B": 2, "C": testStruct2{}, "F": (*testStruct)(nil)},
+			},
 		},
 		{
 			name:  "slice of mixed struct ptrs and non-struct ptrs",
 			slice: []any{&testStruct{A: "a", B: 1}, new(int)},
-			want:  []any{map[string]any{"A": "a", "B": 1, "C": testStruct2{}}, map[string]any{}},
+			want: []any{
+				map[string]any{"A": "a", "B": 1, "C": testStruct2{}, "F": (*testStruct)(nil)},
+				map[string]any{},
+			},
 		},
 		{
 			name:  "slice of complex struct ptrs",
 			slice: []any{&testStruct{A: "a", B: 1, C: testStruct2{D: "d", E: 1}}, &testStruct{A: "b", B: 2, C: testStruct2{D: "e", E: 2}}},
 			want: []any{
-				map[string]any{"A": "a", "B": 1, "C": testStruct2{D: "d", E: 1}},
-				map[string]any{"A": "b", "B": 2, "C": testStruct2{D: "e", E: 2}},
+				map[string]any{"A": "a", "B": 1, "C": testStruct2{D: "d", E: 1}, "F": (*testStruct)(nil)},
+				map[string]any{"A": "b", "B": 2, "C": testStruct2{D: "e", E: 2}, "F": (*testStruct)(nil)},
 			},
 		},
 		{
