@@ -14,7 +14,7 @@ type twoWayMergeTest[T any] struct {
 	want     any
 }
 
-func runTwoWayMergeTests[T any](t *testing.T, mergeFunc func(T, T) T, tests []twoWayMergeTest[T]) {
+func runTwoWayMergeTests[T any](t *testing.T, mergeFunc func(T, T) any, tests []twoWayMergeTest[T]) {
 	t.Helper()
 
 	for _, test := range tests {
@@ -82,62 +82,22 @@ func TestTwoWayMerge(t *testing.T) {
 func TestTwoWayMergeMap(t *testing.T) {
 	runTwoWayMergeTests(t, twoWayMergeMap, []twoWayMergeTest[map[string]any]{
 		{
-			name: "disjoint maps",
-			local: map[string]any{
-				"a": 1,
-				"b": 2,
-				"c": 3,
-			},
-			upstream: map[string]any{
-				"d": 1,
-				"e": 2,
-				"f": 3,
-			},
-			want: map[string]any{
-				"a": 1,
-				"b": 2,
-				"c": 3,
-				"d": 1,
-				"e": 2,
-				"f": 3,
-			},
+			name:     "disjoint maps",
+			local:    map[string]any{"a": 1, "b": 2, "c": 3},
+			upstream: map[string]any{"d": 1, "e": 2, "f": 3},
+			want:     map[string]any{"a": 1, "b": 2, "c": 3, "d": 1, "e": 2, "f": 3},
 		},
 		{
-			name: "overlapping maps",
-			local: map[string]any{
-				"a": 1,
-				"b": 2,
-				"c": 3,
-			},
-			upstream: map[string]any{
-				"b": 3,
-				"c": 4,
-				"d": 5,
-			},
-			want: map[string]any{
-				"a": 1,
-				"b": 3,
-				"c": 4,
-				"d": 5,
-			},
+			name:     "overlapping maps",
+			local:    map[string]any{"a": 1, "b": 2, "c": 3},
+			upstream: map[string]any{"b": 3, "c": 4, "d": 5},
+			want:     map[string]any{"a": 1, "b": 3, "c": 4, "d": 5},
 		},
 		{
-			name: "equal maps",
-			local: map[string]any{
-				"a": 1,
-				"b": 2,
-				"c": 3,
-			},
-			upstream: map[string]any{
-				"a": 1,
-				"b": 2,
-				"c": 3,
-			},
-			want: map[string]any{
-				"a": 1,
-				"b": 2,
-				"c": 3,
-			},
+			name:     "equal maps",
+			local:    map[string]any{"a": 1, "b": 2, "c": 3},
+			upstream: map[string]any{"a": 1, "b": 2, "c": 3},
+			want:     map[string]any{"a": 1, "b": 2, "c": 3},
 		},
 		{
 			name: "complex maps",
@@ -146,10 +106,7 @@ func TestTwoWayMergeMap(t *testing.T) {
 					"a": 0,
 					"b": 1,
 					"c": 2,
-					"d": []any{
-						1,
-						2,
-					},
+					"d": []any{1, 2},
 					"e": []any{
 						map[string]any{"name": "foo", "bar": "baz"},
 						map[string]any{"name": "qux", "quux": "corge"},
@@ -161,10 +118,7 @@ func TestTwoWayMergeMap(t *testing.T) {
 				"a": map[string]any{
 					"a": 3,
 					"b": 1,
-					"d": []any{
-						3,
-						4,
-					},
+					"d": []any{3, 4},
 					"e": []any{
 						map[string]any{"name": "foo", "bar": "baz2"},
 						map[string]any{"name": "qux", "quux": "corge"},
@@ -176,10 +130,7 @@ func TestTwoWayMergeMap(t *testing.T) {
 					"a": 3,
 					"b": 1,
 					"c": 2,
-					"d": []any{
-						3,
-						4,
-					},
+					"d": []any{3, 4},
 					"e": []any{
 						map[string]any{"name": "foo", "bar": "baz2"},
 						map[string]any{"name": "qux", "quux": "corge"},
@@ -492,9 +443,6 @@ func TestTwoWayMergePtrStruct(t *testing.T) {
 				},
 			},
 		},
-		// {
-		// 	name: "ptr to non-structs",
-		// },
 	})
 }
 
@@ -625,9 +573,9 @@ func TestTwoWayMergeStructSlice(t *testing.T) {
 		},
 		{
 			name:     "with associative keys",
-			local:    []any{testStruct3{Name: "foo", Age: 1}, testStruct3{Name: "bar", Age: 2}, testStruct3{Name: "baz", Age: 3}},
-			upstream: []any{testStruct3{Name: "foo", Age: 5}, testStruct3{Name: "grault", Age: 6}},
-			want:     []any{testStruct3{Name: "foo", Age: 5}, testStruct3{Name: "bar", Age: 2}, testStruct3{Name: "baz", Age: 3}, testStruct3{Name: "grault", Age: 6}},
+			local:    []any{testStruct3{Name: "foo", Value: 1}, testStruct3{Name: "bar", Value: 2}, testStruct3{Name: "baz", Value: 3}},
+			upstream: []any{testStruct3{Name: "foo", Value: 5}, testStruct3{Name: "grault", Value: 6}},
+			want:     []any{testStruct3{Name: "foo", Value: 5}, testStruct3{Name: "bar", Value: 2}, testStruct3{Name: "baz", Value: 3}, testStruct3{Name: "grault", Value: 6}},
 		},
 	}
 
@@ -683,9 +631,9 @@ func TestTwoWayMergePtrStructSlice(t *testing.T) {
 		},
 		{
 			name:     "with associative keys",
-			local:    []any{&testStruct3{Name: "foo", Age: 1}, &testStruct3{Name: "bar", Age: 2}, &testStruct3{Name: "baz", Age: 3}},
-			upstream: []any{&testStruct3{Name: "foo", Age: 5}, &testStruct3{Name: "grault", Age: 6}},
-			want:     []any{&testStruct3{Name: "foo", Age: 5}, &testStruct3{Name: "bar", Age: 2}, &testStruct3{Name: "baz", Age: 3}, &testStruct3{Name: "grault", Age: 6}},
+			local:    []any{&testStruct3{Name: "foo", Value: 1}, &testStruct3{Name: "bar", Value: 2}, &testStruct3{Name: "baz", Value: 3}},
+			upstream: []any{&testStruct3{Name: "foo", Value: 5}, &testStruct3{Name: "grault", Value: 6}},
+			want:     []any{&testStruct3{Name: "foo", Value: 5}, &testStruct3{Name: "bar", Value: 2}, &testStruct3{Name: "baz", Value: 3}, &testStruct3{Name: "grault", Value: 6}},
 		},
 	}
 

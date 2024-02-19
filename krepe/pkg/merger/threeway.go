@@ -14,58 +14,28 @@ import (
 //
 // origin, local, and upstream are not modified but the result may share memory with origin, local, and upstream.
 func threeWayMerge(origin, local, upstream any) any {
-	if upstream == nil {
-		if origin == nil {
-			return local
-		}
-		return nil
-	}
-
-	if local == nil {
-		if origin == nil {
-			return upstream
-		}
-		return nil
-	}
-
 	if origin == nil {
 		return twoWayMerge(local, upstream)
 	}
 
+	if upstream == nil || local == nil {
+		return threeWayMergeScalar(origin, local, upstream)
+	}
+
+	localType := reflect.TypeOf(local)
+	upstreamType := reflect.TypeOf(upstream)
+	originType := reflect.TypeOf(origin)
+
+	if localType != upstreamType || localType != originType {
+		return threeWayMergeScalar(origin, local, upstream)
+	}
+
 	switch localTyped := local.(type) {
 	case map[string]any:
-		upstreamMap, ok := upstream.(map[string]any)
-		if !ok {
-			return local
-		}
-
-		originMap, ok := origin.(map[string]any)
-		if !ok {
-			return twoWayMergeMap(localTyped, upstreamMap)
-		}
-
-		return threeWayMergeMap(originMap, localTyped, upstreamMap)
+		return threeWayMergeMap(origin.(map[string]any), localTyped, upstream.(map[string]any))
 	case []any:
-		upstreamArr, ok := upstream.([]any)
-		if !ok {
-			return local
-		}
-
-		originArr, ok := origin.([]any)
-		if !ok {
-			return twoWayMergeSlice(localTyped, upstreamArr)
-		}
-
-		return threeWayMergeSlice(originArr, localTyped, upstreamArr)
+		return threeWayMergeSlice(origin.([]any), localTyped, upstream.([]any))
 	default:
-		localType := reflect.TypeOf(local)
-		upstreamType := reflect.TypeOf(upstream)
-		originType := reflect.TypeOf(origin)
-
-		if localType != upstreamType || localType != originType {
-			return threeWayMergeScalar(origin, local, upstream)
-		}
-
 		if localType.Kind() == reflect.Ptr && localType.Elem().Kind() == reflect.Struct {
 			return threeWayMergePtrStruct(origin, local, upstream)
 		} else if localType.Kind() == reflect.Struct {
@@ -77,7 +47,7 @@ func threeWayMerge(origin, local, upstream any) any {
 }
 
 // threeWayMergeMap returns the result of a recursive 3-way merge on each key in local or upstream.
-func threeWayMergeMap(origin, local, upstream map[string]any) map[string]any {
+func threeWayMergeMap(origin, local, upstream map[string]any) any {
 	keepKeys := make(map[string]struct{})
 	for k := range local {
 		keepKeys[k] = struct{}{}
@@ -88,34 +58,25 @@ func threeWayMergeMap(origin, local, upstream map[string]any) map[string]any {
 
 	res := make(map[string]any)
 	for key := range keepKeys {
-		originVal, originOk := origin[key]
-		localVal, localOk := local[key]
-		upstreamVal, upstreamOk := upstream[key]
+		originVal := origin[key]
+		localVal := local[key]
+		upstreamVal := upstream[key]
 
-		if originOk && !localOk && !upstreamOk {
-		} else if !originOk && localOk && !upstreamOk {
-			res[key] = localVal
-		} else if !originOk && !localOk && upstreamOk {
-			res[key] = upstreamVal
-		} else if originOk && localOk && !upstreamOk {
-			val := delta(localVal, originVal)
-			if val != nil {
-				res[key] = val
-			}
-		} else if originOk && !localOk && upstreamOk {
-		} else if !originOk && localOk && upstreamOk {
-			res[key] = twoWayMerge(localVal, upstreamVal)
-		} else if originOk && localOk && upstreamOk {
-			res[key] = threeWayMerge(originVal, localVal, upstreamVal)
+		newVal := threeWayMerge(originVal, localVal, upstreamVal)
+		if newVal != nil {
+			res[key] = newVal
 		}
 	}
 
+	if len(res) == 0 {
+		return nil
+	}
 	return res
 }
 
 // threeWayMergeSlice returns the result of performing a 3-way merge on origin, local, and upstream.
 // The algorithm used depends on whether origin, local, and upstream are associative.
-func threeWayMergeSlice(origin, local, upstream []any) []any {
+func threeWayMergeSlice(origin, local, upstream []any) any {
 	if isUniformStructSlices(origin, local, upstream) {
 		return threeWayMergeStructSlice(origin, local, upstream)
 	}
@@ -124,7 +85,7 @@ func threeWayMergeSlice(origin, local, upstream []any) []any {
 		return threeWayMergePtrStructSlice(origin, local, upstream)
 	}
 
-	if isAssociativeSlice(origin) && isAssociativeSlice(local) && isAssociativeSlice(upstream) {
+	if isAssociativeSlices(origin, local, upstream) {
 		return threeWayMergeSliceAssociative(origin, local, upstream)
 	}
 
@@ -136,101 +97,70 @@ func threeWayMergeSlice(origin, local, upstream []any) []any {
 // An element only present in upstream will be returned as-is at the end of the slice.
 // An element present in both local and upstream will be 2-way merged recursively.
 // An element present in origin, local, and upstream will be 3-way merged recursively.
-func threeWayMergeSliceAssociative(origin, local, upstream []any) []any {
-	key := getCommonAssociativeKey(getAssociativeKeys(origin), getAssociativeKeys(local), getAssociativeKeys(upstream))
-	if key == "" {
+func threeWayMergeSliceAssociative(origin, local, upstream []any) any {
+	key, ok := getCommonAssociativeKey(getAssociativeKeys(origin), getAssociativeKeys(local), getAssociativeKeys(upstream))
+	if !ok {
 		return threeWayMergeSliceNonAssociative(origin, local, upstream)
 	}
 
-	type twoElemTuple struct {
+	type groupedItems struct {
 		origin   any
+		local    any
 		upstream any
 	}
-	keysToRemove := make(map[string]any)
-	keysToMerge := make(map[string]twoElemTuple)
-	keysToAdd := make(map[string]any)
-
+	items := map[string]*groupedItems{}
 	for _, elem := range origin {
-		elemMap, ok := elem.(map[string]any)
-		if !ok {
-			return threeWayMergeSliceNonAssociative(origin, local, upstream)
-		}
-
-		keyVal, ok := elemMap[key].(string)
-		if !ok {
-			return threeWayMergeSliceNonAssociative(origin, local, upstream)
-		}
-
-		keysToRemove[keyVal] = elem
+		items[elem.(map[string]any)[key].(string)] = &groupedItems{origin: elem}
 	}
-
-	for _, elem := range upstream {
-		elemMap, ok := elem.(map[string]any)
-		if !ok {
-			return threeWayMergeSliceNonAssociative(origin, local, upstream)
-		}
-
-		keyVal, ok := elemMap[key].(string)
-		if !ok {
-			return threeWayMergeSliceNonAssociative(origin, local, upstream)
-		}
-
-		if originElem, ok := keysToRemove[keyVal]; ok {
-			delete(keysToRemove, keyVal)
-			keysToMerge[keyVal] = twoElemTuple{
-				origin:   originElem,
-				upstream: elem,
-			}
-		} else {
-			keysToAdd[keyVal] = elem
-		}
-	}
-
-	var result []any
 	for _, elem := range local {
-		elemMap, ok := elem.(map[string]any)
-		if !ok {
-			return threeWayMergeSliceNonAssociative(origin, local, upstream)
-		}
-
-		keyVal, ok := elemMap[key].(string)
-		if !ok {
-			return threeWayMergeSliceNonAssociative(origin, local, upstream)
-		}
-
-		if _, ok := keysToRemove[keyVal]; ok {
-			continue
-		}
-
-		if keepTuple, ok := keysToMerge[keyVal]; ok {
-			delete(keysToMerge, keyVal)
-			result = append(result, threeWayMerge(keepTuple.origin, elem, keepTuple.upstream))
-		} else if addElem, ok := keysToAdd[keyVal]; ok {
-			delete(keysToAdd, keyVal)
-			result = append(result, twoWayMerge(elem, addElem))
+		key := elem.(map[string]any)[key].(string)
+		if group, ok := items[key]; ok {
+			group.local = elem
 		} else {
-			result = append(result, elem)
+			items[key] = &groupedItems{local: elem}
+		}
+	}
+	for _, elem := range upstream {
+		key := elem.(map[string]any)[key].(string)
+		if group, ok := items[key]; ok {
+			group.upstream = elem
+		} else {
+			items[key] = &groupedItems{upstream: elem}
 		}
 	}
 
-	for _, elem := range keysToAdd {
-		result = append(result, elem)
+	var res []any
+	used := map[string]struct{}{}
+	for _, elem := range local {
+		key := elem.(map[string]any)[key].(string)
+		group := items[key]
+		newVal := threeWayMerge(group.origin, group.local, group.upstream)
+		if newVal != nil {
+			res = append(res, newVal)
+		}
+		used[key] = struct{}{}
+	}
+	for _, elem := range upstream {
+		key := elem.(map[string]any)[key].(string)
+		if _, ok := used[key]; !ok {
+			group := items[key]
+			newVal := threeWayMerge(group.origin, group.local, group.upstream)
+			if newVal != nil {
+				res = append(res, newVal)
+			}
+		}
 	}
 
-	return result
+	return res
 }
 
 // threeWayMergeSliceNonAssociative returns the upstream value iff upstream has diverged from origin, otherwise local is returned.
-func threeWayMergeSliceNonAssociative(origin, local, upstream []any) []any {
-	if reflect.DeepEqual(origin, upstream) {
-		return local
-	}
-
-	return upstream
+func threeWayMergeSliceNonAssociative(origin, local, upstream []any) any {
+	return threeWayMergeScalar(origin, local, upstream)
 }
 
 // threeWayMergeScalar returns the upstream value iff upstream has diverged from origin, otherwise local is returned.
-func threeWayMergeScalar[T any](origin, local, upstream T) T {
+func threeWayMergeScalar(origin, local, upstream any) any {
 	if reflect.DeepEqual(origin, upstream) {
 		return local
 	}
@@ -239,73 +169,105 @@ func threeWayMergeScalar[T any](origin, local, upstream T) T {
 }
 
 func threeWayMergePtrStruct(origin, local, upstream any) any {
+	if local == nil || upstream == nil {
+		return threeWayMergeScalar(origin, local, upstream)
+	}
+	if origin == nil {
+		return twoWayMergePtrStruct(local, upstream)
+	}
+
 	originMap := ptrStructToMap(origin)
 	localMap := ptrStructToMap(local)
 	upstreamMap := ptrStructToMap(upstream)
 
 	merged := threeWayMergeMap(originMap, localMap, upstreamMap)
-	return mapStringAnyToPtrStruct(merged, reflect.TypeOf(local).Elem())
+	if merged == nil {
+		return reflect.New(reflect.TypeOf(local).Elem()).Interface()
+	}
+
+	targetType := threeWayMergeScalar(
+		reflect.TypeOf(origin).Elem(),
+		reflect.TypeOf(local).Elem(),
+		reflect.TypeOf(upstream).Elem(),
+	).(reflect.Type)
+	return mapStringAnyToPtrStruct(merged.(map[string]any), targetType)
 }
 
+// TODO: make these changes in twoway also
 func threeWayMergeStruct(origin, local, upstream any) any {
 	originMap := structToMap(origin)
 	localMap := structToMap(local)
 	upstreamMap := structToMap(upstream)
 
 	merged := threeWayMergeMap(originMap, localMap, upstreamMap)
-	return mapStringAnyToStruct(merged, reflect.TypeOf(local))
+	if merged == nil {
+		return reflect.Zero(reflect.TypeOf(local)).Interface()
+	}
+
+	targetType := threeWayMergeScalar(
+		reflect.TypeOf(origin),
+		reflect.TypeOf(local),
+		reflect.TypeOf(upstream),
+	).(reflect.Type)
+	return mapStringAnyToStruct(merged.(map[string]any), targetType)
 }
 
-func threeWayMergeStructSlice(origin, local, upstream []any) []any {
+func threeWayMergeStructSlice(origin, local, upstream []any) any {
+	if len(origin) == 0 {
+		return twoWayMergeStructSlice(local, upstream)
+	}
+
 	if len(origin) == 0 && len(local) == 0 && len(upstream) == 0 {
-		return nil
+		return threeWayMergeScalar(origin, local, upstream)
 	}
 
 	var targetType reflect.Type
 	if len(origin) > 0 {
 		targetType = reflect.TypeOf(origin[0])
-	} else if len(local) > 0 {
-		targetType = reflect.TypeOf(local[0])
-	} else if len(upstream) > 0 {
-		targetType = reflect.TypeOf(upstream[0])
 	}
 
 	if targetType.Kind() != reflect.Struct {
-		return nil
+		return threeWayMergeSliceNonAssociative(origin, local, upstream)
+	}
+
+	if len(local) > 0 && reflect.TypeOf(local[0]) != targetType || len(upstream) > 0 && reflect.TypeOf(upstream[0]) != targetType {
+		return threeWayMergeSliceNonAssociative(origin, local, upstream)
 	}
 
 	originSliceMap := sliceStructToSliceMap(origin)
 	localSliceMap := sliceStructToSliceMap(local)
 	upstreamSliceMap := sliceStructToSliceMap(upstream)
 
-	mergedSliceMap := threeWayMergeSlice(originSliceMap, localSliceMap, upstreamSliceMap)
+	mergedSliceMap := threeWayMergeSlice(originSliceMap, localSliceMap, upstreamSliceMap).([]any)
 	return sliceMapToSliceStruct(mergedSliceMap, targetType)
 }
 
-func threeWayMergePtrStructSlice(origin, local, upstream []any) []any {
+func threeWayMergePtrStructSlice(origin, local, upstream []any) any {
 	if len(origin) == 0 && len(local) == 0 && len(upstream) == 0 {
-		return nil
+		return threeWayMergeScalar(origin, local, upstream)
+	}
+
+	if len(origin) == 0 {
+		return twoWayMergePtrStructSlice(local, upstream)
 	}
 
 	var targetType reflect.Type
 	if len(origin) > 0 {
 		targetType = reflect.TypeOf(origin[0])
-	} else if len(local) > 0 {
-		targetType = reflect.TypeOf(local[0])
-	} else if len(upstream) > 0 {
-		targetType = reflect.TypeOf(upstream[0])
 	}
 
-	if targetType.Kind() != reflect.Ptr {
-		return nil
+	if targetType.Kind() != reflect.Ptr || targetType.Elem().Kind() != reflect.Struct {
+		return threeWayMergeSliceNonAssociative(origin, local, upstream)
 	}
 
-	targetType = targetType.Elem()
+	if len(local) > 0 && reflect.TypeOf(local[0]) != targetType || len(upstream) > 0 && reflect.TypeOf(upstream[0]) != targetType {
+		return threeWayMergeSliceNonAssociative(origin, local, upstream)
+	}
 
 	originSliceMap := slicePtrStructToSliceMap(origin)
 	localSliceMap := slicePtrStructToSliceMap(local)
 	upstreamSliceMap := slicePtrStructToSliceMap(upstream)
 
-	mergedSliceMap := threeWayMergeSlice(originSliceMap, localSliceMap, upstreamSliceMap)
+	mergedSliceMap := threeWayMergeSlice(originSliceMap, localSliceMap, upstreamSliceMap).([]any)
 	return sliceMapToSlicePtrStruct(mergedSliceMap, targetType)
 }

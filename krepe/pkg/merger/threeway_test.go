@@ -15,7 +15,7 @@ type threeWayMergeTest[T any] struct {
 	want     any
 }
 
-func runThreeWayMergeTests[T any](t *testing.T, threeWayMergeFunc func(T, T, T) T, tests []threeWayMergeTest[T]) {
+func runThreeWayMergeTests[T any](t *testing.T, threeWayMergeFunc func(T, T, T) any, tests []threeWayMergeTest[T]) {
 	t.Helper()
 
 	for _, test := range tests {
@@ -56,6 +56,7 @@ func TestThreeWayMergeAny(t *testing.T) {
 			},
 			want: []any{
 				map[string]any{"name": "a", "value": 1},
+				map[string]any{"name": "b", "value": 2},
 			},
 		},
 		{
@@ -77,14 +78,14 @@ func TestThreeWayMergeAny(t *testing.T) {
 			origin:   map[string]any{"a": 1, "b": 2, "d": 5},
 			local:    map[string]any{"a": 1, "b": 3, "c": 4},
 			upstream: 1,
-			want:     map[string]any{"a": 1, "b": 3, "c": 4},
+			want:     1,
 		},
 		{
 			name:     "origin and upstream slices but local scalar",
 			origin:   []any{1, 2, 3},
 			local:    1,
 			upstream: []any{4, 5, 6},
-			want:     1,
+			want:     []any{4, 5, 6},
 		},
 		{
 			name:     "local and upstream slices but origin scalar",
@@ -105,7 +106,7 @@ func TestThreeWayMergeAny(t *testing.T) {
 			origin:   1,
 			local:    2,
 			upstream: map[string]any{"a": 1, "b": 2},
-			want:     2,
+			want:     map[string]any{"a": 1, "b": 2},
 		},
 		{
 			name:     "origin upstream nil but local map",
@@ -159,7 +160,7 @@ func TestThreeWayMergeMap(t *testing.T) {
 			origin:   map[string]any{"a": 1, "b": 2, "c": 3},
 			local:    map[string]any{"a": 1, "b": 3, "d": 5},
 			upstream: map[string]any{"a": 1, "b": 4, "c": 4},
-			want:     map[string]any{"a": 1, "b": 4, "d": 5},
+			want:     map[string]any{"a": 1, "b": 4, "c": 4, "d": 5},
 		},
 		{
 			name:     "key removed in upstream",
@@ -173,7 +174,7 @@ func TestThreeWayMergeMap(t *testing.T) {
 			origin:   map[string]any{"a": 1, "b": 2},
 			local:    map[string]any{"a": 2, "b": 2},
 			upstream: map[string]any{"b": 2},
-			want:     map[string]any{"a": 2, "b": 2},
+			want:     map[string]any{"b": 2},
 		},
 		{
 			name:     "key removed from both local and upstream",
@@ -201,7 +202,7 @@ func TestThreeWayMergeMap(t *testing.T) {
 			origin:   map[string]any{"foo": map[string]any{"a": 1, "b": 2}, "bar": 3},
 			local:    map[string]any{"foo": map[string]any{"a": 1, "b": 3}, "bar": 3},
 			upstream: map[string]any{"bar": 3},
-			want:     map[string]any{"foo": map[string]any{"b": 3}, "bar": 3},
+			want:     map[string]any{"bar": 3},
 		},
 		{
 			name:     "key removed from local but present in origin and upstream",
@@ -215,7 +216,7 @@ func TestThreeWayMergeMap(t *testing.T) {
 			origin:   map[string]any{"foo": 1, "bar": 2},
 			local:    map[string]any{"foo": 1},
 			upstream: map[string]any{"foo": 1, "bar": 3},
-			want:     map[string]any{"foo": 1},
+			want:     map[string]any{"foo": 1, "bar": 3},
 		},
 		{
 			name:     "key added in upstream but same as present in local",
@@ -264,28 +265,28 @@ func TestThreeWayMergeMap(t *testing.T) {
 			origin:   map[string]any{"foo": 1},
 			local:    map[string]any{"foo": nil},
 			upstream: map[string]any{"foo": 1},
-			want:     map[string]any{"foo": nil},
+			want:     nil,
 		},
 		{
 			name:     "key changed in upstream with nil",
 			origin:   map[string]any{"foo": 1},
 			local:    map[string]any{"foo": 1},
 			upstream: map[string]any{"foo": nil},
-			want:     map[string]any{"foo": nil},
+			want:     nil,
 		},
 		{
 			name:     "key changed in local and upstream with nil",
 			origin:   map[string]any{"foo": 1},
 			local:    map[string]any{"foo": nil},
 			upstream: map[string]any{"foo": nil},
-			want:     map[string]any{"foo": nil},
+			want:     nil,
 		},
 		{
 			name:     "key changed in local with scalar and upstream with nil",
 			origin:   map[string]any{"foo": 1},
 			local:    map[string]any{"foo": 2},
 			upstream: map[string]any{"foo": nil},
-			want:     map[string]any{"foo": nil},
+			want:     nil,
 		},
 	})
 }
@@ -410,6 +411,7 @@ func TestThreeWayMergeSliceAssociative(t *testing.T) {
 			},
 			want: []any{
 				map[string]any{"name": "foo", "a": 1},
+				map[string]any{"name": "bar", "b": 3},
 			},
 		},
 		{
@@ -537,7 +539,7 @@ func TestThreeWayMergeSliceNonAssociative(t *testing.T) {
 }
 
 func TestThreeWayMergeScalar(t *testing.T) {
-	runThreeWayMergeTests(t, threeWayMergeScalar[any], []threeWayMergeTest[any]{
+	runThreeWayMergeTests[any](t, threeWayMergeScalar, []threeWayMergeTest[any]{
 		{
 			name:     "origin and upstream match",
 			origin:   1,
@@ -551,6 +553,295 @@ func TestThreeWayMergeScalar(t *testing.T) {
 			local:    2,
 			upstream: 3,
 			want:     3,
+		},
+	})
+}
+
+func TestThreeWayMergePtrStruct(t *testing.T) {
+	runThreeWayMergeTests[any](t, threeWayMergePtrStruct, []threeWayMergeTest[any]{
+		{
+			name:     "nil origin",
+			origin:   nil,
+			local:    &struct{ A int }{A: 1},
+			upstream: &struct{ A int }{A: 2},
+			want:     &struct{ A int }{A: 2},
+		},
+		{
+			name:     "nil local with different upstream",
+			origin:   &struct{ A int }{A: 1},
+			local:    nil,
+			upstream: &struct{ A int }{A: 2},
+			want:     &struct{ A int }{A: 2},
+		},
+		{
+			name:     "nil local with same upstream",
+			origin:   &struct{ A int }{A: 1},
+			local:    nil,
+			upstream: &struct{ A int }{A: 1},
+			want:     nil,
+		},
+		{
+			name:     "nil upstream with different local",
+			origin:   &struct{ A int }{A: 1},
+			local:    &struct{ A int }{A: 2},
+			upstream: nil,
+			want:     nil,
+		},
+		{
+			name:     "nil upstream with same local",
+			origin:   &struct{ A int }{A: 1},
+			local:    &struct{ A int }{A: 1},
+			upstream: nil,
+			want:     nil,
+		},
+		{
+			name:     "nil origin and local",
+			origin:   nil,
+			local:    nil,
+			upstream: &struct{ A int }{A: 1},
+			want:     &struct{ A int }{A: 1},
+		},
+		{
+			name:     "nil origin and upstream",
+			origin:   nil,
+			local:    &struct{ A int }{A: 1},
+			upstream: nil,
+			want:     &struct{ A int }{A: 1},
+		},
+		{
+			name:     "nil local and upstream",
+			origin:   &struct{ A int }{A: 1},
+			local:    nil,
+			upstream: nil,
+			want:     nil,
+		},
+		{
+			name:     "nil origin, local and upstream",
+			origin:   nil,
+			local:    nil,
+			upstream: nil,
+			want:     nil,
+		},
+		{
+			name:     "ptr to empty structs",
+			origin:   &struct{}{},
+			local:    &struct{}{},
+			upstream: &struct{}{},
+			want:     &struct{}{},
+		},
+		{
+			name:     "ptr to non-empty structs",
+			origin:   &struct{ A int }{A: 1},
+			local:    &struct{ A int }{A: 2},
+			upstream: &struct{ A int }{A: 3},
+			want:     &struct{ A int }{A: 3},
+		},
+		{
+			name:   "ptr to different types of structs",
+			origin: &struct{ A int }{A: 1},
+			local:  &struct{ A int }{A: 2},
+			upstream: &struct {
+				A int
+				C int
+			}{A: 1, C: 3},
+			want: &struct {
+				A int
+				C int
+			}{A: 2, C: 3},
+		},
+	})
+}
+
+func TestThreeWayMergeStruct(t *testing.T) {
+	runThreeWayMergeTests[any](t, threeWayMergeStruct, []threeWayMergeTest[any]{
+		{
+			name:     "empty structs",
+			origin:   struct{}{},
+			local:    struct{}{},
+			upstream: struct{}{},
+			want:     struct{}{},
+		},
+		{
+			name:     "non-empty structs",
+			origin:   struct{ A int }{A: 1},
+			local:    struct{ A int }{A: 2},
+			upstream: struct{ A int }{A: 3},
+			want:     struct{ A int }{A: 3},
+		},
+		{
+			name:   "different types of structs",
+			origin: struct{ A int }{A: 1},
+			local:  struct{ A int }{A: 2},
+			upstream: struct {
+				A int
+				C int
+			}{A: 1, C: 3},
+			want: struct {
+				A int
+				C int
+			}{A: 2, C: 3},
+		},
+	})
+}
+
+func TestThreeWayMergeStructSlice(t *testing.T) {
+	runThreeWayMergeTests[[]any](t, threeWayMergeStructSlice, []threeWayMergeTest[[]any]{
+		{
+			name:     "empty slices",
+			origin:   []any{},
+			local:    []any{},
+			upstream: []any{},
+			want:     []any{},
+		},
+		{
+			name: "non-empty associate slices",
+			origin: []any{
+				testStruct3{Name: "a", Value: 1},
+				testStruct3{Name: "b", Value: 2},
+			},
+			local: []any{
+				testStruct3{Name: "a", Value: 1},
+				testStruct3{Name: "b", Value: 3},
+				testStruct3{Name: "c", Value: 4},
+			},
+			upstream: []any{
+				testStruct3{Name: "a", Value: 1},
+				testStruct3{Name: "b", Value: 4},
+				testStruct3{Name: "d", Value: 5},
+			},
+			want: []any{
+				testStruct3{Name: "a", Value: 1},
+				testStruct3{Name: "b", Value: 4},
+				testStruct3{Name: "c", Value: 4},
+				testStruct3{Name: "d", Value: 5},
+			},
+		},
+		{
+			name:     "non-empty non-associate slices",
+			origin:   []any{testStruct{A: "1"}, testStruct{A: "2"}},
+			local:    []any{testStruct{A: "1"}, testStruct{A: "3"}, testStruct{A: "4"}},
+			upstream: []any{testStruct{A: "1"}, testStruct{A: "4"}, testStruct{A: "5"}},
+			want:     []any{testStruct{A: "1"}, testStruct{A: "4"}, testStruct{A: "5"}},
+		},
+		{
+			name:   "empty origin uses two way merge",
+			origin: []any{},
+			local: []any{
+				testStruct3{Name: "a", Value: 1},
+				testStruct3{Name: "b", Value: 3},
+				testStruct3{Name: "c", Value: 4},
+			},
+			upstream: []any{
+				testStruct3{Name: "a", Value: 1},
+				testStruct3{Name: "b", Value: 4},
+				testStruct3{Name: "d", Value: 5},
+			},
+			want: []any{
+				testStruct3{Name: "a", Value: 1},
+				testStruct3{Name: "b", Value: 4},
+				testStruct3{Name: "c", Value: 4},
+				testStruct3{Name: "d", Value: 5},
+			},
+		},
+		{
+			name: "different list types",
+			origin: []any{
+				testStruct{A: "1"},
+				testStruct{A: "2"},
+			},
+			local: []any{
+				testStruct2{D: "1"},
+				testStruct2{D: "2"},
+			},
+			upstream: []any{
+				testStruct3{Name: "a", Value: 1},
+				testStruct3{Name: "b", Value: 2},
+			},
+			want: []any{
+				testStruct3{Name: "a", Value: 1},
+				testStruct3{Name: "b", Value: 2},
+			},
+		},
+	})
+}
+
+func TestThreeWayMergePtrStructSlice(t *testing.T) {
+	runThreeWayMergeTests[[]any](t, threeWayMergePtrStructSlice, []threeWayMergeTest[[]any]{
+		{
+			name:     "empty slices",
+			origin:   []any{},
+			local:    []any{},
+			upstream: []any{},
+			want:     []any{},
+		},
+		{
+			name: "non-empty associate slices",
+			origin: []any{
+				&testStruct3{Name: "a", Value: 1},
+				&testStruct3{Name: "b", Value: 2},
+			},
+			local: []any{
+				&testStruct3{Name: "a", Value: 1},
+				&testStruct3{Name: "b", Value: 3},
+				&testStruct3{Name: "c", Value: 4},
+			},
+			upstream: []any{
+				&testStruct3{Name: "a", Value: 1},
+				&testStruct3{Name: "b", Value: 4},
+				&testStruct3{Name: "d", Value: 5},
+			},
+			want: []any{
+				&testStruct3{Name: "a", Value: 1},
+				&testStruct3{Name: "b", Value: 4},
+				&testStruct3{Name: "c", Value: 4},
+				&testStruct3{Name: "d", Value: 5},
+			},
+		},
+		{
+			name:     "non-empty non-associate slices",
+			origin:   []any{&testStruct{A: "1"}, &testStruct{A: "2"}},
+			local:    []any{&testStruct{A: "1"}, &testStruct{A: "3"}, &testStruct{A: "4"}},
+			upstream: []any{&testStruct{A: "1"}, &testStruct{A: "4"}, &testStruct{A: "5"}},
+			want:     []any{&testStruct{A: "1"}, &testStruct{A: "4"}, &testStruct{A: "5"}},
+		},
+		{
+			name:   "empty origin uses two way merge",
+			origin: []any{},
+			local: []any{
+				&testStruct3{Name: "a", Value: 1},
+				&testStruct3{Name: "b", Value: 3},
+				&testStruct3{Name: "c", Value: 4},
+			},
+			upstream: []any{
+				&testStruct3{Name: "a", Value: 1},
+				&testStruct3{Name: "b", Value: 4},
+				&testStruct3{Name: "d", Value: 5},
+			},
+			want: []any{
+				&testStruct3{Name: "a", Value: 1},
+				&testStruct3{Name: "b", Value: 4},
+				&testStruct3{Name: "c", Value: 4},
+				&testStruct3{Name: "d", Value: 5},
+			},
+		},
+		{
+			name: "different list types",
+			origin: []any{
+				&testStruct{A: "1"},
+				&testStruct{A: "2"},
+			},
+			local: []any{
+				&testStruct2{D: "1"},
+				&testStruct2{D: "2"},
+			},
+			upstream: []any{
+				&testStruct3{Name: "a", Value: 1},
+				&testStruct3{Name: "b", Value: 2},
+			},
+			want: []any{
+				&testStruct3{Name: "a", Value: 1},
+				&testStruct3{Name: "b", Value: 2},
+			},
 		},
 	})
 }

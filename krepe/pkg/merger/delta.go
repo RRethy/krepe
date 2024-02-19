@@ -90,8 +90,8 @@ func deltaSlice(source, remove []any) []any {
 // Comparison is done by the value of the common associative key.
 // Both source and remove must be associative slices or the non-associative algorithm is used.
 func deltaSliceAssociative(source, remove []any) []any {
-	key := getCommonAssociativeKey(getAssociativeKeys(source), getAssociativeKeys(remove))
-	if key == "" {
+	key, ok := getCommonAssociativeKey(getAssociativeKeys(source), getAssociativeKeys(remove))
+	if !ok {
 		return deltaSliceNonAssociative(source, remove)
 	}
 

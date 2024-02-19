@@ -100,7 +100,7 @@ func TestGetAssociativeKeys(t *testing.T) {
 				map[string]any{"name": "foo", "type": "foo", "a": 2, "b": 3, "c": 4},
 				map[string]any{"name": "bar", "type": "bar", "a": 2, "b": 3, "c": 4, "d": 5},
 			},
-			want: []string{"type", "name"},
+			want: []string{"name", "type"},
 		},
 	}
 
@@ -244,12 +244,14 @@ func TestGetCommonAssociativeKey(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			var got string
+			var ok bool
 			if len(test.keys3) > 0 {
-				got = getCommonAssociativeKey(test.keys1, test.keys2, test.keys3)
+				got, ok = getCommonAssociativeKey(test.keys1, test.keys2, test.keys3)
 			} else {
-				got = getCommonAssociativeKey(test.keys1, test.keys2)
+				got, ok = getCommonAssociativeKey(test.keys1, test.keys2)
 			}
 			assert.Equal(t, test.want, got)
+			assert.Equal(t, test.want != "", ok)
 		})
 	}
 }

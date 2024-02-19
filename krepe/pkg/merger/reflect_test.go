@@ -8,8 +8,8 @@ import (
 )
 
 type testStruct3 struct {
-	Name string
-	Age  int
+	Name  string
+	Value int
 }
 
 type testStruct2 struct {

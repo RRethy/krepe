@@ -4,8 +4,8 @@ var (
 	// TODO(RRethy): this is a bit of a hack, but it works for now, we should try
 	// to use openapi
 	associativeKeys = []string{
-		"type",
 		"name",
+		"type",
 		"mountPath",
 		"devicePath",
 		"ip",
@@ -22,6 +22,15 @@ var (
 		"Manager",
 	}
 )
+
+func isAssociativeSlices(slices ...[]any) bool {
+	for _, slice := range slices {
+		if !isAssociativeSlice(slice) {
+			return false
+		}
+	}
+	return true
+}
 
 // isAssociativeSlice returns true if the slice contains only associations,
 // otherwise false.
@@ -104,13 +113,14 @@ func hasAssociativeKey(slice []any, key string) bool {
 
 // getCommonAssociativeKey returns the highest priority associative key in all slices,
 // otherwise "".
-func getCommonAssociativeKey(keyss ...[]string) string {
+// TODO: this should allow for multiple keys
+func getCommonAssociativeKey(keyss ...[]string) (string, bool) {
 	commonKeys := getCommonAssociativeKeys(keyss)
 	if len(commonKeys) == 0 {
-		return ""
+		return "", false
 	}
 
-	return commonKeys[0]
+	return commonKeys[0], true
 }
 
 // getCommonAssociativeKeys returns the associative keys that are common to all slices.
