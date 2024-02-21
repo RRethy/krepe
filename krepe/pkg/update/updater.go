@@ -11,6 +11,7 @@ type Updater struct {
 	git    *git.Git
 	writer writer.Writer
 	merger merger.Merger
+	dir    string
 }
 
 type Option func(*Updater)
@@ -33,6 +34,12 @@ func WithMerger(m merger.Merger) Option {
 	}
 }
 
+func WithDir(dir string) Option {
+	return func(updater *Updater) {
+		updater.dir = dir
+	}
+}
+
 func NewUpdater(options ...Option) (*Updater, error) {
 	git, err := git.NewGit()
 	if err != nil {
@@ -43,6 +50,7 @@ func NewUpdater(options ...Option) (*Updater, error) {
 		git,
 		writer.Noop{},
 		merger.Noop{},
+		"",
 	}
 	for _, option := range options {
 		option(i)
@@ -88,7 +96,7 @@ func (updater *Updater) Update(p *pkg.Package, url, name string) error {
 
 	p.UpdatePackage(newPkg, upstreamPkgRef, name)
 
-	err = updater.writer.Write(p)
+	err = updater.writer.Write(p, updater.dir)
 	if err != nil {
 		return err
 	}

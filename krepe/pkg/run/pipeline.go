@@ -9,13 +9,20 @@ type pipeline struct {
 	pkg    *pkg.Package
 	name   string
 	writer writer.Writer
+	dir    string
 }
 
 type option func(*pipeline)
 
-func withWriter(w writer.Writer) option {
+func WithWriter(w writer.Writer) option {
 	return func(p *pipeline) {
 		p.writer = w
+	}
+}
+
+func WithDir(dir string) option {
+	return func(p *pipeline) {
+		p.dir = dir
 	}
 }
 
@@ -34,11 +41,7 @@ func (p *pipeline) run() error {
 		return err
 	}
 
-	if p.writer == nil {
-		return nil
-	}
-
-	err = p.writer.Write(p.pkg)
+	err = p.writer.Write(p.pkg, p.dir)
 	if err != nil {
 		return err
 	}

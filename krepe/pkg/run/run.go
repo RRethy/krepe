@@ -19,12 +19,12 @@ func Run(pkgPath, pipeline string) error {
 		return err
 	}
 
-	w, err := writer.NewPackageWriter(absPath)
+	w, err := writer.NewDiskWriter()
 	if err != nil {
 		return fmt.Errorf("creating writer: %w", err)
 	}
 
-	r := newPipeline(pkg, pipeline, withWriter(w))
+	r := newPipeline(pkg, pipeline, WithWriter(w), WithDir(absPath))
 
 	err = r.run()
 	if err != nil {

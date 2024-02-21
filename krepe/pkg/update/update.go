@@ -22,12 +22,12 @@ func Update(pkgPath, url, name string) error {
 
 	merger := merger.NewMerger()
 
-	writer, err := writer.NewPackageWriter(filepath.Dir(absPath))
+	writer, err := writer.NewDiskWriter()
 	if err != nil {
 		return err
 	}
 
-	updater, err := NewUpdater(WithMerger(merger), WithWriter(writer))
+	updater, err := NewUpdater(WithMerger(merger), WithWriter(writer), WithDir(absPath))
 	if err != nil {
 		return err
 	}

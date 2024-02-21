@@ -14,7 +14,7 @@ type Mock struct {
 	Cnt     int
 }
 
-func (m *Mock) Write(pkg *pkg.Package) error {
+func (m *Mock) Write(pkg *pkg.Package, _ string) error {
 	if !m.Success {
 		return assert.AnError
 	}

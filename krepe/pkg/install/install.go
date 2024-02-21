@@ -19,12 +19,13 @@ func Install(pkgPath, url, name string) error {
 		return err
 	}
 
-	writer, err := writer.NewPackageWriter(filepath.Dir(absPath))
+	writer, err := writer.NewDiskWriter()
 	if err != nil {
 		return err
 	}
 
 	installer, err := NewInstaller(
+		WithDir(filepath.Dir(absPath)),
 		WithWriter(writer),
 	)
 	if err != nil {

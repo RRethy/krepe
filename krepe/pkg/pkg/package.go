@@ -192,3 +192,45 @@ func (p *Package) UpdatePackage(pkg *Package, ref *git.PkgRef, name string) {
 		panic("internal error TODO")
 	}
 }
+
+func (p *Package) GetKrepe() *types.Krepe {
+	var fileImports []string
+	for _, fileImport := range p.FileImports {
+		fileImports = append(fileImports, fileImport.Name)
+	}
+
+	var packageImports []types.PackageImport
+	for _, packageImport := range p.PackageImports {
+		packageImports = append(packageImports, types.PackageImport{
+			Ref:  packageImport.Ref.String(),
+			Name: packageImport.Package.Name,
+		})
+	}
+
+	var pipelines []types.Pipeline
+	for _, pipeline := range p.Pipelines {
+		var steps []types.Step
+		for _, step := range pipeline.Steps {
+			steps = append(steps, types.Step{
+				Function: step.Name,
+				Target:   step.Target.ToTypesTarget(),
+				Config:   step.Config,
+			})
+		}
+
+		pipelines = append(pipelines, types.Pipeline{
+			Name:  pipeline.Name,
+			Steps: steps,
+		})
+	}
+
+	return &types.Krepe{
+		TypeMeta:   p.TypeMeta,
+		ObjectMeta: p.ObjectMeta,
+		Imports: types.Imports{
+			Packages: packageImports,
+			Files:    fileImports,
+		},
+		Pipelines: pipelines,
+	}
+}

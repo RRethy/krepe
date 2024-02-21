@@ -9,14 +9,14 @@ import (
 )
 
 type Step struct {
-	Name      string
-	Fn        functions.Function
-	Target    Target
-	ConfigMap map[string]any
+	Name   string
+	Fn     functions.Function
+	Target Target
+	Config map[string]any
 }
 
 func NewStep(step types.Step) (*Step, error) {
-	fn, err := functions.NewFunction(step.Function, step.ConfigMap)
+	fn, err := functions.NewFunction(step.Function, step.Config)
 	if err != nil {
 		return nil, err
 	}
@@ -27,10 +27,10 @@ func NewStep(step types.Step) (*Step, error) {
 	}
 
 	return &Step{
-		Name:      step.Function,
-		Fn:        fn,
-		Target:    target,
-		ConfigMap: step.ConfigMap,
+		Name:   step.Function,
+		Fn:     fn,
+		Target: target,
+		Config: step.Config,
 	}, nil
 }
 

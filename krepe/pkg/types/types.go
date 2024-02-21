@@ -18,8 +18,8 @@ type Imports struct {
 }
 
 type PackageImport struct {
-	Ref  string `yaml:"ref,omitempty"`
-	Name string `yaml:"name,omitempty"`
+	Ref  string `yaml:"ref"`
+	Name string `yaml:"name"`
 }
 
 type Pipeline struct {
@@ -28,9 +28,9 @@ type Pipeline struct {
 }
 
 type Step struct {
-	Function  string         `yaml:"function"`
-	Target    Target         `yaml:"target,omitempty"`
-	ConfigMap map[string]any `yaml:"configMap,omitempty"`
+	Function string         `yaml:"function"`
+	Target   Target         `yaml:"target,omitempty"`
+	Config   map[string]any `yaml:"configMap,omitempty"`
 }
 
 type Target struct {
