@@ -115,8 +115,10 @@ func TestInstallerInstall(t *testing.T) {
 				Success: !test.wantWriteErr,
 			}
 
-			installer, err := NewInstaller(WithGit(git), WithWriter(writer))
-			assert.Nil(t, err)
+			installer := &Installer{
+				Git:    git,
+				Writer: writer,
+			}
 
 			err = installer.Install(pkg, test.url, test.newPkgName)
 			if test.wantErr {

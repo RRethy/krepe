@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/RRethy/krepe/krepe/pkg/git"
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 	"github.com/RRethy/krepe/krepe/pkg/writer"
 )
@@ -24,12 +25,15 @@ func Install(pkgPath, url, name string) error {
 		return err
 	}
 
-	installer, err := NewInstaller(
-		WithDir(filepath.Dir(absPath)),
-		WithWriter(writer),
-	)
+	git, err := git.NewGit()
 	if err != nil {
 		return err
+	}
+
+	installer := &Installer{
+		Git:    git,
+		Writer: writer,
+		Dir:    absPath,
 	}
 
 	err = installer.Install(p, url, name)

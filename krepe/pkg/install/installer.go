@@ -7,46 +7,9 @@ import (
 )
 
 type Installer struct {
-	git    *git.Git
-	writer writer.Writer
-	dir    string
-}
-
-type Option func(*Installer)
-
-func WithGit(git *git.Git) Option {
-	return func(installer *Installer) {
-		installer.git = git
-	}
-}
-
-func WithWriter(w writer.Writer) Option {
-	return func(installer *Installer) {
-		installer.writer = w
-	}
-}
-
-func WithDir(dir string) Option {
-	return func(installer *Installer) {
-		installer.dir = dir
-	}
-}
-
-func NewInstaller(options ...Option) (*Installer, error) {
-	git, err := git.NewGit()
-	if err != nil {
-		return nil, err
-	}
-
-	i := &Installer{
-		git,
-		writer.Noop{},
-		"",
-	}
-	for _, option := range options {
-		option(i)
-	}
-	return i, nil
+	Git    *git.Git
+	Writer writer.Writer
+	Dir    string
 }
 
 func (installer *Installer) Install(p *pkg.Package, url, name string) error {
@@ -55,7 +18,7 @@ func (installer *Installer) Install(p *pkg.Package, url, name string) error {
 		return err
 	}
 
-	newPkgPath, err := installer.git.Clone(ref)
+	newPkgPath, err := installer.Git.Clone(ref)
 	if err != nil {
 		return err
 	}
@@ -70,7 +33,7 @@ func (installer *Installer) Install(p *pkg.Package, url, name string) error {
 		return err
 	}
 
-	err = installer.writer.Write(p, installer.dir)
+	err = installer.Writer.Write(p, installer.Dir)
 	if err != nil {
 		return err
 	}
