@@ -5,43 +5,20 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/writer"
 )
 
-type pipeline struct {
-	pkg    *pkg.Package
-	name   string
-	writer writer.Writer
-	dir    string
+type Pipeline struct {
+	Pkg    *pkg.Package
+	Name   string
+	Writer writer.Writer
+	Dir    string
 }
 
-type option func(*pipeline)
-
-func WithWriter(w writer.Writer) option {
-	return func(p *pipeline) {
-		p.writer = w
-	}
-}
-
-func WithDir(dir string) option {
-	return func(p *pipeline) {
-		p.dir = dir
-	}
-}
-
-func newPipeline(pkg *pkg.Package, name string, options ...option) *pipeline {
-	p := &pipeline{pkg: pkg, name: name, writer: writer.Noop{}}
-	for _, o := range options {
-		o(p)
-	}
-
-	return p
-}
-
-func (p *pipeline) run() error {
-	err := p.pkg.RunPipelineByName(p.name)
+func (p *Pipeline) Run() error {
+	err := p.Pkg.RunPipelineByName(p.Name)
 	if err != nil {
 		return err
 	}
 
-	err = p.writer.Write(p.pkg, p.dir)
+	err = p.Writer.Write(p.Pkg, p.Dir)
 	if err != nil {
 		return err
 	}

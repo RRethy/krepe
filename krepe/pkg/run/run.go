@@ -24,9 +24,8 @@ func Run(pkgPath, pipeline string) error {
 		return fmt.Errorf("creating writer: %w", err)
 	}
 
-	r := newPipeline(pkg, pipeline, WithWriter(w), WithDir(absPath))
-
-	err = r.run()
+	p := &Pipeline{Pkg: pkg, Name: pipeline, Writer: w, Dir: absPath}
+	err = p.Run()
 	if err != nil {
 		return fmt.Errorf("calling the runnable in pkg `%s`: %w", pkgPath, err)
 	}

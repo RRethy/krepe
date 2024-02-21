@@ -56,8 +56,12 @@ func TestPipelineRun(t *testing.T) {
 			w := &writer.Mock{
 				Success: !tt.wantWriteErr,
 			}
-			pipeline := newPipeline(pkg, tt.pipelineName, WithWriter(w))
-			err = pipeline.run()
+			pipeline := &Pipeline{
+				Pkg:    pkg,
+				Name:   tt.pipelineName,
+				Writer: w,
+			}
+			err = pipeline.Run()
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.Equal(t, 0, w.Cnt)
