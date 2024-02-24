@@ -17,11 +17,7 @@ func (installer *Installer) Install(pkgPath, newPkgPath, newPkgName string) erro
 		return err
 	}
 
-	newPkgPath, err = filepath.Abs(newPkgPath)
-	if err != nil {
-		return err
-	}
-
+	newPkgPath = filepath.Join(pkgPath, newPkgPath)
 	newPkg, err := pkg.NewPackageFromPathWithName(newPkgPath, newPkgName)
 	if err != nil {
 		return err

@@ -12,12 +12,15 @@ var (
 type Mock struct {
 	Success bool
 	Cnt     int
+	Pkg     *pkg.Package
 }
 
 func (m *Mock) Write(pkg *pkg.Package, _ string) error {
 	if !m.Success {
 		return assert.AnError
 	}
+
+	m.Pkg = pkg
 
 	m.Cnt++
 	return nil
