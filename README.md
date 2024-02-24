@@ -10,3 +10,4 @@ Kubernetes configuration management for engineers who just want to write raw YAM
 1. better test names
 1. docs
 1. package import should have different fields
+1. consistent var naming, tt vs test in tests

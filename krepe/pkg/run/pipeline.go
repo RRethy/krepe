@@ -1,6 +1,8 @@
 package run
 
 import (
+	"fmt"
+
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 	"github.com/RRethy/krepe/krepe/pkg/writer"
 )
@@ -15,7 +17,10 @@ func (p *Pipeline) Run(pkgPath, pipelineName string) error {
 		return err
 	}
 
-	err = pkg.RunPipelineByName(pipelineName)
+	found, err := pkg.RunPipelineByName(pipelineName)
+	if !found {
+		return fmt.Errorf("pipeline `%s` not found", pipelineName)
+	}
 	if err != nil {
 		return err
 	}
