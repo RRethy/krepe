@@ -6,7 +6,8 @@ imports:
     - service.yaml
     - ingress.yaml
   packages:
-    - ref: github.com/RRethy/sample_pkg@v0.0.1
+    - relativePath: ../sample_pkg
+      name: sample_pkg
 pipelines:
   - name: mypipeline
     steps:
@@ -37,3 +38,10 @@ pipelines:
           op: test
           path: /spec/replicas
           value: 3
+  - name: same-as-subpkg-pipeline
+    steps:
+      - function: set-labels
+        target:
+          kind: Ingress
+        configMap:
+          foo: rootpkg

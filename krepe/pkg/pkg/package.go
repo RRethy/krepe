@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/RRethy/krepe/krepe/pkg/git"
 	"github.com/RRethy/krepe/krepe/pkg/types"
 	"github.com/RRethy/krepe/krepe/pkg/yaml"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,72 +21,62 @@ type Package struct {
 }
 
 func NewPackageFromPath(pkgPath string) (*Package, error) {
-	return NewPackageFromPathWithName(pkgPath, filepath.Base(pkgPath))
+	return NewPackageFromPathWithName(pkgPath, "")
 }
 
-func NewPackageFromPathWithName(packagePath, name string) (*Package, error) {
-	if packagePath == "/" {
-		return nil, fmt.Errorf("pkg path cannot be `/`")
+func NewPackageFromPathWithName(pkgPath, name string) (*Package, error) {
+	absPkgPath, err := filepath.Abs(pkgPath)
+	if err != nil {
+		return nil, err
 	}
 
-	if strings.Contains(name, "/") {
-		return nil, fmt.Errorf("pkg name cannot have `/`")
-	}
-
-	// TODO: test this
 	if name == "" {
-		name = filepath.Base(packagePath)
+		name = filepath.Base(absPkgPath)
 	}
 
-	fileInfo, err := os.Stat(packagePath)
+	if name == "" || name == "." || name == "/" || strings.Contains(name, "/") {
+		return nil, fmt.Errorf("pkg name cannot be `%s`", name)
+	}
+
+	fileInfo, err := os.Stat(absPkgPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get info for pkg: %w", err)
 	}
 	if !fileInfo.IsDir() {
-		return nil, fmt.Errorf("pkg path is not a directory: %s", packagePath)
+		return nil, fmt.Errorf("pkg path is not a directory: %s", absPkgPath)
 	}
 
-	krepePath := filepath.Join(packagePath, "krepe.yaml")
+	krepePath := filepath.Join(absPkgPath, "krepe.yaml")
 	krepeYaml, err := os.ReadFile(krepePath)
 	if err != nil {
 		return nil, fmt.Errorf("read %s: %w", krepePath, err)
 	}
 
 	var krepe types.Krepe
-	err = yaml.Unmarshal(krepeYaml, &krepe)
+	err = yaml.Unmarshal(krepeYaml, &krepe, yaml.DisallowUnknownFieldOption)
 	if err != nil {
 		return nil, fmt.Errorf("unmarshal %s: %w", krepePath, err)
 	}
 
 	var packageImports []PackageImport
 	for _, packageImport := range krepe.Imports.Packages {
-		pkgRef, err := git.NewPkgRefFromString(packageImport.Ref)
-		if err != nil {
-			return nil, fmt.Errorf("parse package import ref `%s`: %w", packageImport.Ref, err)
-		}
-
-		name := packageImport.Name
-		if name == "" {
-			name = pkgRef.Name
-		}
-
-		pkg, err := NewPackageFromPathWithName(filepath.Join(packagePath, name), name)
+		pkg, err := NewPackageFromPath(filepath.Join(absPkgPath, packageImport.Name))
 		if err != nil {
 			return nil, fmt.Errorf("importing pkg `%s`: %w", name, err)
 		}
 
 		packageImports = append(packageImports, PackageImport{
-			Ref:     pkgRef,
-			Package: pkg,
+			RelativePath: packageImport.RelativePath,
+			Package:      pkg,
 		})
 	}
 
 	var fileImports []FileImport
 	for _, fileImport := range krepe.Imports.Files {
-		filename := filepath.Join(packagePath, fileImport)
+		filename := filepath.Join(pkgPath, fileImport)
 		fileImport, err := NewFileImportFromPath(filename)
 		if err != nil {
-			return nil, fmt.Errorf("importing file `%s` in pkg `%s`: %w", fileImport.Name, packagePath, err)
+			return nil, fmt.Errorf("importing file `%s` in pkg `%s`: %w", fileImport.Name, pkgPath, err)
 		}
 
 		fileImports = append(fileImports, fileImport)
@@ -97,7 +86,7 @@ func NewPackageFromPathWithName(packagePath, name string) (*Package, error) {
 	for _, typesPipeline := range krepe.Pipelines {
 		pipeline, err := NewPipeline(typesPipeline)
 		if err != nil {
-			return nil, fmt.Errorf("create pipeline `%s` in pkg `%s`: %w", typesPipeline.Name, packagePath, err)
+			return nil, fmt.Errorf("create pipeline `%s` in pkg `%s`: %w", typesPipeline.Name, pkgPath, err)
 		}
 
 		pipelines = append(pipelines, pipeline)
@@ -114,14 +103,23 @@ func NewPackageFromPathWithName(packagePath, name string) (*Package, error) {
 	}, nil
 }
 
-func (p *Package) RunPipelineByName(name string) error {
+func (p *Package) RunPipelineByName(name string) (found bool, err error) {
+	found = false
+	for _, packageImport := range p.PackageImports {
+		foundInImport, err := packageImport.Package.RunPipelineByName(name)
+		if err != nil {
+			return false, err
+		}
+		found = found || foundInImport
+	}
+
 	for _, pipeline := range p.Pipelines {
 		if pipeline.Name == name {
-			return p.RunPipeline(pipeline)
+			return true, p.RunPipeline(pipeline)
 		}
 	}
 
-	return fmt.Errorf("failed to get pipeline `%s`", name)
+	return found, nil
 }
 
 func (p *Package) RunPipeline(pipeline Pipeline) error {
@@ -142,58 +140,45 @@ func (p *Package) RunPipeline(pipeline Pipeline) error {
 	return nil
 }
 
-func (p *Package) AddPackage(pkg *Package, ref *git.PkgRef, name string) error {
-	if name == "" {
-		name = ref.Name
-	}
-	pkg.Name = name
-
+func (p *Package) AddPackage(pkg *Package, relPath string) error {
 	for _, existingPkgImport := range p.PackageImports {
 		if existingPkgImport.Package.Name == pkg.Name {
-			return fmt.Errorf("pkg `%s` already exists", pkg.Name)
+			return fmt.Errorf("package with name `%s` already exists", pkg.Name)
 		}
 	}
 
 	p.PackageImports = append(p.PackageImports, PackageImport{
-		Ref:     ref,
-		Package: pkg,
+		RelativePath: relPath,
+		Package:      pkg,
 	})
 	return nil
 }
 
-func (p *Package) GetPackageImportByName(name string) (*PackageImport, error) {
+func (p *Package) GetPackageImportByName(name string) (pkgImport *PackageImport, ok bool) {
 	for _, pkgImport := range p.PackageImports {
 		if pkgImport.Package.Name == name {
-			return &pkgImport, nil
+			return &pkgImport, true
 		}
 	}
 
-	return nil, fmt.Errorf("failed to get package import `%s`", name)
+	return nil, false
 }
 
-func (p *Package) UpdatePackage(pkg *Package, ref *git.PkgRef, name string) {
-	if name == "" {
-		name = ref.Name
-	}
-	pkg.Name = name
-
+func (p *Package) UpdatePackage(pkg *Package, relPath string) error {
 	for i, existingPkgImport := range p.PackageImports {
 		if existingPkgImport.Package.Name == pkg.Name {
 			p.PackageImports[i] = PackageImport{
-				Ref:     ref,
-				Package: pkg,
+				RelativePath: relPath,
+				Package:      pkg,
 			}
-			return
+			return nil
 		}
 	}
 
-	err := p.AddPackage(pkg, ref, name)
-	if err != nil {
-		panic("internal error TODO")
-	}
+	return fmt.Errorf("no imported package with name %s", pkg.Name)
 }
 
-func (p *Package) GetKrepe() *types.Krepe {
+func (p *Package) GetTypesKrepe() *types.Krepe {
 	var fileImports []string
 	for _, fileImport := range p.FileImports {
 		fileImports = append(fileImports, fileImport.Name)
@@ -202,8 +187,8 @@ func (p *Package) GetKrepe() *types.Krepe {
 	var packageImports []types.PackageImport
 	for _, packageImport := range p.PackageImports {
 		packageImports = append(packageImports, types.PackageImport{
-			Ref:  packageImport.Ref.String(),
-			Name: packageImport.Package.Name,
+			RelativePath: packageImport.RelativePath,
+			Name:         packageImport.Package.Name,
 		})
 	}
 

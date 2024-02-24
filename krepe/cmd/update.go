@@ -1,37 +1,41 @@
 package cmd
 
 import (
+	"errors"
+
 	"github.com/RRethy/krepe/krepe/pkg/update"
 	"github.com/spf13/cobra"
 )
 
 var (
-	updatePkgName string
-	updateCmd     = &cobra.Command{
+	updateCmd = &cobra.Command{
 		Use:   "update",
 		Short: "Update a package",
 		Long: `Update a package.
 
 Usage:
-  update [packageRef]
+  krepe update packageImport
 
 Arguments:
-  packageRef  The reference to a package in the form 'github.com/$OWNER/$REPO[$PATH]@$TAG'. This argument is required.
+  packageImport  The name of the imported package to update. This argument is required.
 
 Example:
-  update 'github.com/Owner/Repo/path/to/package@v1.0.0'`,
+  krepe update some_imported_package`,
 		Args: cobra.MinimumNArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			err := update.Update(pkgPath, args[0], installPkgName)
-			if err != nil {
-				panic(err)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if len(args) == 0 {
+				return errors.New("packageName is required")
 			}
+
+			err := update.Update(args[0])
+			if err != nil {
+				return err
+			}
+			return nil
 		},
 	}
 )
 
 func init() {
 	rootCmd.AddCommand(updateCmd)
-
-	updateCmd.Flags().StringVarP(&updatePkgName, "name", "n", "", "name override of the package being updated")
 }

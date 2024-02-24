@@ -2,20 +2,11 @@ package yaml
 
 import (
 	"github.com/goccy/go-yaml"
-	yamlv3 "gopkg.in/yaml.v3"
 )
 
-type BytesUnmarshaler yaml.BytesUnmarshaler
-type InterfaceUnmarshaler yaml.InterfaceUnmarshaler
+var DisallowUnknownFieldOption = yaml.DecodeOption(yaml.DisallowUnknownField())
 
 // Unmarshal return [yaml.Unmarshal].
-func Unmarshal(data []byte, v any) error {
-	return yaml.Unmarshal(data, v)
-}
-
-// UnmarshalCompatibilityShim is a shim for yaml.v3,
-// this is needed for types which don't support go-yaml's Unmarshaler interface.
-// E.g. orderedmap.OrderedMap
-func UnmarshalCompatibilityShim(data []byte, out any) error {
-	return yamlv3.Unmarshal([]byte(data), out)
+func Unmarshal(data []byte, v any, opts ...yaml.DecodeOption) error {
+	return yaml.UnmarshalWithOptions(data, v, opts...)
 }

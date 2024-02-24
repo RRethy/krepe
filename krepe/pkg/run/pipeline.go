@@ -6,19 +6,21 @@ import (
 )
 
 type Pipeline struct {
-	Pkg    *pkg.Package
-	Name   string
 	Writer writer.Writer
-	Dir    string
 }
 
-func (p *Pipeline) Run() error {
-	err := p.Pkg.RunPipelineByName(p.Name)
+func (p *Pipeline) Run(pkgPath, pipelineName string) error {
+	pkg, err := pkg.NewPackageFromPath(pkgPath)
 	if err != nil {
 		return err
 	}
 
-	err = p.Writer.Write(p.Pkg, p.Dir)
+	err = pkg.RunPipelineByName(pipelineName)
+	if err != nil {
+		return err
+	}
+
+	err = p.Writer.Write(pkg, pkgPath)
 	if err != nil {
 		return err
 	}

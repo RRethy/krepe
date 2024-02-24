@@ -18,8 +18,8 @@ type Imports struct {
 }
 
 type PackageImport struct {
-	Ref  string `yaml:"ref"`
-	Name string `yaml:"name"`
+	RelativePath string `yaml:"relativePath"`
+	Name         string `yaml:"name"`
 }
 
 type Pipeline struct {

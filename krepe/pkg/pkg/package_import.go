@@ -1,11 +1,6 @@
 package pkg
 
-import (
-	"github.com/RRethy/krepe/krepe/pkg/git"
-)
-
-// TODO: validate package.name == name
 type PackageImport struct {
-	Ref     *git.PkgRef
-	Package *Package
+	RelativePath string
+	Package      *Package
 }

@@ -1,10 +1,11 @@
 package pkg
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
-	"github.com/RRethy/krepe/krepe/pkg/git"
+	"github.com/RRethy/krepe/krepe/pkg/yaml"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,17 +33,29 @@ func TestNewPackageFromPathWithName(t *testing.T) {
 		{
 			name:           "valid package",
 			packagePath:    filepath.Join(packagesPath, "sample_pkg_with_pkg_installed_pkg"),
-			packageName:    "sample_pkg_with_pkg_installed",
+			packageName:    "sample_pkg_with_pkg_installed_pkg",
 			wantErr:        false,
-			wantName:       "sample_pkg_with_pkg_installed",
+			wantName:       "sample_pkg_with_pkg_installed_pkg",
 			packageImports: []string{"sample_pkg"},
 			fileImports:    []string{"deployment.yaml", "service.yaml", "ingress.yaml"},
-			pipelines:      []string{"mypipeline", "badpipeline", "no-op-pipeline", "fail-on-file-import", "fail-on-package-import"},
+			pipelines:      []string{"mypipeline", "badpipeline", "no-op-pipeline", "fail-on-file-import", "fail-on-package-import", "same-as-subpkg-pipeline"},
 		},
 		{
 			name:        "bad package path",
 			packagePath: "/",
 			packageName: "foobar",
+			wantErr:     true,
+		},
+		{
+			name:        "empty package path",
+			packagePath: "",
+			packageName: "",
+			wantErr:     true,
+		},
+		{
+			name:        "package with krepe file with unknown fields must error",
+			packagePath: filepath.Join(packagesPath, "sample_pkg_with_unknown_field"),
+			packageName: "",
 			wantErr:     true,
 		},
 		{
@@ -97,6 +110,16 @@ func TestNewPackageFromPathWithName(t *testing.T) {
 			fileImports:    []string{"deployment.yaml", "service.yaml", "ingress.yaml"},
 			pipelines:      []string{"mypipeline", "badpipeline", "no-op-pipeline"},
 		},
+		{
+			name:           "different name",
+			packagePath:    filepath.Join(packagesPath, "sample_pkg"),
+			packageName:    "foobar",
+			wantErr:        false,
+			wantName:       "foobar",
+			packageImports: nil,
+			fileImports:    []string{"deployment.yaml", "service.yaml", "ingress.yaml"},
+			pipelines:      []string{"mypipeline", "badpipeline", "no-op-pipeline"},
+		},
 	}
 
 	for _, test := range tests {
@@ -127,38 +150,70 @@ func TestNewPackageFromPathWithName(t *testing.T) {
 }
 
 func TestPackageRunPipelineByName(t *testing.T) {
-	pkg, err := NewPackageFromPath(filepath.Join(packagesPath, "sample_pkg_with_pkg_installed_pkg"))
-	assert.NoError(t, err)
-
 	tests := []struct {
 		name         string
 		pipelineName string
 		wantErr      bool
+		wantFound    bool
 		assert       func(t *testing.T, p *Package)
 	}{
 		{
 			name:         "valid pipeline",
 			pipelineName: "mypipeline",
 			wantErr:      false,
+			wantFound:    true,
 			assert: func(t *testing.T, p *Package) {
-				// assert.Equal(t, map[string]string{"foo": "bar"}, p.FileImports[0].Resource.GetLabels())
+				assert.Equal(t, map[string]string{"foo": "bar"}, p.FileImports[0].Resource.GetLabels())
+			},
+		},
+		{
+			name:         "pipeline that exists in root and package import runs on package import first",
+			pipelineName: "same-as-subpkg-pipeline",
+			wantFound:    true,
+			assert: func(t *testing.T, p *Package) {
+				assert.Equal(t, map[string]string{"foo": "rootpkg"}, p.FileImports[2].Resource.GetLabels())
+				assert.Equal(t, map[string]string{"foo": "subpkg"}, p.PackageImports[0].Package.FileImports[0].Resource.GetLabels())
+				assert.Equal(t, map[string]string{"foo": "subpkg"}, p.PackageImports[0].Package.FileImports[1].Resource.GetLabels())
+				assert.Equal(t, map[string]string{"foo": "rootpkg"}, p.PackageImports[0].Package.FileImports[2].Resource.GetLabels())
+			},
+		},
+		{
+			name:         "pipeline that exists only in package import runs",
+			pipelineName: "only-in-subpkg-pipeline",
+			wantFound:    true,
+			assert: func(t *testing.T, p *Package) {
+				assert.Equal(t, map[string]string{"foo": "subpkg"}, p.PackageImports[0].Package.FileImports[0].Resource.GetLabels())
+				assert.Equal(t, map[string]string{"foo": "subpkg"}, p.PackageImports[0].Package.FileImports[1].Resource.GetLabels())
+				assert.Equal(t, map[string]string{"foo": "subpkg"}, p.PackageImports[0].Package.FileImports[2].Resource.GetLabels())
 			},
 		},
 		{
 			name:         "non-existent pipeline",
 			pipelineName: "non-existent-pipeline",
+			wantErr:      false,
+			wantFound:    false,
+		},
+		{
+			name:         "fails on bad pipeline",
+			pipelineName: "badpipeline",
 			wantErr:      true,
 		},
 	}
 
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			err := pkg.RunPipelineByName(test.pipelineName)
+			pkg, err := NewPackageFromPath(filepath.Join(packagesPath, "sample_pkg_with_pkg_installed_pkg"))
+			assert.NoError(t, err)
+
+			found, err := pkg.RunPipelineByName(test.pipelineName)
 			if test.wantErr {
 				assert.Error(t, err)
 			} else {
+				assert.Equal(t, test.wantFound, found)
 				assert.NoError(t, err)
-				// test.assert(t, pkg)
+				if test.wantFound {
+					test.assert(t, pkg)
+				}
 			}
 		})
 	}
@@ -209,36 +264,32 @@ func TestPackageRunPipeline(t *testing.T) {
 
 func TestPackageAddPackage(t *testing.T) {
 	tests := []struct {
-		name         string
-		pkgPath      string
-		newPkgPath   string
-		newPkgRefStr string
-		newPkgName   string
-		wantErr      bool
+		name       string
+		pkgPath    string
+		newPkgPath string
+		newPkgName string
+		wantErr    bool
 	}{
 		{
-			name:         "valid package",
-			pkgPath:      filepath.Join(packagesPath, "sample_pkg"),
-			newPkgPath:   filepath.Join(packagesPath, "sample_pkg"),
-			newPkgRefStr: "github.com/RRethy/sample_pkg@v0.0.1",
-			newPkgName:   "",
-			wantErr:      false,
+			name:       "valid package",
+			pkgPath:    filepath.Join(packagesPath, "sample_pkg"),
+			newPkgPath: "../sample_pkg",
+			newPkgName: "sample_pkg",
+			wantErr:    false,
 		},
 		{
-			name:         "valid package with name",
-			pkgPath:      filepath.Join(packagesPath, "sample_pkg"),
-			newPkgPath:   filepath.Join(packagesPath, "sample_pkg"),
-			newPkgRefStr: "github.com/RRethy/sample_pkg@v0.0.1",
-			newPkgName:   "foobar",
-			wantErr:      false,
+			name:       "valid package with name",
+			pkgPath:    filepath.Join(packagesPath, "sample_pkg"),
+			newPkgPath: "../sample_pkg",
+			newPkgName: "foobar",
+			wantErr:    false,
 		},
 		{
-			name:         "duplicate pacakge",
-			pkgPath:      filepath.Join(packagesPath, "sample_pkg_with_pkg_installed_pkg"),
-			newPkgPath:   filepath.Join(packagesPath, "sample_pkg"),
-			newPkgRefStr: "github.com/RRethy/sample_pkg@v0.0.1",
-			newPkgName:   "",
-			wantErr:      true,
+			name:       "duplicate pacakge",
+			pkgPath:    filepath.Join(packagesPath, "sample_pkg_with_pkg_installed_pkg"),
+			newPkgPath: "../sample_pkg",
+			newPkgName: "",
+			wantErr:    true,
 		},
 	}
 
@@ -247,24 +298,18 @@ func TestPackageAddPackage(t *testing.T) {
 			p, err := NewPackageFromPath(test.pkgPath)
 			assert.NoError(t, err)
 
-			newP, err := NewPackageFromPath(test.newPkgPath)
-			assert.NoError(t, err)
-
-			ref, err := git.NewPkgRefFromString(test.newPkgRefStr)
+			newP, err := NewPackageFromPathWithName(filepath.Join(test.pkgPath, test.newPkgPath), test.newPkgName)
 			assert.NoError(t, err)
 
 			originPkgImportsLen := len(p.PackageImports)
-			err = p.AddPackage(newP, ref, test.newPkgName)
+			err = p.AddPackage(newP, test.newPkgPath)
 			if test.wantErr {
 				assert.Error(t, err)
+				assert.Equal(t, originPkgImportsLen, len(p.PackageImports))
 			} else {
 				assert.NoError(t, err)
 				assert.Equal(t, originPkgImportsLen+1, len(p.PackageImports))
-				expectedName := ref.Name
-				if test.newPkgName != "" {
-					expectedName = test.newPkgName
-				}
-				assert.Equal(t, expectedName, p.PackageImports[len(p.PackageImports)-1].Package.Name)
+				assert.Equal(t, test.newPkgName, p.PackageImports[len(p.PackageImports)-1].Package.Name)
 			}
 		})
 	}
@@ -275,19 +320,19 @@ func TestPackageGetPackageImportByName(t *testing.T) {
 		name    string
 		pkgPath string
 		pkgName string
-		wantErr bool
+		wantOk  bool
 	}{
 		{
 			name:    "valid package",
 			pkgPath: filepath.Join(packagesPath, "sample_pkg_with_pkg_installed_pkg"),
 			pkgName: "sample_pkg",
-			wantErr: false,
+			wantOk:  true,
 		},
 		{
 			name:    "non-existent package",
 			pkgPath: filepath.Join(packagesPath, "sample_pkg_with_pkg_installed_pkg"),
 			pkgName: "non-existent-pkg",
-			wantErr: true,
+			wantOk:  false,
 		},
 	}
 
@@ -296,12 +341,12 @@ func TestPackageGetPackageImportByName(t *testing.T) {
 			p, err := NewPackageFromPath(test.pkgPath)
 			assert.NoError(t, err)
 
-			pkgImport, err := p.GetPackageImportByName(test.pkgName)
-			if test.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
+			pkgImport, ok := p.GetPackageImportByName(test.pkgName)
+			if test.wantOk {
+				assert.True(t, ok)
 				assert.Equal(t, test.pkgName, pkgImport.Package.Name)
+			} else {
+				assert.False(t, ok)
 			}
 		})
 	}
@@ -309,31 +354,28 @@ func TestPackageGetPackageImportByName(t *testing.T) {
 
 func TestPackageUpdatePackage(t *testing.T) {
 	tests := []struct {
-		name         string
-		pkgPath      string
-		newPkgPath   string
-		newPkgRefStr string
-		newPkgName   string
-		wantIdx      int
-		wantName     string
+		name       string
+		pkgPath    string
+		newPkgPath string
+		newPkgName string
+		wantErr    bool
+		wantIdx    int
+		wantName   string
 	}{
 		{
-			name:         "existent package",
-			pkgPath:      filepath.Join(packagesPath, "sample_pkg_with_pkg_installed_pkg"),
-			newPkgPath:   filepath.Join(packagesPath, "sample_pkg"),
-			newPkgRefStr: "github.com/RRethy/sample_pkg@v0.0.1",
-			newPkgName:   "",
-			wantIdx:      0,
-			wantName:     "sample_pkg",
+			name:       "existent package",
+			pkgPath:    filepath.Join(packagesPath, "sample_pkg_with_pkg_installed_pkg"),
+			newPkgPath: "../sample_pkg",
+			newPkgName: "",
+			wantIdx:    0,
+			wantName:   "sample_pkg",
 		},
 		{
-			name:         "non-existent package",
-			pkgPath:      filepath.Join(packagesPath, "sample_pkg_with_pkg_installed_pkg"),
-			newPkgPath:   filepath.Join(packagesPath, "sample_pkg"),
-			newPkgRefStr: "github.com/RRethy/sample_pkg@v0.0.1",
-			newPkgName:   "foobar",
-			wantIdx:      1,
-			wantName:     "foobar",
+			name:       "non-existent package",
+			pkgPath:    filepath.Join(packagesPath, "sample_pkg_with_pkg_installed_pkg"),
+			newPkgPath: "../sample_pkg",
+			newPkgName: "foobar",
+			wantErr:    true,
 		},
 	}
 
@@ -342,14 +384,29 @@ func TestPackageUpdatePackage(t *testing.T) {
 			p, err := NewPackageFromPath(test.pkgPath)
 			assert.NoError(t, err)
 
-			newP, err := NewPackageFromPath(test.newPkgPath)
+			newP, err := NewPackageFromPathWithName(filepath.Join(test.pkgPath, test.newPkgPath), test.newPkgName)
 			assert.NoError(t, err)
 
-			ref, err := git.NewPkgRefFromString(test.newPkgRefStr)
-			assert.NoError(t, err)
-
-			p.UpdatePackage(newP, ref, test.newPkgName)
-			assert.Equal(t, test.wantName, p.PackageImports[test.wantIdx].Package.Name)
+			p.UpdatePackage(newP, test.newPkgPath)
+			if test.wantErr {
+				assert.Equal(t, 1, len(p.PackageImports))
+			} else {
+				assert.Equal(t, test.wantName, p.PackageImports[test.wantIdx].Package.Name)
+			}
 		})
 	}
+}
+
+func TestPackageGetTypesKrepe(t *testing.T) {
+	pkg, err := NewPackageFromPath(filepath.Join(packagesPath, "sample_pkg"))
+	assert.NoError(t, err)
+
+	krepe := pkg.GetTypesKrepe()
+	assert.NotNil(t, krepe)
+
+	got, err := yaml.Marshal(krepe)
+	assert.NoError(t, err)
+	expected, err := os.ReadFile(filepath.Join(packagesPath, "sample_pkg", "krepe.yaml"))
+	assert.NoError(t, err)
+	assert.Equal(t, string(expected), string(got))
 }

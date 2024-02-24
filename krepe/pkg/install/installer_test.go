@@ -4,8 +4,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/RRethy/krepe/krepe/pkg/exec"
-	"github.com/RRethy/krepe/krepe/pkg/git"
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 	"github.com/RRethy/krepe/krepe/pkg/writer"
 	"github.com/stretchr/testify/assert"
@@ -16,9 +14,6 @@ const (
 )
 
 func TestInstallerInstall(t *testing.T) {
-	installedRepoRef, err := git.NewPkgRefFromString("github.com/RRethy/sample_pkg@v0.0.1")
-	assert.Nil(t, err)
-
 	tests := []struct {
 		name         string
 		pkgPath      string
@@ -104,21 +99,11 @@ func TestInstallerInstall(t *testing.T) {
 			pkg, err := pkg.NewPackageFromPathWithName(test.pkgPath, test.newPkgName)
 			assert.Nil(t, err)
 
-			cmd := exec.NewExec(exec.WithCmd(test.cmd))
-			git, err := git.NewGit(
-				git.WithExec(cmd),
-				git.WithDir(packagesDirName),
-			)
-			assert.Nil(t, err)
-
 			writer := &writer.Mock{
 				Success: !test.wantWriteErr,
 			}
 
-			installer := &Installer{
-				Git:    git,
-				Writer: writer,
-			}
+			installer := &Installer{Writer: writer}
 
 			err = installer.Install(pkg, test.url, test.newPkgName)
 			if test.wantErr {

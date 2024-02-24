@@ -2,5 +2,5 @@ kind: Krepe
 apiVersion: krepe.io/v1
 imports:
   packages:
-    - ref: github.com/RRethy/foobarbarzzz@v1
+    - relativePath: ../foobarbarzzz
       name: foobar

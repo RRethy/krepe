@@ -1,41 +1,17 @@
 package update
 
 import (
-	"fmt"
-	"path/filepath"
+	"os"
 
 	"github.com/RRethy/krepe/krepe/pkg/merger"
-	"github.com/RRethy/krepe/krepe/pkg/pkg"
 	"github.com/RRethy/krepe/krepe/pkg/writer"
 )
 
-func Update(pkgPath, url, name string) error {
-	absPath, err := filepath.Abs(pkgPath)
-	if err != nil {
-		return fmt.Errorf("getting absolute path: %w", err)
-	}
-
-	p, err := pkg.NewPackageFromPath(pkgPath)
+func Update(packageName string) error {
+	dir, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	merger := merger.NewMerger()
-
-	writer, err := writer.NewDiskWriter()
-	if err != nil {
-		return err
-	}
-
-	updater, err := NewUpdater(WithMerger(merger), WithWriter(writer), WithDir(absPath))
-	if err != nil {
-		return err
-	}
-
-	err = updater.Update(p, url, name)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return (&Updater{Merger: merger.Package{}, Writer: &writer.Disk{}}).Update(dir, packageName)
 }

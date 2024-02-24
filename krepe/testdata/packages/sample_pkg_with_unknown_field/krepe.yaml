@@ -1,0 +1,8 @@
+kind: Krepe
+apiVersion: krepe.io/v1
+pipelines:
+  - name: mypipeline
+    steps:
+      - function: set-labels
+        targets:
+          kind: DafuqIsTargets

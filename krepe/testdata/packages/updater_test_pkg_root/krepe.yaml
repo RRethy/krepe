@@ -2,5 +2,5 @@ kind: Krepe
 apiVersion: krepe.io/v1
 imports:
   packages:
-    - ref: github.com/RRethy/updater_test_pkg_origin@v1
+    - relativePath: ../updater_test_pkg_origin
       name: foobar

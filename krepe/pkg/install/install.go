@@ -1,45 +1,16 @@
 package install
 
 import (
-	"fmt"
-	"path/filepath"
+	"os"
 
-	"github.com/RRethy/krepe/krepe/pkg/git"
-	"github.com/RRethy/krepe/krepe/pkg/pkg"
 	"github.com/RRethy/krepe/krepe/pkg/writer"
 )
 
-func Install(pkgPath, url, name string) error {
-	absPath, err := filepath.Abs(pkgPath)
-	if err != nil {
-		return fmt.Errorf("getting absolute path: %w", err)
-	}
-
-	p, err := pkg.NewPackageFromPath(absPath)
+func Install(pkgPath, name string) error {
+	dir, err := os.Getwd()
 	if err != nil {
 		return err
 	}
 
-	writer, err := writer.NewDiskWriter()
-	if err != nil {
-		return err
-	}
-
-	git, err := git.NewGit()
-	if err != nil {
-		return err
-	}
-
-	installer := &Installer{
-		Git:    git,
-		Writer: writer,
-		Dir:    absPath,
-	}
-
-	err = installer.Install(p, url, name)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return (&Installer{Writer: &writer.Disk{}}).Install(dir, pkgPath, name)
 }

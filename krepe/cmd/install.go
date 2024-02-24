@@ -13,19 +13,20 @@ var (
 		Long: `Import a pacakge.
 
 Usage:
-  install [packageRef]
+  krepe install [path]
 
 Arguments:
-  packageRef  The reference to a package in the form 'github.com/$OWNER/$REPO[$PATH]@$TAG'. This argument is required.
+  path  The path to the package to install. Relative paths must be relative to the package being operated on. This argument is required.
 
 Example:
-  install 'github.com/Owner/Repo/path/to/package@v1.0.0'`,
+  krepe install ../some_package`,
 		Args: cobra.MinimumNArgs(1),
-		Run: func(cmd *cobra.Command, args []string) {
-			err := install.Install(pkgPath, args[0], installPkgName)
+		RunE: func(cmd *cobra.Command, args []string) error {
+			err := install.Install(args[0], installPkgName)
 			if err != nil {
-				panic(err)
+				return err
 			}
+			return nil
 		},
 	}
 )

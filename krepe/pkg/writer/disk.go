@@ -12,10 +12,6 @@ import (
 type Disk struct {
 }
 
-func NewDiskWriter() (Disk, error) {
-	return Disk{}, nil
-}
-
 func (d Disk) Write(pkg *pkg.Package, dir string) error {
 	if dir == "" {
 		return errors.New("dir cannot be empty")
@@ -31,7 +27,7 @@ func (d Disk) Write(pkg *pkg.Package, dir string) error {
 		return err
 	}
 
-	krepe := pkg.GetKrepe()
+	krepe := pkg.GetTypesKrepe()
 	raw, err := yaml.Marshal(krepe)
 	if err != nil {
 		return err

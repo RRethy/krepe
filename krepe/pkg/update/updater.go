@@ -1,105 +1,70 @@
 package update
 
 import (
-	"github.com/RRethy/krepe/krepe/pkg/git"
+	_ "path/filepath"
+
 	"github.com/RRethy/krepe/krepe/pkg/merger"
-	"github.com/RRethy/krepe/krepe/pkg/pkg"
+	_ "github.com/RRethy/krepe/krepe/pkg/pkg"
 	"github.com/RRethy/krepe/krepe/pkg/writer"
 )
 
 type Updater struct {
-	git    *git.Git
-	writer writer.Writer
-	merger merger.Merger
-	dir    string
+	Writer writer.Writer
+	Merger merger.Merger
 }
 
-type Option func(*Updater)
+// TODO: we should never use filepath.Abs unless we know we have a full path
+func (updater *Updater) Update(rootPkgPath, packageName string) error {
+	// p, err := pkg.NewPackageFromPath(rootPkgPath)
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// pkgImport, err := p.GetPackageImportByName(packageName)
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// subPkgPath := filepath.Join(rootPkgPath, pkgImport.Package.Name)
+	// subPkg, err := pkg.NewPackageFromPath(subPkgPath)
+	// if err != nil {
+	// 	return err
+	// }
+	//
+	// upstreamPkgPath := filepath.Join(rootPkgPath, pkgImport.RelativePath)
+	// upstreamPkg, err := pkg.NewPackageFromPath(upstreamPkgPath)
+	// if err != nil {
+	// 	return err
+	// }
 
-func WithGit(git *git.Git) Option {
-	return func(updater *Updater) {
-		updater.git = git
-	}
-}
+	// krepe update -C rootPkg subPkg1
+	// krepe update -C rootPkg/subPkg1 subPkg1-1
+	// krepe update -C rootPkg/subPkg1/subPkg1-1 subPkg1-1-1
 
-func WithWriter(w writer.Writer) Option {
-	return func(updater *Updater) {
-		updater.writer = w
-	}
-}
+	// rootPkg
+	// .krepe/rootPkg
+	// 	- subPkg1
+	//    .krepe/subPkg1
+	//    - subPkg1-1
+	//      - subPkg1-1-1
+	//    - subPkg1-2
+	// 	- subPkg2
+	//    .krepe/subPkg2
+	//    - subPkg2-1
+	//    - subPkg2-2
+	// 	- subPkg3
+	//    .krepe/subPkg3
+	//
+	// a package has a .krepe directory with a krepe.yaml and imported files
+	// if subpackage doesn't exist and a parent directory is .krepe/, then we are an origin cache and we should look in ../<subpackage>/.krepe/
+	// needs a change in the pkg package to handle this
 
-func WithMerger(m merger.Merger) Option {
-	return func(updater *Updater) {
-		updater.merger = m
-	}
-}
-
-func WithDir(dir string) Option {
-	return func(updater *Updater) {
-		updater.dir = dir
-	}
-}
-
-func NewUpdater(options ...Option) (*Updater, error) {
-	git, err := git.NewGit()
-	if err != nil {
-		return nil, err
-	}
-
-	i := &Updater{
-		git,
-		writer.Noop{},
-		merger.Noop{},
-		"",
-	}
-	for _, option := range options {
-		option(i)
-	}
-	return i, nil
-}
-
-func (updater *Updater) Update(p *pkg.Package, url, name string) error {
-	upstreamPkgRef, err := git.NewPkgRefFromString(url)
-	if err != nil {
-		return err
-	}
-
-	upstreamPkgPath, err := updater.git.Clone(upstreamPkgRef)
-	if err != nil {
-		return err
-	}
-
-	upstreamPkg, err := pkg.NewPackageFromPathWithName(upstreamPkgPath, name)
-	if err != nil {
-		return err
-	}
-
-	pkgImport, err := p.GetPackageImportByName(name)
-	if err != nil {
-		return err
-	}
-
-	localPkgRef := pkgImport.Ref
-	localPkg := pkgImport.Package
-
-	originPkgPath, err := updater.git.Clone(localPkgRef)
-	if err != nil {
-		return err
-	}
-
-	originPkg, err := pkg.NewPackageFromPathWithName(originPkgPath, name)
-	if err != nil {
-		return err
-	}
-
-	newPkg := updater.merger.Merge(originPkg, localPkg, upstreamPkg)
-
-	p.UpdatePackage(newPkg, upstreamPkgRef, name)
-
-	err = updater.writer.Write(p, updater.dir)
-	if err != nil {
-		return err
-	}
+	// p.UpdatePackage(newPkg, upstreamPkgRef, name)
+	//
+	// err = updater.Writer.Write(p, updater.dir)
+	// if err != nil {
+	// 	return err
+	// }
 
 	return nil
 }

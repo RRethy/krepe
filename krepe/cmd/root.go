@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/cobra"
 )
@@ -10,7 +11,18 @@ var (
 	pkgPath string
 	rootCmd = &cobra.Command{
 		Use:   "krepe",
-		Short: "Kubernetes configuration management tooling",
+		Short: "Kubernetes configuration management tooling.",
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			absPkgPath, err := filepath.Abs(pkgPath)
+			if err != nil {
+				panic(err)
+			}
+
+			err = os.Chdir(absPkgPath)
+			if err != nil {
+				panic(err)
+			}
+		},
 	}
 )
 
@@ -22,5 +34,5 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&pkgPath, "pkg", "C", ".", "path to the package to run")
+	rootCmd.PersistentFlags().StringVarP(&pkgPath, "pkgPath", "C", ".", "path to the package to run")
 }

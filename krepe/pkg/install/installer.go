@@ -1,39 +1,43 @@
 package install
 
 import (
-	"github.com/RRethy/krepe/krepe/pkg/git"
+	"path/filepath"
+
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 	"github.com/RRethy/krepe/krepe/pkg/writer"
 )
 
 type Installer struct {
-	Git    *git.Git
 	Writer writer.Writer
-	Dir    string
 }
 
-func (installer *Installer) Install(p *pkg.Package, url, name string) error {
-	ref, err := git.NewPkgRefFromString(url)
+func (installer *Installer) Install(pkgPath, newPkgPath, newPkgName string) error {
+	rootPkg, err := pkg.NewPackageFromPath(pkgPath)
 	if err != nil {
 		return err
 	}
 
-	newPkgPath, err := installer.Git.Clone(ref)
+	newPkgPath, err = filepath.Abs(newPkgPath)
 	if err != nil {
 		return err
 	}
 
-	newPkg, err := pkg.NewPackageFromPathWithName(newPkgPath, name)
+	newPkg, err := pkg.NewPackageFromPathWithName(newPkgPath, newPkgName)
 	if err != nil {
 		return err
 	}
 
-	err = p.AddPackage(newPkg, ref, name)
+	relPath, err := filepath.Rel(pkgPath, newPkgPath)
 	if err != nil {
 		return err
 	}
 
-	err = installer.Writer.Write(p, installer.Dir)
+	err = rootPkg.AddPackage(newPkg, relPath)
+	if err != nil {
+		return err
+	}
+
+	err = installer.Writer.Write(rootPkg, pkgPath)
 	if err != nil {
 		return err
 	}
