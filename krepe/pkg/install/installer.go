@@ -9,6 +9,7 @@ import (
 
 type Installer struct {
 	Writer writer.Writer
+	Cache  writer.Writer
 }
 
 func (installer *Installer) Install(pkgPath, newPkgPath, newPkgName string) error {

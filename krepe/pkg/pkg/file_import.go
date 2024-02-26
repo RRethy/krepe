@@ -12,7 +12,7 @@ import (
 type FileImport struct {
 	Resource *unstructured.Unstructured
 	Name     string
-	Raw      []byte
+	Raw      []byte // TODO: remove this
 }
 
 func NewFileImportFromPath(path string) (FileImport, error) {

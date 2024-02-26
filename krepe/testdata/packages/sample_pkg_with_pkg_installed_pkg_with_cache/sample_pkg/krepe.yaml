@@ -1,0 +1,15 @@
+kind: Krepe
+apiVersion: krepe.io/v1
+metadata:
+  name: sample_pkg
+imports:
+  files:
+    - deployment.yaml
+    - service.yaml
+    - ingress.yaml
+pipelines:
+  - name: default
+    steps:
+      - function: set-labels
+        configMap:
+          foo: bar

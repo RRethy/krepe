@@ -11,3 +11,6 @@ Kubernetes configuration management for engineers who just want to write raw YAM
 1. docs
 1. package import should have different fields
 1. consistent var naming, tt vs test in tests
+1. if local is nil, no matter origin or upstream, return nil
+1. move reader/writer into pkg/?
+1. stop doing filepath.Abs everywhere

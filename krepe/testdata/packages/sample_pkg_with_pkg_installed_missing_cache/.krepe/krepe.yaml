@@ -1,0 +1,12 @@
+kind: Krepe
+apiVersion: krepe.io/v1
+metadata:
+  name: sample_pkg_with_pkg_installed_missing_cache
+imports:
+  files:
+    - deployment.yaml
+    - service.yaml
+    - ingress.yaml
+  packages:
+    - relativePath: ../sample_pkg
+      name: sample_pkg

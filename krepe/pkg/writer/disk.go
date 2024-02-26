@@ -1,7 +1,6 @@
 package writer
 
 import (
-	"errors"
 	"os"
 	"path/filepath"
 
@@ -9,19 +8,20 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/yaml"
 )
 
+var (
+	_ Writer = Disk{}
+)
+
 type Disk struct {
+	DirSuffix string
 }
 
 func (d Disk) Write(pkg *pkg.Package, dir string) error {
-	if dir == "" {
-		return errors.New("dir cannot be empty")
-	}
-
 	if pkg == nil {
 		return nil
 	}
 
-	pkgPath := filepath.Join(dir, pkg.Name)
+	pkgPath := filepath.Join(dir, pkg.Name, d.DirSuffix)
 	err := os.MkdirAll(pkgPath, 0755)
 	if err != nil {
 		return err
@@ -33,7 +33,7 @@ func (d Disk) Write(pkg *pkg.Package, dir string) error {
 		return err
 	}
 
-	err = os.WriteFile(filepath.Join(pkgPath, "krepe.yaml"), raw, 0644)
+	err = os.WriteFile(filepath.Join(pkgPath, d.DirSuffix, "krepe.yaml"), raw, 0644)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,7 @@ func (d Disk) Write(pkg *pkg.Package, dir string) error {
 			return err
 		}
 
-		err = os.WriteFile(filepath.Join(pkgPath, fileImport.Name), raw, 0644)
+		err = os.WriteFile(filepath.Join(pkgPath, d.DirSuffix, fileImport.Name), raw, 0644)
 		if err != nil {
 			return err
 		}

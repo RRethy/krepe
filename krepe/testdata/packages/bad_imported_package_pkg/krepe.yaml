@@ -1,7 +1,5 @@
 kind: Krepe
 apiVersion: krepe.io/v1
-metadata:
-  name: sample_pkg_with_pkg_installed_pkg
 imports:
   files:
     - deployment.yaml

@@ -1,0 +1,29 @@
+kind: Krepe
+apiVersion: krepe.io/v1
+imports:
+  files:
+    - deployment.yaml
+    - service.yaml
+    - ingress.yaml
+pipelines:
+  - name: mypipeline
+    steps:
+      - function: set-labels
+        configMap:
+          foo: bar
+  - name: badpipeline
+    steps:
+      - function: run-fail
+  - name: no-op-pipeline
+    steps:
+      - function: succeed
+  - name: same-as-subpkg-pipeline
+    steps:
+      - function: set-labels
+        configMap:
+          foo: subpkg
+  - name: only-in-subpkg-pipeline
+    steps:
+      - function: set-labels
+        configMap:
+          foo: subpkg

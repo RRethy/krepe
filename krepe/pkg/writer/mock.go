@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	_ Writer = &Mock{}
+	_ Writer = Mock{}
 )
 
 type Mock struct {
@@ -15,7 +15,7 @@ type Mock struct {
 	Pkg     *pkg.Package
 }
 
-func (m *Mock) Write(pkg *pkg.Package, _ string) error {
+func (m Mock) Write(pkg *pkg.Package, _ string) error {
 	if !m.Success {
 		return assert.AnError
 	}
