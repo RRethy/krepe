@@ -7,9 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	_ Merger = &Mock{}
-)
+var _ Merger = &Mock{}
 
 type Mock struct {
 	Origin   *pkg.Package

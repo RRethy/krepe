@@ -4,9 +4,7 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 )
 
-var (
-	_ Merger = Noop{}
-)
+var _ Merger = Noop{}
 
 type Noop struct{}
 

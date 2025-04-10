@@ -37,11 +37,11 @@ func remove(obj any, path []string) (any, any, error) {
 		return nil, nil, nil
 	}
 
-	switch obj.(type) {
+	switch obj := obj.(type) {
 	case map[string]any:
-		return removeInMap(obj.(map[string]any), path[0], path[1:])
+		return removeInMap(obj, path[0], path[1:])
 	case []any:
-		return removeInArray(obj.([]any), path[0], path[1:])
+		return removeInArray(obj, path[0], path[1:])
 	default:
 		return nil, nil, fmt.Errorf("incompatible type for value %s: %T", obj, obj)
 	}

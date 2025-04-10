@@ -1,27 +1,25 @@
 package merger
 
-var (
-	// TODO(RRethy): this is a bit of a hack, but it works for now, we should try
-	// to use openapi
-	associativeKeys = []string{
-		"name",
-		"type",
-		"mountPath",
-		"devicePath",
-		"ip",
-		"topologyKey",
-		"containerPort",
-		"manager",
-		"Type",
-		"Name",
-		"MountPath",
-		"DevicePath",
-		"IP",
-		"TopologyKey",
-		"ContainerPort",
-		"Manager",
-	}
-)
+// TODO(RRethy): this is a bit of a hack, but it works for now, we should try
+// to use openapi
+var associativeKeys = []string{
+	"name",
+	"type",
+	"mountPath",
+	"devicePath",
+	"ip",
+	"topologyKey",
+	"containerPort",
+	"manager",
+	"Type",
+	"Name",
+	"MountPath",
+	"DevicePath",
+	"IP",
+	"TopologyKey",
+	"ContainerPort",
+	"Manager",
+}
 
 func isAssociativeSlices(slices ...[]any) bool {
 	for _, slice := range slices {

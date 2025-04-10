@@ -92,7 +92,7 @@ func NewPackageFromPathWithName(pkgPath, name string) (*Package, error) {
 		pipelines = append(pipelines, pipeline)
 	}
 
-	krepe.ObjectMeta.Name = name
+	krepe.Name = name
 
 	return &Package{
 		TypeMeta:       krepe.TypeMeta,

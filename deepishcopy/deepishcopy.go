@@ -19,11 +19,11 @@ import (
 //   - nil
 //   - map[K][V] where K is a string and V is of type T
 func Copy(src any) any {
-	switch src.(type) {
+	switch src := src.(type) {
 	case map[string]any:
-		return copyMap(src.(map[string]any))
+		return copyMap(src)
 	case []any:
-		return copySlice(src.([]any))
+		return copySlice(src)
 	case bool, int, int8, int16, int32, int64, uint, uint8, uint16, uint32, uint64,
 		float32, float64, complex64, complex128, string, nil:
 		return src

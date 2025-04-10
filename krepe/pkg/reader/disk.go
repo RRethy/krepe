@@ -10,9 +10,7 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/yaml"
 )
 
-var (
-	_ Reader = Disk{}
-)
+var _ Reader = Disk{}
 
 type Disk struct {
 	DirSuffix                  string

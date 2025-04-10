@@ -6,9 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-var (
-	_ Function = &SetName{}
-)
+var _ Function = &SetName{}
 
 type SetName struct {
 	name string

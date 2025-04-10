@@ -39,11 +39,11 @@ func replace(obj any, path []string, value any) (any, error) {
 		return value, nil
 	}
 
-	switch obj.(type) {
+	switch obj := obj.(type) {
 	case map[string]any:
-		return replaceInMap(obj.(map[string]any), path[0], path[1:], value)
+		return replaceInMap(obj, path[0], path[1:], value)
 	case []any:
-		return replaceInArray(obj.([]any), path[0], path[1:], value)
+		return replaceInArray(obj, path[0], path[1:], value)
 	default:
 		return nil, fmt.Errorf("incompatible type for value %s: %T", obj, obj)
 	}

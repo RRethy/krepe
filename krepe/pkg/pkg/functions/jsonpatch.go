@@ -7,9 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-var (
-	_ Function = &JsonPatch{}
-)
+var _ Function = &JsonPatch{}
 
 type JsonPatch struct {
 	op    string

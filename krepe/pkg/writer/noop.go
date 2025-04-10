@@ -4,9 +4,7 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 )
 
-var (
-	_ Writer = Noop{}
-)
+var _ Writer = Noop{}
 
 type Noop struct{}
 

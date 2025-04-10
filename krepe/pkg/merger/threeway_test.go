@@ -539,7 +539,7 @@ func TestThreeWayMergeSliceNonAssociative(t *testing.T) {
 }
 
 func TestThreeWayMergeScalar(t *testing.T) {
-	runThreeWayMergeTests[any](t, threeWayMergeScalar, []threeWayMergeTest[any]{
+	runThreeWayMergeTests(t, threeWayMergeScalar, []threeWayMergeTest[any]{
 		{
 			name:     "origin and upstream match",
 			origin:   1,
@@ -558,7 +558,7 @@ func TestThreeWayMergeScalar(t *testing.T) {
 }
 
 func TestThreeWayMergePtrStruct(t *testing.T) {
-	runThreeWayMergeTests[any](t, threeWayMergePtrStruct, []threeWayMergeTest[any]{
+	runThreeWayMergeTests(t, threeWayMergePtrStruct, []threeWayMergeTest[any]{
 		{
 			name:     "nil origin",
 			origin:   nil,
@@ -653,7 +653,7 @@ func TestThreeWayMergePtrStruct(t *testing.T) {
 }
 
 func TestThreeWayMergeStruct(t *testing.T) {
-	runThreeWayMergeTests[any](t, threeWayMergeStruct, []threeWayMergeTest[any]{
+	runThreeWayMergeTests(t, threeWayMergeStruct, []threeWayMergeTest[any]{
 		{
 			name:     "empty structs",
 			origin:   struct{}{},
@@ -685,7 +685,7 @@ func TestThreeWayMergeStruct(t *testing.T) {
 }
 
 func TestThreeWayMergeStructSlice(t *testing.T) {
-	runThreeWayMergeTests[[]any](t, threeWayMergeStructSlice, []threeWayMergeTest[[]any]{
+	runThreeWayMergeTests(t, threeWayMergeStructSlice, []threeWayMergeTest[[]any]{
 		{
 			name:     "empty slices",
 			origin:   []any{},
@@ -766,7 +766,7 @@ func TestThreeWayMergeStructSlice(t *testing.T) {
 }
 
 func TestThreeWayMergePtrStructSlice(t *testing.T) {
-	runThreeWayMergeTests[[]any](t, threeWayMergePtrStructSlice, []threeWayMergeTest[[]any]{
+	runThreeWayMergeTests(t, threeWayMergePtrStructSlice, []threeWayMergeTest[[]any]{
 		{
 			name:     "empty slices",
 			origin:   []any{},

@@ -6,9 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-var (
-	_ Function = &ConfigFail{}
-)
+var _ Function = &ConfigFail{}
 
 type ConfigFail struct{}
 

@@ -4,9 +4,7 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 )
 
-var (
-	_ Writer = Cache{}
-)
+var _ Writer = Cache{}
 
 type Cache struct{}
 

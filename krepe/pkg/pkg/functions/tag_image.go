@@ -6,9 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-var (
-	_ Function = &TagImage{}
-)
+var _ Function = &TagImage{}
 
 type TagImage struct{}
 

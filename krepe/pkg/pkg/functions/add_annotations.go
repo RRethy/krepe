@@ -6,9 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-var (
-	_ Function = &AddAnnotations{}
-)
+var _ Function = &AddAnnotations{}
 
 type AddAnnotations struct {
 	annotations map[string]string

@@ -4,9 +4,7 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 )
 
-var (
-	_ Merger = Package{}
-)
+var _ Merger = Package{}
 
 type Package struct{}
 

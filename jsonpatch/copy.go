@@ -54,11 +54,11 @@ func get(obj any, path []string) (any, error) {
 		return obj, nil
 	}
 
-	switch obj.(type) {
+	switch obj := obj.(type) {
 	case map[string]any:
-		return getInMap(obj.(map[string]any), path[0], path[1:])
+		return getInMap(obj, path[0], path[1:])
 	case []any:
-		return getInArray(obj.([]any), path[0], path[1:])
+		return getInArray(obj, path[0], path[1:])
 	default:
 		return nil, fmt.Errorf("incompatible type for value %s: %T", obj, obj)
 	}
