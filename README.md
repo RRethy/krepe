@@ -36,9 +36,89 @@ pipelines:
       - function: set-labels
         configMap:
           app: my-app
+      - function: set-labels
+        target:
+          kind: Service
+        configMap:
+          svc-label: my-svc-label
 ```
 
-From this basic `krepe.yaml`, we can run the `default` pipeline using `krepe run default` (`default` can be omitted). In the `default` pipeline above, we set a common label across all resources.
+From this basic `krepe.yaml`, we can run the `default` pipeline using `krepe run default` (`default` can be omitted). In the `default` pipeline above, we set a common label across all resources, and then we set a label on the `Service` resource only.
+
+### Pipeline Functions
+
+#### add_annotations
+
+The `add_annotations` function adds to the existing annotations.
+
+```yaml
+      - function: add-annotations
+        configMap:
+          app: my-app
+```
+
+#### add_labels
+
+The `add_labels` function adds to the existing labels.
+
+```yaml
+      - function: add-labels
+        configMap:
+          app: my-app
+```
+
+#### jsonpatch
+
+The `jsonpatch` function applies a JSON patch to the resources.
+
+```yaml
+      - function: jsonpatch
+        configMap:
+          op: add
+          value:
+            foo: bar
+          path: /metadata/annotations
+```
+
+#### set_annotations
+
+The `set_annotations` function sets the annotations to the specified value.
+
+```yaml
+      - function: set-annotations
+        configMap:
+          app: my-app
+```
+
+#### set_labels
+
+The `set_labels` function sets the labels to the specified value.
+
+```yaml
+      - function: set-labels
+        configMap:
+          app: my-app
+```
+
+#### set_name
+
+The `set_name` function sets the name of the resource.
+
+```yaml
+      - function: set-name
+        configMap:
+          name: my-app
+```
+
+#### set_namespace
+
+The `set_namespace` function sets the namespace of the resource.
+
+```yaml
+      - function: set-namespace
+        configMap:
+          namespace: my-app
+```
 
 ## CLI Usage
 
