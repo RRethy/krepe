@@ -1,6 +1,7 @@
 package writer
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -49,9 +50,13 @@ func (d Disk) Write(pkg *pkg.Package, dir string) error {
 	}
 
 	for _, packageImport := range pkg.PackageImports {
-		err = d.Write(packageImport.Package, filepath.Join(pkgPath, packageImport.Package.Name))
 		if err != nil {
-			return err
+			return fmt.Errorf("writing package import %s to cache: %w", packageImport.Package.Name, err)
+		}
+
+		err = d.Write(packageImport.Package, pkgPath)
+		if err != nil {
+			return fmt.Errorf("writing package import %s: %w", packageImport.Package.Name, err)
 		}
 	}
 

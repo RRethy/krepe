@@ -35,5 +35,5 @@ Example:
 }
 
 func init() {
-	rootCmd.AddCommand(updateCmd)
+	// rootCmd.AddCommand(updateCmd)
 }

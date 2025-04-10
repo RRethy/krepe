@@ -9,7 +9,6 @@ import (
 
 type Installer struct {
 	Writer writer.Writer
-	Cache  writer.Writer
 }
 
 func (installer *Installer) Install(pkgPath, newPkgPath, newPkgName string) error {
@@ -34,7 +33,8 @@ func (installer *Installer) Install(pkgPath, newPkgPath, newPkgName string) erro
 		return err
 	}
 
-	err = installer.Writer.Write(rootPkg, pkgPath)
+	pkgDir := filepath.Dir(newPkgPath)
+	err = installer.Writer.Write(rootPkg, pkgDir)
 	if err != nil {
 		return err
 	}
