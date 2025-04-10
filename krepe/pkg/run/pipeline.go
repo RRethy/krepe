@@ -2,6 +2,7 @@ package run
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/RRethy/krepe/krepe/pkg/pkg"
 	"github.com/RRethy/krepe/krepe/pkg/writer"
@@ -25,7 +26,7 @@ func (p *Pipeline) Run(pkgPath, pipelineName string) error {
 		return err
 	}
 
-	err = p.Writer.Write(pkg, pkgPath)
+	err = p.Writer.Write(pkg, filepath.Dir(pkgPath))
 	if err != nil {
 		return err
 	}

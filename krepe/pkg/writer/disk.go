@@ -8,9 +8,7 @@ import (
 	"github.com/RRethy/krepe/krepe/pkg/yaml"
 )
 
-var (
-	_ Writer = Disk{}
-)
+var _ Writer = Disk{}
 
 type Disk struct {
 	DirSuffix string
@@ -22,7 +20,7 @@ func (d Disk) Write(pkg *pkg.Package, dir string) error {
 	}
 
 	pkgPath := filepath.Join(dir, pkg.Name, d.DirSuffix)
-	err := os.MkdirAll(pkgPath, 0755)
+	err := os.MkdirAll(pkgPath, 0o755)
 	if err != nil {
 		return err
 	}
@@ -33,18 +31,18 @@ func (d Disk) Write(pkg *pkg.Package, dir string) error {
 		return err
 	}
 
-	err = os.WriteFile(filepath.Join(pkgPath, d.DirSuffix, "krepe.yaml"), raw, 0644)
+	err = os.WriteFile(filepath.Join(pkgPath, d.DirSuffix, "krepe.yaml"), raw, 0o644)
 	if err != nil {
 		return err
 	}
 
 	for _, fileImport := range pkg.FileImports {
-		raw, err := yaml.Marshal(fileImport.Resource)
+		raw, err := yaml.Marshal(fileImport.Resource.Object)
 		if err != nil {
 			return err
 		}
 
-		err = os.WriteFile(filepath.Join(pkgPath, d.DirSuffix, fileImport.Name), raw, 0644)
+		err = os.WriteFile(filepath.Join(pkgPath, d.DirSuffix, fileImport.Name), raw, 0o644)
 		if err != nil {
 			return err
 		}

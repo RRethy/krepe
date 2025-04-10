@@ -6,9 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-var (
-	_ Function = &SetLabels{}
-)
+var _ Function = &SetLabels{}
 
 type SetLabels struct {
 	labels map[string]string
