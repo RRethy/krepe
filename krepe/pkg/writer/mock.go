@@ -5,9 +5,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	_ Writer = Mock{}
-)
+var _ Writer = &Mock{}
 
 type Mock struct {
 	Success bool
@@ -15,7 +13,7 @@ type Mock struct {
 	Pkg     *pkg.Package
 }
 
-func (m Mock) Write(pkg *pkg.Package, _ string) error {
+func (m *Mock) Write(pkg *pkg.Package, _ string) error {
 	if !m.Success {
 		return assert.AnError
 	}
